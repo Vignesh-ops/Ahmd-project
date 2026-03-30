@@ -347,7 +347,7 @@ export default function UsersManager() {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-white/55">
+          <p className="text-sm text-red/55">
             {message || "Fresh setup now starts with zero store users. Add any number of store accounts with unique store codes."}
           </p>
           <Button type="submit" icon={Plus}>
@@ -382,9 +382,15 @@ export default function UsersManager() {
       ) : null}
 
       {loading ? (
-        <div className="glass-panel rounded-[32px] border border-white/5 p-8 text-center text-white/55">
-          Loading store users...
-        </div>
+       <div className="glass-panel rounded-[32px] border border-white/5 p-8 text-center">
+       <div className="flex flex-col items-center gap-4">
+         <div className="relative w-12 h-12">
+           <div className="absolute inset-0 rounded-full border-4 border-white/20"></div>
+           <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-green-400 animate-spin"></div>
+         </div>
+         <p className="text-white/55">Loading store users...</p>
+       </div>
+     </div>
       ) : (
         <div className="grid gap-4">
           {users.map((user) => (
