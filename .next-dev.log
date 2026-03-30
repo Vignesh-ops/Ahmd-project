@@ -1,0 +1,1175 @@
+
+> ahmad-enterprices@1.0.0 dev
+> npm run db:start-local && next dev
+
+
+> ahmad-enterprices@1.0.0 db:start-local
+> powershell -ExecutionPolicy Bypass -File scripts/start-local-mysql.ps1
+
+Local MySQL is ready at mysql://ubi_app:ubi_app_123@localhost:3307/ubi_remittance
+  Ôû▓ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env
+
+ Ô£ô Starting...
+ Ô£ô Ready in 8.5s
+ Ô£ô Compiled /middleware in 1330ms
+ Ô£ô Compiled (171 modules)
+ Ôùï Compiling /bank-order ...
+ Ô£ô Compiled /bank-order in 6.1s (921 modules)
+ Ôùï Compiling /login ...
+ Ô£ô Compiled /login in 2.4s (934 modules)
+ GET /login 200 in 2759ms
+ Ô¿» TypeError: Cannot read properties of undefined (reading 'call')
+    at Object.__webpack_require__ [as require] (G:\AHMAD_APP\.next\server\webpack-runtime.js:33:43)
+digest: "482561183"
+Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://reactjs.org/link/invalid-hook-call for tips about how to debug and fix this problem.
+TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:162364)
+    at usePathname (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/navigation.js:121:34)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:50)
+    at au (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:10446)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:15122
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16908)
+    at a_ (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:49776)
+    at ab (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:11808)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16871
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16908)
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:46505)
+    at a_ (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:49776)
+    at ab (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:11808)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16871
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16908)
+    at a_ (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:49776)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:58612
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:59270
+    at aN (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:59278)
+    at Timeout._onTimeout (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:6939)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+ Ô¿» TypeError: Cannot read properties of null (reading 'useContext')
+    at t.useContext (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:162364)
+    at usePathname (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/navigation.js:121:34)
+    at ErrorBoundary (webpack-internal:///(ssr)/./node_modules/next/dist/client/components/error-boundary.js:159:50)
+    at au (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:10446)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:15122
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16908)
+    at a_ (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:49776)
+    at ab (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:11808)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16871
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16908)
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:46505)
+    at a_ (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:49776)
+    at ab (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:11808)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16871
+    at aw (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:16908)
+    at a_ (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:49776)
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:58612
+    at G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:59270
+    at aN (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:59278)
+    at Timeout._onTimeout (G:\AHMAD_APP\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:35:6939)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7) {
+  page: '/bank-order'
+}
+ Ôùï Compiling /_error ...
+ Ô£ô Compiled /_error in 3.7s (1161 modules)
+ GET /bank-order 500 in 16476ms
+ GET /bank-order 200 in 684ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 616ms (636 modules)
+ GET /api/auth/csrf 200 in 249ms
+ GET /api/auth/session 200 in 2244ms
+ POST /api/auth/signout 200 in 77ms
+ GET /api/auth/session 200 in 143ms
+ GET /api/auth/session 200 in 161ms
+ GET /api/auth/session 200 in 66ms
+ Ôùï Compiling / ...
+ Ô£ô Compiled / in 2.4s (1190 modules)
+ GET /api/auth/session 200 in 2560ms
+ GET / 200 in 3083ms
+ GET /api/auth/session 200 in 86ms
+ GET /api/auth/session 200 in 42ms
+ GET /api/auth/session 200 in 44ms
+ GET /api/auth/csrf 200 in 26ms
+ POST /api/auth/signout 200 in 31ms
+ GET /api/auth/session 200 in 55ms
+ GET /login 200 in 132ms
+ GET /api/auth/session 200 in 96ms
+ GET /api/auth/session 200 in 62ms
+ GET /api/auth/session 200 in 51ms
+ GET /api/auth/providers 200 in 68ms
+ GET /api/auth/csrf 200 in 30ms
+ POST /api/auth/callback/credentials 401 in 260ms
+ GET /api/auth/providers 200 in 66ms
+ GET /api/auth/csrf 200 in 37ms
+ POST /api/auth/callback/credentials 200 in 242ms
+ GET /api/auth/session 200 in 40ms
+ GET /?_rsc=turmx 200 in 101ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 1271ms (1215 modules)
+ GET /admin?_rsc=196l8 200 in 85ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 759ms (701 modules)
+ Ô£ô Compiled (703 modules)
+ GET /api/admin/summary? 200 in 1456ms
+ GET /api/history?type=bank 200 in 1472ms
+ GET /api/admin/summary? 200 in 91ms
+ GET /api/history?type=bank 200 in 102ms
+ Ôùï Compiling /history ...
+ Ô£ô Compiled /history in 1103ms (1259 modules)
+ GET /history?_rsc=127xp 200 in 67ms
+ GET /api/history? 200 in 61ms
+ GET /api/history? 200 in 49ms
+ GET /api/admin/summary? 200 in 103ms
+ GET /api/history?type=bank 200 in 122ms
+ GET /api/admin/summary? 200 in 86ms
+ GET /api/history?type=bank 200 in 81ms
+ Ôùï Compiling /admin/users ...
+ Ô£ô Compiled /admin/users in 979ms (1276 modules)
+ GET /admin/users?_rsc=13bkb 200 in 66ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 649ms (724 modules)
+ Ô£ô Compiled (726 modules)
+ GET /api/admin/account 200 in 1489ms
+ GET /api/admin/users 200 in 1518ms
+ GET /api/admin/account 200 in 58ms
+ GET /api/admin/users 200 in 79ms
+ PUT /api/admin/account 400 in 89ms
+ GET /history?storeCode=S1&_rsc=1dt4z 200 in 56ms
+ GET /api/history?storeCode=S1 200 in 56ms
+ GET /api/history?storeCode=S1 200 in 57ms
+ GET /bank-order?_rsc=1o4s9 200 in 57ms
+ Ôùï Compiling /receipt/[id] ...
+ Ô£ô Compiled /receipt/[id] in 4.6s (1417 modules)
+ GET /receipt/B-ADM-20260329-0001?_rsc=19hiv 200 in 266ms
+ GET /history?_rsc=1dt4z 200 in 66ms
+ GET /api/history? 200 in 90ms
+ GET /api/history? 200 in 45ms
+ GET /?_rsc=1bsz2 200 in 156ms
+ GET /admin?_rsc=1krsj 200 in 63ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 680ms (788 modules)
+ GET /api/history?type=bank 200 in 1628ms
+ GET /api/admin/summary? 200 in 1691ms
+ GET /api/history?type=bank 200 in 92ms
+ GET /api/admin/summary? 200 in 86ms
+ GET /admin/users?_rsc=1ndpr 200 in 53ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 568ms (790 modules)
+ Ô£ô Compiled (792 modules)
+ GET /api/admin/account 200 in 1923ms
+ GET /api/admin/users 200 in 1942ms
+ GET /api/admin/account 200 in 58ms
+ GET /api/admin/users 200 in 66ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 1133ms (752 modules)
+ GET /api/auth/session 200 in 1752ms
+ GET /api/auth/session 200 in 33ms
+ GET /api/auth/session 200 in 95ms
+ GET /api/auth/session 200 in 42ms
+ Ôùï Compiling /history ...
+ Ô£ô Compiled /history in 647ms (761 modules)
+ GET /history?_rsc=1dt4z 200 in 2977ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 623ms (788 modules)
+ GET /api/history? 200 in 858ms
+ GET /api/history? 200 in 44ms
+ GET /api/auth/session 200 in 89ms
+ GET /api/auth/session 200 in 58ms
+ GET /bank-order?_rsc=ovhu1 200 in 2110ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 763ms (790 modules)
+ GET /api/history?type=bank 200 in 1534ms
+ GET /api/admin/summary? 200 in 1567ms
+ GET /api/history?type=bank 200 in 82ms
+ GET /api/admin/summary? 200 in 88ms
+ GET /api/auth/session 200 in 146ms
+ GET /api/auth/session 200 in 109ms
+ GET /admin?_rsc=1krsj 200 in 123ms
+ GET /api/admin/summary? 200 in 138ms
+ GET /api/history?type=bank 200 in 169ms
+ GET /api/admin/summary? 200 in 183ms
+ GET /api/history?type=bank 200 in 171ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 2.3s (792 modules)
+ Ô£ô Compiled (794 modules)
+ GET /api/admin/account 200 in 3579ms
+ GET /api/admin/users 200 in 3605ms
+ GET /api/admin/account 200 in 62ms
+ GET /api/admin/users 200 in 68ms
+ GET /api/auth/session 200 in 205ms
+ GET /api/auth/session 200 in 46ms
+ GET /admin/users 200 in 407ms
+ GET /api/admin/account 200 in 134ms
+ GET /api/auth/session 200 in 147ms
+ GET /api/admin/account 200 in 50ms
+ GET /api/auth/session 200 in 54ms
+ GET /api/auth/session 200 in 34ms
+ GET /api/admin/users 200 in 2200ms
+ GET /api/admin/users 200 in 91ms
+ GET /?_rsc=1bsz2 200 in 2095ms
+ Ô£ô Compiled in 6.5s (1420 modules)
+ GET /?_rsc=1ffcw 200 in 898ms
+ Ô£ô Compiled in 2s (1420 modules)
+ GET /?_rsc=1ffcw 200 in 185ms
+ Ô£ô Compiled in 1575ms (1420 modules)
+ GET /?_rsc=1ffcw 200 in 181ms
+ Ô£ô Compiled in 828ms (641 modules)
+ GET /?_rsc=1ffcw 200 in 161ms
+ Ô£ô Compiled in 2.1s (1387 modules)
+ GET /?_rsc=1ffcw 200 in 323ms
+ Ô£ô Compiled in 1457ms (1387 modules)
+ GET /?_rsc=1ffcw 200 in 154ms
+ Ô£ô Compiled in 1282ms (1387 modules)
+ GET /?_rsc=1ffcw 200 in 161ms
+ Ô£ô Compiled in 542ms (641 modules)
+ GET /?_rsc=1ffcw 200 in 99ms
+ Ô£ô Compiled in 1941ms (1387 modules)
+ GET /?_rsc=1ffcw 200 in 177ms
+ Ô£ô Compiled in 1992ms (1387 modules)
+ GET /?_rsc=1ffcw 200 in 140ms
+ Ô£ô Compiled in 2.6s (1387 modules)
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 865ms (750 modules)
+ GET /api/auth/session 200 in 1804ms
+ GET /?_rsc=1ffcw 200 in 1926ms
+ GET /api/auth/session 200 in 153ms
+ GET / 200 in 1083ms
+ Ô£ô Compiled in 2.1s (1391 modules)
+ GET /api/auth/session 200 in 190ms
+ GET /api/auth/session 200 in 58ms
+ GET /api/auth/session 200 in 44ms
+ GET /history?_rsc=127xp 200 in 315ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 800ms (777 modules)
+ GET /api/history? 200 in 1060ms
+ GET /api/history? 200 in 97ms
+ GET /history?_rsc=15ubi 200 in 157ms
+ GET /api/history?storeCode=ADM 200 in 73ms
+ GET /api/history? 200 in 48ms
+ GET /api/history?storeCode=ADM 200 in 670ms
+ Ôùï Compiling /bank-order ...
+ Ô£ô Compiled /bank-order in 2.3s (788 modules)
+ GET /bank-order?_rsc=1o4s9 200 in 182ms
+ GET /history?_rsc=1dt4z 200 in 62ms
+ GET /api/history? 200 in 83ms
+ GET /api/history? 200 in 76ms
+ Ôùï Compiling /settings ...
+ Ô£ô Compiled /settings in 2.6s (1360 modules)
+ GET /settings?_rsc=1qy2s 200 in 274ms
+ GET /api/auth/session 200 in 155ms
+ GET /api/auth/session 200 in 50ms
+ GET /admin?_rsc=196l8 200 in 63ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 936ms (719 modules)
+ Ô£ô Compiled in 3ms (719 modules)
+ GET /api/history?type=bank 200 in 1988ms
+ Ô£ô Compiled in 1ms (719 modules)
+ Ô£ô Compiled in 1ms (719 modules)
+ GET /api/admin/summary? 200 in 3153ms
+ Ô£ô Compiled in 1ms (719 modules)
+ GET /admin?_rsc=1csz2 200 in 2891ms
+ GET /api/history?type=bank 200 in 2765ms
+ GET /api/admin/summary? 200 in 1653ms
+ GET /history?storeCode=ADM&_rsc=1dt4z 200 in 58ms
+ GET /api/history?storeCode=ADM 200 in 78ms
+ GET /api/history?storeCode=ADM 200 in 67ms
+ GET /api/admin/summary? 200 in 73ms
+ GET /api/history?type=bank 200 in 115ms
+ GET /api/admin/summary? 200 in 104ms
+ GET /api/history?type=bank 200 in 102ms
+ GET /api/auth/session 200 in 477ms
+ GET /api/auth/session 200 in 43ms
+ GET /admin/users?_rsc=13bkb 200 in 70ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 1669ms (708 modules)
+ Ô£ô Compiled (710 modules)
+ GET /api/admin/account 200 in 2517ms
+ GET /api/admin/users 200 in 2558ms
+ GET /api/admin/account 200 in 108ms
+ GET /api/admin/users 200 in 111ms
+ GET /settings?_rsc=3i61o 200 in 82ms
+ GET /admin?_rsc=1krsj 200 in 66ms
+ GET /api/admin/summary? 200 in 125ms
+ GET /api/history?type=bank 200 in 165ms
+ GET /api/admin/summary? 200 in 257ms
+ GET /api/history?type=bank 200 in 245ms
+ GET /api/admin/users 200 in 112ms
+ GET /api/admin/account 200 in 112ms
+ GET /api/admin/users 200 in 94ms
+ GET /api/admin/account 200 in 94ms
+ GET /api/auth/session 200 in 129ms
+ GET /api/auth/session 200 in 35ms
+ GET /api/auth/session 200 in 2209ms
+ GET /api/auth/session 200 in 99ms
+ GET /admin/users 200 in 2364ms
+ GET /api/admin/account 200 in 129ms
+ GET /api/admin/users 200 in 164ms
+ GET /api/auth/session 200 in 141ms
+ GET /api/admin/account 200 in 206ms
+ GET /api/auth/session 200 in 153ms
+ GET /api/admin/users 200 in 214ms
+ GET /api/auth/session 200 in 71ms
+ Ôùï Compiling / ...
+ Ô£ô Compiled / in 1238ms (719 modules)
+ GET /?_rsc=1bsz2 200 in 231ms
+ GET /admin?_rsc=1krsj 200 in 83ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 1158ms (721 modules)
+ Ô£ô Compiled (723 modules)
+ GET /api/admin/summary? 200 in 2519ms
+ GET /api/history?type=bank 200 in 2509ms
+ GET /api/admin/summary? 200 in 80ms
+ GET /api/history?type=bank 200 in 144ms
+ GET /admin/users?_rsc=1ndpr 200 in 65ms
+ GET /api/admin/users 200 in 103ms
+ GET /api/admin/account 200 in 121ms
+ GET /api/admin/users 200 in 106ms
+ GET /api/admin/account 200 in 107ms
+ GET /?_rsc=1bsz2 200 in 114ms
+ GET /api/auth/session 200 in 120ms
+ GET /api/auth/session 200 in 66ms
+ GET /bank-order?_rsc=1o4s9 200 in 58ms
+ GET /?_rsc=1bsz2 200 in 88ms
+ GET /history?_rsc=127xp 200 in 67ms
+ GET /api/history? 200 in 58ms
+ GET /api/history? 200 in 69ms
+ GET /history 200 in 334ms
+ GET /api/auth/session 200 in 91ms
+ GET /api/history? 200 in 144ms
+ GET /api/auth/session 200 in 121ms
+ GET /api/history? 200 in 135ms
+ GET /api/auth/session 200 in 51ms
+ Ôùï Compiling /login ...
+ Ô£ô Compiled /login in 2.7s (715 modules)
+ GET /login 200 in 3056ms
+ GET /history?_rsc=15ubi 200 in 158ms
+ GET /api/auth/session 200 in 252ms
+ GET /api/auth/session 200 in 53ms
+ GET /?_rsc=1bsz2 200 in 102ms
+ GET /settings?_rsc=1qy2s 200 in 66ms
+ GET /history?_rsc=1dt4z 200 in 53ms
+ GET /api/history? 200 in 85ms
+ GET /api/history? 200 in 75ms
+ GET /bank-order?_rsc=1o4s9 200 in 65ms
+ GET /admin?_rsc=196l8 200 in 2084ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 759ms (717 modules)
+ GET /api/history?type=bank 200 in 1695ms
+ GET /api/history?type=bank 200 in 50ms
+ GET /api/admin/summary? 200 in 3762ms
+ GET /api/admin/summary? 200 in 43ms
+ GET /settings?_rsc=3i61o 200 in 72ms
+ GET /admin?_rsc=1krsj 200 in 63ms
+ GET /api/admin/summary? 200 in 188ms
+ GET /api/history?type=bank 200 in 118ms
+ GET /api/admin/summary? 200 in 88ms
+ GET /api/history?type=bank 200 in 108ms
+ GET /bank-order?_rsc=ovhu1 200 in 64ms
+ GET /?_rsc=1bsz2 200 in 72ms
+ GET /history?_rsc=1dt4z 200 in 80ms
+ GET /api/history? 200 in 69ms
+ GET /api/history? 200 in 84ms
+ GET /api/history? 200 in 145ms
+ GET /api/history? 200 in 68ms
+ GET /settings?_rsc=3i61o 200 in 81ms
+ GET /api/history? 200 in 67ms
+ GET /api/history? 200 in 73ms
+ GET /admin?_rsc=1krsj 200 in 68ms
+ GET /api/admin/summary? 200 in 105ms
+ GET /api/history?type=bank 200 in 130ms
+ GET /api/admin/summary? 200 in 121ms
+ GET /api/history?type=bank 200 in 103ms
+ GET /api/admin/summary? 200 in 116ms
+ GET /api/history?type=bank 200 in 116ms
+ GET /api/admin/summary? 200 in 112ms
+ GET /api/history?type=bank 200 in 106ms
+ GET /api/auth/session 200 in 159ms
+ GET /api/auth/session 200 in 48ms
+ GET /admin 200 in 288ms
+ GET /api/admin/summary? 200 in 120ms
+ GET /api/history?type=bank 200 in 126ms
+ GET /api/auth/session 200 in 194ms
+ GET /api/admin/summary? 200 in 219ms
+ GET /api/history?type=bank 200 in 178ms
+ GET /api/auth/session 200 in 113ms
+ GET /api/auth/session 200 in 36ms
+ Ôùï Compiling /admin/users ...
+ Ô£ô Compiled /admin/users in 3.3s (719 modules)
+ Ôùï Compiling /login ...
+ Ô£ô Compiled /login in 1321ms (727 modules)
+ GET /admin/users?_rsc=13bkb 200 in 3064ms
+ GET /login 200 in 1629ms
+ GET /login 200 in 3228ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 3.8s (729 modules)
+ Ô£ô Compiled (731 modules)
+ GET /api/admin/account 200 in 5273ms
+ GET /api/admin/users 200 in 5281ms
+ GET /api/admin/account 200 in 59ms
+ GET /api/admin/users 200 in 94ms
+ GET /api/auth/session 200 in 203ms
+ GET /api/auth/session 200 in 95ms
+ GET /?_rsc=1bsz2 200 in 136ms
+ GET /bank-order?_rsc=1o4s9 200 in 73ms
+ GET /history?_rsc=127xp 200 in 64ms
+ GET /api/history? 200 in 146ms
+ GET /api/history? 200 in 107ms
+ GET /settings?_rsc=1qy2s 200 in 77ms
+ GET /admin?_rsc=1krsj 200 in 81ms
+ GET /api/admin/summary? 200 in 143ms
+ GET /api/history?type=bank 200 in 163ms
+ GET /api/admin/summary? 200 in 230ms
+ GET /api/history?type=bank 200 in 249ms
+ GET /api/auth/session 200 in 2296ms
+ GET /api/auth/session 200 in 80ms
+ GET /api/auth/session 200 in 58ms
+ GET /api/auth/session 200 in 186ms
+ GET /admin 200 in 2387ms
+ GET /api/admin/summary? 200 in 133ms
+ GET /api/history?type=bank 200 in 215ms
+ GET /api/auth/session 200 in 253ms
+ GET /api/admin/summary? 200 in 301ms
+ GET /api/history?type=bank 200 in 171ms
+ GET /api/auth/session 200 in 150ms
+ GET /api/auth/session 200 in 810ms
+ GET /login 200 in 165ms
+ GET /api/auth/session 200 in 126ms
+ GET /admin 200 in 213ms
+ GET /api/auth/session 200 in 126ms
+ GET /api/admin/summary? 200 in 168ms
+ GET /api/history?type=bank 200 in 186ms
+ GET /api/admin/summary? 200 in 205ms
+ GET /api/auth/session 200 in 215ms
+ GET /api/history?type=bank 200 in 264ms
+ GET /?_rsc=1bsz2 200 in 88ms
+ GET / 200 in 709ms
+ GET /api/auth/session 200 in 239ms
+ GET /api/auth/session 200 in 146ms
+ GET /bank-order?_rsc=1o4s9 200 in 96ms
+ GET /history?_rsc=127xp 200 in 117ms
+ GET /api/history? 200 in 120ms
+ GET /api/history? 200 in 176ms
+ GET / 200 in 898ms
+ GET /api/auth/session 200 in 206ms
+ GET /api/auth/session 200 in 147ms
+ GET /api/auth/session 200 in 341ms
+ GET / 200 in 386ms
+ GET /api/auth/session 200 in 120ms
+ GET /api/auth/session 200 in 84ms
+ GET / 200 in 495ms
+ GET /api/auth/session 200 in 129ms
+ GET /api/auth/session 200 in 93ms
+ GET /api/auth/session 200 in 300ms
+ GET /api/auth/session 200 in 579ms
+ GET /admin?_rsc=196l8 200 in 88ms
+ GET /api/admin/summary? 200 in 111ms
+ GET /api/history?type=bank 200 in 166ms
+ GET /api/admin/summary? 200 in 153ms
+ GET /api/history?type=bank 200 in 194ms
+ GET /admin/users?_rsc=13bkb 200 in 78ms
+ GET /api/admin/users 200 in 173ms
+ GET /api/admin/account 200 in 178ms
+ GET /api/admin/account 200 in 182ms
+ GET /api/admin/users 200 in 197ms
+ Ôùï Compiling /api/admin/users/[id] ...
+ Ô£ô Compiled /api/admin/users/[id] in 1877ms (725 modules)
+ DELETE /api/admin/users/9 200 in 4332ms
+ GET /api/admin/users 200 in 131ms
+ GET /api/admin/account 200 in 147ms
+ DELETE /api/admin/users/8 200 in 497ms
+ GET /api/admin/users 200 in 126ms
+ GET /api/admin/account 200 in 144ms
+ DELETE /api/admin/users/7 200 in 276ms
+ GET /api/admin/users 200 in 165ms
+ GET /api/admin/account 200 in 157ms
+ DELETE /api/admin/users/6 200 in 197ms
+ GET /api/admin/users 200 in 106ms
+ GET /api/admin/account 200 in 150ms
+ GET /admin/users 200 in 416ms
+ GET /api/admin/users 200 in 177ms
+ GET /api/admin/account 200 in 148ms
+ GET /api/auth/session 200 in 245ms
+ GET /api/admin/users 200 in 232ms
+ GET /api/admin/account 200 in 141ms
+ GET /api/auth/session 200 in 120ms
+ GET /?_rsc=1bsz2 200 in 182ms
+ GET /bank-order?_rsc=1o4s9 200 in 88ms
+ GET /history?_rsc=127xp 200 in 69ms
+ GET /api/history? 200 in 87ms
+ GET /api/history? 200 in 80ms
+ GET /settings?_rsc=1qy2s 200 in 2176ms
+ GET /api/auth/session 200 in 135ms
+ GET /api/auth/session 200 in 116ms
+ GET /?_rsc=1bsz2 200 in 2181ms
+ GET /settings 200 in 257ms
+ GET /api/auth/session 200 in 101ms
+ GET /api/auth/session 200 in 102ms
+ GET /?_rsc=1bsz2 200 in 108ms
+ GET /api/auth/session 200 in 145ms
+ GET /api/auth/session 200 in 125ms
+ GET /api/auth/session 200 in 122ms
+ GET /api/auth/session 200 in 137ms
+ GET / 200 in 292ms
+ GET /api/auth/session 200 in 309ms
+ GET /api/auth/session 200 in 114ms
+ GET /api/auth/session 200 in 157ms
+ GET / 200 in 353ms
+ GET /api/auth/session 200 in 192ms
+ GET /api/auth/session 200 in 101ms
+ Ô£ô Compiled in 8.1s (1325 modules)
+ GET /?_rsc=1ffcw 200 in 1190ms
+ GET /api/auth/session 200 in 260ms
+ GET /api/auth/session 200 in 163ms
+ GET /bank-order?_rsc=1o4s9 200 in 116ms
+ GET /?_rsc=1bsz2 200 in 170ms
+ GET /api/auth/session 200 in 186ms
+ GET /api/auth/session 200 in 204ms
+ GET /api/auth/session 200 in 2482ms
+ GET /api/auth/session 200 in 168ms
+ Ô£ô Compiled in 8.8s (1325 modules)
+ GET /?_rsc=1ffcw 200 in 3529ms
+ GET /api/auth/session 200 in 300ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 1877ms (690 modules)
+ GET /admin?_rsc=196l8 200 in 215ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 1260ms (717 modules)
+ Ô£ô Compiled in 2ms (719 modules)
+ Ô£ô Compiled in 3ms (719 modules)
+ Ô£ô Compiled in 3ms (719 modules)
+ GET /api/admin/summary? 200 in 7284ms
+ Ô£ô Compiled in 4ms (719 modules)
+ GET /api/history?type=bank 200 in 8599ms
+ Ô£ô Compiled in 3ms (719 modules)
+ Ô£ô Compiled in 1ms (719 modules)
+ Ô£ô Compiled in 2ms (719 modules)
+ GET /api/admin/summary? 200 in 5474ms
+ GET /api/history?type=bank 200 in 5406ms
+ GET /admin/users?_rsc=13bkb 200 in 5111ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 4.9s (721 modules)
+ Ô£ô Compiled (723 modules)
+ GET /api/admin/account 200 in 7454ms
+ GET /api/admin/users 200 in 7479ms
+ GET /api/admin/account 200 in 168ms
+ GET /api/admin/users 200 in 184ms
+ GET /api/auth/session 200 in 152ms
+ GET /api/auth/session 200 in 499ms
+ GET / 200 in 875ms
+ GET /api/auth/session 200 in 241ms
+ GET /api/auth/session 200 in 196ms
+ GET /bank-order?_rsc=1o4s9 200 in 2112ms
+ GET /history?_rsc=127xp 200 in 78ms
+ GET /api/history? 200 in 113ms
+ GET /api/history? 200 in 95ms
+ GET /settings?_rsc=1qy2s 200 in 64ms
+ GET /admin?_rsc=196l8 200 in 64ms
+ GET /api/history?type=bank 200 in 130ms
+ GET /api/history?type=bank 200 in 292ms
+ GET /api/admin/summary? 200 in 2167ms
+ GET /api/admin/summary? 200 in 62ms
+ GET /api/auth/session 200 in 216ms
+ GET /api/auth/session 200 in 164ms
+ GET /history?storeCode=ADM&_rsc=1dt4z 200 in 73ms
+ GET /api/history?storeCode=ADM 200 in 118ms
+ GET /api/history?storeCode=ADM 200 in 92ms
+ GET /api/history? 200 in 132ms
+ GET /api/history?storeCode=ADM 200 in 134ms
+ GET /?_rsc=1bsz2 200 in 2150ms
+ Ô£ô Compiled in 18.3s (1360 modules)
+ GET /admin?_rsc=1krsj 200 in 13871ms
+ GET /admin?_rsc=1csz2 200 in 163ms
+ Ôùï Compiling /api/admin/summary ...
+ GET /api/auth/session 200 in 980ms
+ Ô£ô Compiled /api/admin/summary in 3.5s (714 modules)
+ GET /api/history?type=bank 200 in 6977ms
+ GET /api/auth/session 200 in 8487ms
+ GET /api/admin/summary? 200 in 9508ms
+ GET /api/history?type=bank 200 in 3836ms
+ GET /api/admin/summary? 200 in 1206ms
+ Ôùï Compiling /login ...
+ Ô£ô Compiled /login in 9.2s (1368 modules)
+ GET /api/auth/session 200 in 10334ms
+ GET /api/auth/session 200 in 960ms
+ GET /api/auth/session 200 in 136ms
+ GET /admin/users?_rsc=vcquj 200 in 150ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 1476ms (736 modules)
+ Ô£ô Compiled (738 modules)
+ GET /api/admin/users 200 in 2748ms
+ GET /api/admin/account 200 in 2744ms
+ GET /api/admin/users 200 in 91ms
+ GET /api/admin/account 200 in 103ms
+ GET /admin?_rsc=1krsj 200 in 829ms
+ GET /api/admin/summary? 200 in 610ms
+ GET /api/history?type=bank 200 in 744ms
+ GET /api/admin/summary? 200 in 351ms
+ GET /api/history?type=bank 200 in 319ms
+ GET /api/admin/users 200 in 535ms
+ GET /api/admin/account 200 in 624ms
+ GET /api/admin/users 200 in 366ms
+ GET /api/admin/account 200 in 585ms
+ GET /api/admin/summary? 200 in 380ms
+ GET /api/history?type=bank 200 in 487ms
+ GET /api/admin/summary? 200 in 273ms
+ GET /api/history?type=bank 200 in 210ms
+ GET /?_rsc=1bsz2 200 in 140ms
+ GET /bank-order?_rsc=ovhu1 200 in 90ms
+ GET /api/auth/session 200 in 162ms
+ GET /history?_rsc=1dt4z 200 in 78ms
+ GET /api/history? 200 in 70ms
+ GET /api/history? 200 in 67ms
+ GET /api/auth/session 200 in 124ms
+ Ôùï Compiling /_not-found ...
+ Ô£ô Compiled /_not-found in 11.9s (1329 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 14626ms
+ Ôùï Compiling /receipt/[id] ...
+ Ô£ô Compiled /receipt/[id] in 1963ms (769 modules)
+ GET /receipt/B-ADM-20260329-0001?_rsc=19hiv 200 in 82ms
+ GET /receipt/B-ADM-20260329-0001?_rsc=1d3wp 200 in 2332ms
+ GET /?_rsc=1bsz2 200 in 2700ms
+ GET /api/auth/session 200 in 167ms
+ GET / 200 in 589ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 317ms
+ GET /api/auth/session 200 in 174ms
+ GET /api/auth/session 200 in 80ms
+ GET /bank-order?_rsc=1o4s9 200 in 70ms
+ GET /history?_rsc=127xp 200 in 68ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 1760ms (788 modules)
+ Ôùï Compiling /settings ...
+ Ô£ô Compiled /settings in 722ms (793 modules)
+ GET /settings?_rsc=1qy2s 200 in 105ms
+ GET /api/history? 200 in 4279ms
+ GET /api/history? 200 in 56ms
+ GET /api/history? 200 in 108ms
+ GET /api/history? 200 in 96ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 1150ms (801 modules)
+ GET /admin?_rsc=196l8 200 in 131ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 2.6s (803 modules)
+ GET /api/history?type=bank 200 in 4523ms
+ GET /api/admin/summary? 200 in 4540ms
+ GET /api/history?type=bank 200 in 127ms
+ GET /api/admin/summary? 200 in 160ms
+ GET /api/history? 200 in 176ms
+ GET /api/history? 200 in 87ms
+ GET /bank-order?_rsc=ovhu1 200 in 144ms
+ GET /?_rsc=1bsz2 200 in 168ms
+ GET /history?_rsc=1dt4z 200 in 93ms
+ GET /api/history? 200 in 224ms
+ GET /api/history? 200 in 469ms
+ GET /settings?_rsc=3i61o 200 in 103ms
+ Ô£ô Compiled in 43.2s (1452 modules)
+ GET /api/auth/session 200 in 3516ms
+ GET /settings?_rsc=1ukgm 200 in 230ms
+ GET /admin?_rsc=1krsj 200 in 495ms
+ GET /api/admin/summary? 200 in 367ms
+ GET /api/history?type=bank 200 in 454ms
+ GET /api/admin/summary? 200 in 172ms
+ GET /api/history?type=bank 200 in 142ms
+ GET /admin/users?_rsc=13bkb 200 in 125ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 2.8s (804 modules)
+ Ô£ô Compiled (806 modules)
+ GET /api/admin/account 200 in 4371ms
+ GET /api/admin/users 200 in 4426ms
+ GET /api/admin/account 200 in 145ms
+ GET /api/admin/users 200 in 130ms
+ GET /api/admin/summary? 200 in 593ms
+ GET /api/history?type=bank 200 in 646ms
+ GET /api/admin/summary? 200 in 121ms
+ GET /api/history?type=bank 200 in 198ms
+ GET /?_rsc=1bsz2 200 in 163ms
+ GET /bank-order?_rsc=ovhu1 200 in 87ms
+ GET /history?_rsc=1dt4z 200 in 589ms
+ GET /api/history? 200 in 51ms
+ GET /api/history? 200 in 148ms
+ GET /settings?_rsc=3i61o 200 in 66ms
+ GET /api/history? 200 in 62ms
+ GET /api/history? 200 in 79ms
+ GET /?_rsc=1bsz2 200 in 61ms
+ Ôùï Compiling /api/orders/bank ...
+ Ô£ô Compiled /api/orders/bank in 1841ms (724 modules)
+ POST /api/orders/bank 400 in 2389ms
+ GET /history?_rsc=1dt4z 200 in 140ms
+ GET /api/history? 200 in 69ms
+ GET /api/history? 200 in 98ms
+ GET /?_rsc=1bsz2 200 in 4203ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 753ms (721 modules)
+ GET /api/auth/session 200 in 1081ms
+ Ôùï Compiling /receipt/[id] ...
+ Ô£ô Compiled /receipt/[id] in 1243ms (795 modules)
+ GET /receipt/B-ADM-20260329-0001?_rsc=19hiv 200 in 142ms
+ Ôùï Compiling /_not-found ...
+ Ô£ô Compiled /_not-found in 3.8s (1438 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 4439ms
+ GET /?_rsc=1ffcw 200 in 183ms
+ GET / 200 in 528ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 341ms
+ GET /api/auth/session 200 in 181ms
+ GET /api/auth/session 200 in 90ms
+ GET /api/auth/session 200 in 217ms
+ GET /api/auth/session 200 in 249ms
+ GET /api/auth/session 200 in 132ms
+ GET /api/auth/session 200 in 229ms
+ Ô£ô Compiled in 5.6s (1408 modules)
+ GET /?_rsc=1ffcw 200 in 2798ms
+ GET /api/auth/session 200 in 144ms
+ GET / 200 in 537ms
+ GET /api/auth/session 200 in 101ms
+ GET /api/auth/session 200 in 131ms
+ Ôùï Compiling /_not-found ...
+ Ô£ô Compiled /_not-found in 1631ms (1397 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 2240ms
+ GET /api/auth/session 200 in 161ms
+ GET /api/auth/session 200 in 675ms
+ GET / 200 in 771ms
+ GET /bank-order 200 in 745ms
+ GET /api/auth/session 200 in 108ms
+ GET /api/auth/session 200 in 149ms
+ GET /api/auth/session 200 in 249ms
+ Ô£ô Compiled in 10.2s (1408 modules)
+ GET /api/auth/session 200 in 4812ms
+ GET /bank-order?_rsc=1rr62 200 in 2221ms
+ GET /bank-order 200 in 3239ms
+ GET /api/auth/session 200 in 106ms
+ GET /api/auth/session 200 in 56ms
+ GET /?_rsc=1bsz2 200 in 127ms
+ GET /history?_rsc=127xp 200 in 2095ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /settings in 1859ms (787 modules)
+ Ô£ô Compiled (792 modules)
+ GET /api/history? 200 in 3488ms
+ GET /api/history? 200 in 133ms
+ GET /settings?_rsc=1qy2s 200 in 151ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 1214ms (800 modules)
+ GET /admin?_rsc=196l8 200 in 83ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 883ms (802 modules)
+ GET /api/history?type=bank 200 in 1893ms
+ GET /api/history?type=bank 200 in 103ms
+ GET /api/admin/summary? 200 in 4043ms
+ GET /api/admin/summary? 200 in 65ms
+ GET /api/auth/session 200 in 187ms
+ Ô£ô Compiled in 6.2s (1438 modules)
+ GET /admin?_rsc=1csz2 200 in 734ms
+ GET /api/admin/summary?storeCode=ADM 200 in 144ms
+ GET /api/history?storeCode=ADM&type=bank 200 in 162ms
+ GET /api/history?storeCode=ADM&from=2026-03-29&type=bank 200 in 84ms
+ GET /api/history?storeCode=ADM&from=2026-03-29&to=2026-03-29&type=bank 200 in 55ms
+ GET /api/history?storeCode=ADM&from=2026-03-29&to=2026-03-29&type=bank&status=done 200 in 70ms
+ GET /api/auth/session 200 in 210ms
+ GET /api/auth/session 200 in 388ms
+ GET /api/auth/session 200 in 110ms
+ GET /settings?_rsc=3i61o 200 in 88ms
+ GET /?_rsc=1bsz2 200 in 2164ms
+ GET /admin?_rsc=1krsj 200 in 68ms
+ GET /api/admin/summary? 200 in 333ms
+ GET /api/history?type=bank 200 in 382ms
+ GET /api/admin/summary? 200 in 139ms
+ GET /api/history?type=bank 200 in 161ms
+ GET /api/auth/session 200 in 2191ms
+ GET /api/history? 200 in 159ms
+ GET /api/history? 200 in 136ms
+ GET /api/history? 200 in 316ms
+ GET /api/history? 200 in 102ms
+ GET /api/admin/summary? 200 in 142ms
+ GET /api/history?type=bank 200 in 196ms
+ GET /api/admin/summary? 200 in 275ms
+ GET /api/history?type=bank 200 in 248ms
+ GET /api/history? 200 in 119ms
+ GET /api/history? 200 in 113ms
+ GET /api/admin/summary? 200 in 140ms
+ GET /api/history?type=bank 200 in 165ms
+ GET /api/history?type=bank 200 in 109ms
+ GET /api/admin/summary? 200 in 2233ms
+ GET /api/auth/session 200 in 128ms
+ GET /bank-order?_rsc=ovhu1 200 in 99ms
+ GET /history?_rsc=1dt4z 200 in 92ms
+ GET /api/history? 200 in 110ms
+ GET /api/history? 200 in 105ms
+ GET /?_rsc=1bsz2 200 in 102ms
+ GET /receipt/B-ADM-20260329-0001?_rsc=19hiv 200 in 103ms
+ GET /bank-order?_rsc=ovhu1 200 in 263ms
+ GET /history?_rsc=1dt4z 200 in 98ms
+ GET /api/history? 200 in 62ms
+ GET /api/history? 200 in 106ms
+ GET /settings?_rsc=3i61o 200 in 67ms
+ GET /?_rsc=1bsz2 200 in 97ms
+ GET /api/history? 200 in 102ms
+ GET /api/history? 200 in 109ms
+ GET /receipt/B-ADM-20260329-0001?_rsc=63rki 200 in 101ms
+ Ô£ô Compiled in 7.8s (1439 modules)
+ GET /bank-order?_rsc=ovhu1 200 in 5851ms
+ GET /bank-order?_rsc=1rr62 200 in 118ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 2.2s (780 modules)
+ GET /api/auth/session 200 in 2997ms
+ GET /history?_rsc=1dt4z 200 in 608ms
+ GET /api/history? 200 in 512ms
+ GET /api/history? 200 in 256ms
+ GET /api/history?storeCode=ADM 200 in 126ms
+ GET /history 200 in 911ms
+ GET /api/history? 200 in 765ms
+ GET /api/auth/session 200 in 818ms
+ GET /api/history? 200 in 201ms
+ GET /api/auth/session 200 in 130ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 3.1s (788 modules)
+ GET /admin?_rsc=1csz2 200 in 190ms
+ Ôùï Compiling /api/admin/summary ...
+ Ô£ô Compiled /api/admin/summary in 1431ms (790 modules)
+ GET /api/admin/summary? 200 in 2515ms
+ GET /api/history?type=bank 200 in 2532ms
+ GET /api/admin/summary? 200 in 90ms
+ GET /api/history?type=bank 200 in 100ms
+ GET /api/auth/session 200 in 134ms
+ GET /api/admin/summary?storeCode=ADM 200 in 695ms
+ GET /api/history?storeCode=ADM&type=bank 200 in 683ms
+ GET /api/history?storeCode=ADM&type=bank&status=pending 200 in 51ms
+ GET /api/history?storeCode=ADM&type=bank&status=done 200 in 52ms
+ Ôùï Compiling /admin/users ...
+ Ô£ô Compiled /admin/users in 2.2s (797 modules)
+ GET /admin/users?_rsc=13bkb 200 in 79ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 1468ms (799 modules)
+ GET /admin/users?_rsc=vcquj 200 in 2427ms
+ Ô£ô Compiled in 1ms (801 modules)
+ Ô£ô Compiled in 0ms (801 modules)
+ Ô£ô Compiled in 2ms (801 modules)
+ GET /api/admin/users 200 in 4153ms
+ Ô£ô Compiled in 1ms (801 modules)
+ GET /api/admin/account 200 in 5279ms
+ GET /admin/users?_rsc=vcquj 200 in 3684ms
+ Ô£ô Compiled in 1ms (801 modules)
+ Ô£ô Compiled in 0ms (801 modules)
+ Ô£ô Compiled in 1ms (801 modules)
+ GET /api/admin/users 200 in 3436ms
+ GET /api/admin/account 200 in 2993ms
+ GET /admin/users?_rsc=vcquj 200 in 2877ms
+ PUT /api/admin/account 400 in 54ms
+ GET /api/auth/session 200 in 2173ms
+ GET /api/auth/session 200 in 99ms
+ Ô£ô Compiled in 8s (1405 modules)
+ GET /admin/users?_rsc=vcquj 200 in 7527ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 1480ms (784 modules)
+ Ô£ô Compiled in 10ms (786 modules)
+ Ô£ô Compiled in 1ms (786 modules)
+ Ô£ô Compiled in 1ms (786 modules)
+ GET /api/admin/users 200 in 6951ms
+ Ô£ô Compiled in 1ms (786 modules)
+ GET /api/admin/account 200 in 8902ms
+ GET /admin/users?_rsc=vcquj 200 in 7039ms
+ Ô£ô Compiled in 1ms (786 modules)
+ Ô£ô Compiled in 1ms (786 modules)
+ Ô£ô Compiled in 1ms (786 modules)
+ GET /api/admin/users 200 in 5345ms
+ GET /api/admin/account 200 in 4160ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 2.7s (759 modules)
+ GET /api/auth/session 200 in 5788ms
+ GET /admin/users 200 in 3561ms
+ Ôùï Compiling /api/admin/account ...
+ Ô£ô Compiled /api/admin/account in 581ms (786 modules)
+ Ô£ô Compiled (788 modules)
+ GET /api/auth/session 200 in 1449ms
+ GET /api/admin/account 200 in 1766ms
+ GET /api/admin/users 200 in 1775ms
+ GET /api/auth/session 200 in 681ms
+ GET /api/admin/account 200 in 501ms
+ GET /api/admin/users 200 in 486ms
+ POST /api/admin/users 201 in 579ms
+ GET /api/admin/users 200 in 363ms
+ GET /api/admin/account 200 in 373ms
+ GET /api/auth/session 200 in 5192ms
+ GET /api/auth/csrf 200 in 901ms
+ POST /api/auth/signout 200 in 61ms
+ Ôùï Compiling /login ...
+ Ô£ô Compiled /login in 11.6s (767 modules)
+ GET /api/auth/session 200 in 5875ms
+ GET /login 200 in 14522ms
+ GET /api/auth/session 200 in 79ms
+ GET /api/auth/session 200 in 32ms
+ Ô£ô Compiled in 6.7s (1579 modules)
+ GET /login?_rsc=1c5gs 200 in 4185ms
+ GET /login?_rsc=1c5gs 200 in 55ms
+ Ô£ô Compiled in 2.2s (1408 modules)
+ GET /login?_rsc=1c5gs 200 in 124ms
+ GET /api/auth/providers 200 in 925ms
+ GET /api/auth/csrf 200 in 41ms
+ POST /api/auth/callback/credentials 200 in 1232ms
+ GET /api/auth/session 200 in 883ms
+ GET /?_rsc=turmx 200 in 308ms
+ Ôùï Compiling /settings ...
+ Ô£ô Compiled /settings in 1532ms (763 modules)
+ GET /settings?_rsc=1qy2s 200 in 142ms
+ Ôùï Compiling /bank-order ...
+ Ô£ô Compiled /bank-order in 1031ms (774 modules)
+ GET /bank-order?_rsc=1o4s9 200 in 88ms
+ Ôùï Compiling /history ...
+ Ô£ô Compiled /history in 1855ms (699 modules)
+ GET /history?_rsc=127xp 200 in 510ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 1026ms (726 modules)
+ GET /api/history? 200 in 3672ms
+ GET /api/history? 200 in 64ms
+ GET /settings?_rsc=3i61o 200 in 2387ms
+ GET /settings?_rsc=18v68 200 in 2173ms
+ GET /?_rsc=1bsz2 200 in 104ms
+ GET /api/auth/session 200 in 103ms
+ GET /api/auth/session 200 in 75ms
+ GET /settings?_rsc=3i61o 200 in 74ms
+ GET /bank-order?_rsc=ovhu1 200 in 74ms
+ GET /?_rsc=1bsz2 200 in 72ms
+ GET /api/auth/csrf 200 in 73ms
+ POST /api/auth/signout 200 in 33ms
+ GET /login 200 in 517ms
+ GET /api/auth/session 200 in 193ms
+ GET /api/auth/session 200 in 62ms
+ GET /api/auth/providers 200 in 71ms
+ GET /api/auth/csrf 200 in 40ms
+ POST /api/auth/callback/credentials 200 in 665ms
+ GET /api/auth/session 200 in 51ms
+ GET /?_rsc=turmx 200 in 141ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 1114ms (693 modules)
+ GET /admin?_rsc=196l8 200 in 106ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 2.1s (720 modules)
+ Ô£ô Compiled in 0ms (722 modules)
+ Ô£ô Compiled in 1ms (722 modules)
+ Ô£ô Compiled in 1ms (722 modules)
+ GET /api/admin/summary? 200 in 4574ms
+ Ô£ô Compiled in 1ms (722 modules)
+ GET /api/history?type=bank 200 in 5577ms
+ GET /admin?_rsc=1hbbw 200 in 3431ms
+ Ô£ô Compiled in 1ms (722 modules)
+ Ô£ô Compiled in 1ms (722 modules)
+ Ô£ô Compiled in 2ms (722 modules)
+ GET /api/admin/summary? 200 in 3146ms
+ GET /api/history?type=bank 200 in 3143ms
+ GET /history?storeCode=ADM&_rsc=127xp 200 in 66ms
+ GET /api/history?storeCode=ADM 200 in 66ms
+ GET /api/history?storeCode=ADM 200 in 106ms
+ GET /settings?_rsc=1qy2s 200 in 57ms
+ GET /admin?_rsc=1krsj 200 in 65ms
+ GET /api/admin/summary? 200 in 124ms
+ GET /api/history?type=bank 200 in 147ms
+ GET /api/admin/summary? 200 in 106ms
+ GET /api/history?type=bank 200 in 104ms
+ GET /bank-order?_rsc=1o4s9 200 in 62ms
+ GET /history?_rsc=1dt4z 200 in 71ms
+ GET /api/history? 200 in 79ms
+ GET /api/history? 200 in 81ms
+ GET /?_rsc=1bsz2 200 in 97ms
+ GET /bank-order?_rsc=ovhu1 200 in 51ms
+ GET /settings?_rsc=3i61o 200 in 2149ms
+ GET /admin?_rsc=1krsj 200 in 63ms
+ GET /api/history?type=bank 200 in 134ms
+ GET /api/history?type=bank 200 in 77ms
+ GET /api/admin/summary? 200 in 2176ms
+ GET /api/admin/summary? 200 in 109ms
+ Ôùï Compiling /receipt/[id] ...
+ Ô£ô Compiled /receipt/[id] in 3.3s (788 modules)
+ GET /receipt/B-ADM-20260329-0001?_rsc=19hiv 200 in 318ms
+ GET /history?_rsc=1dt4z 200 in 73ms
+ GET /api/history? 200 in 147ms
+ GET /api/history? 200 in 96ms
+ GET /api/admin/summary? 200 in 115ms
+ GET /api/history?type=bank 200 in 117ms
+ GET /api/admin/summary? 200 in 433ms
+ GET /api/history?type=bank 200 in 444ms
+ GET /?_rsc=1bsz2 200 in 2141ms
+ GET /admin?_rsc=1krsj 200 in 69ms
+ GET /api/admin/summary? 200 in 134ms
+ GET /api/history?type=bank 200 in 147ms
+ GET /api/admin/summary? 200 in 114ms
+ GET /api/history?type=bank 200 in 117ms
+ GET /bank-order?_rsc=ovhu1 200 in 78ms
+ Ôùï Compiling /api/orders/bank ...
+ Ô£ô Compiled /api/orders/bank in 2.3s (714 modules)
+ POST /api/orders/bank 400 in 3016ms
+ GET /bank-order?_rsc=1d7ez 200 in 155ms
+ Ôùï Compiling /api/customers/lookup ...
+ Ô£ô Compiled /api/customers/lookup in 1006ms (716 modules)
+ GET /api/customers/lookup?type=bank&mobile=1234667890 200 in 1443ms
+ POST /api/orders/bank 201 in 190ms
+ Ôùï Compiling /receipt/[id] ...
+ Ô£ô Compiled /receipt/[id] in 766ms (792 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=121zu 200 in 116ms
+ GET /?_rsc=1bsz2 200 in 112ms
+ GET /settings?_rsc=3i61o 200 in 126ms
+ GET /history?_rsc=1dt4z 200 in 92ms
+ GET /api/history? 200 in 97ms
+ GET /api/history? 200 in 108ms
+ GET /admin?_rsc=1krsj 200 in 262ms
+ GET /api/admin/summary? 200 in 107ms
+ GET /api/history?type=bank 200 in 159ms
+ GET /api/admin/summary? 200 in 431ms
+ GET /api/history?type=bank 200 in 385ms
+ GET /bank-order?_rsc=ovhu1 200 in 113ms
+ GET /receipt/B-ADM-20260330-0001?_rsc=1m45a 200 in 102ms
+ Ôùï Compiling /api/orders/bank/[id] ...
+ Ô£ô Compiled /api/orders/bank/[id] in 1281ms (794 modules)
+ PUT /api/orders/bank/6 200 in 3856ms
+ Ô£ô Compiled in 8.1s (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 797ms
+ Ô£ô Compiled in 1366ms (1402 modules)
+ Ô£ô Compiled in 627ms (650 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 432ms
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 156ms
+ Ô£ô Compiled in 1390ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 201ms
+ Ô£ô Compiled in 1482ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 551ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 997ms (756 modules)
+ GET /api/auth/session 200 in 1302ms
+ Ô£ô Compiled in 2.5s (1406 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 2998ms
+ Ô£ô Compiled in 1435ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 455ms
+ Ô£ô Compiled in 2.1s (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 210ms
+ Ô£ô Compiled in 1354ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 166ms
+ Ô£ô Compiled in 1489ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 253ms
+ Ô£ô Compiled in 3.1s (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 753ms
+ Ô£ô Compiled in 1315ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 382ms
+ Ô£ô Compiled in 1494ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 534ms
+ Ô£ô Compiled in 1264ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 589ms
+ Ô£ô Compiled in 2.7s (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 716ms
+ Ô£ô Compiled in 1663ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 425ms
+ Ô£ô Compiled in 1734ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 664ms
+ Ô£ô Compiled in 1345ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 520ms
+ Ô£ô Compiled in 1625ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 247ms
+ Ô£ô Compiled in 1987ms (1402 modules)
+ GET /receipt/B-ADM-20260330-0001?_rsc=n6xsb 200 in 200ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 1171ms (756 modules)
+ GET /api/auth/session 200 in 3575ms
+ GET /receipt/B-ADM-20260330-0001 200 in 2422ms
+ GET /api/auth/session 200 in 65ms
+ GET /api/auth/session 200 in 222ms
+ GET /api/auth/csrf 200 in 45ms
+ POST /api/auth/signout 200 in 36ms
+ Ôùï Compiling /login ...
+ Ô£ô Compiled /login in 2.6s (764 modules)
+ GET /login 200 in 3104ms
+ GET /api/auth/session 200 in 60ms
+ GET /api/auth/session 200 in 32ms
+ GET /api/auth/providers 200 in 68ms
+ GET /api/auth/csrf 200 in 29ms
+ POST /api/auth/callback/credentials 200 in 446ms
+ GET /api/auth/session 200 in 37ms
+ GET /?_rsc=turmx 200 in 2128ms
+ GET /bank-order?_rsc=1o4s9 200 in 60ms
+ GET /history?_rsc=127xp 200 in 43ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 731ms (791 modules)
+ GET /api/history? 200 in 1075ms
+ GET /api/history? 200 in 48ms
+ Ôùï Compiling /settings ...
+ Ô£ô Compiled /settings in 1032ms (796 modules)
+ GET /settings?_rsc=1qy2s 200 in 93ms
+ Ôùï Compiling /api/settings ...
+ Ô£ô Compiled /api/settings in 634ms (801 modules)
+ PUT /api/settings 200 in 862ms
+ GET /settings?_rsc=18v68 200 in 79ms
+ GET /bank-order?_rsc=1o4s9 200 in 40ms
+ Ôùï Compiling /api/customers/lookup ...
+ Ô£ô Compiled /api/customers/lookup in 1187ms (803 modules)
+ GET /api/customers/lookup?type=bank&mobile=0123456789 200 in 1358ms
+ Ôùï Compiling /api/orders/bank ...
+ Ô£ô Compiled /api/orders/bank in 518ms (786 modules)
+ POST /api/orders/bank 201 in 655ms
+ GET /receipt/B-S1-20260330-0001?_rsc=j2s9n 200 in 67ms
+ GET /?_rsc=1bsz2 200 in 95ms
+ Ô£ô Compiled /api/auth/[...nextauth] in 442ms (773 modules)
+ GET /api/auth/csrf 200 in 832ms
+ POST /api/auth/signout 200 in 161ms
+ GET /login 200 in 354ms
+ GET /api/auth/session 200 in 71ms
+ GET /api/auth/session 200 in 33ms
+ GET /api/auth/providers 200 in 57ms
+ GET /api/auth/csrf 200 in 28ms
+ POST /api/auth/callback/credentials 200 in 377ms
+ GET /api/auth/session 200 in 38ms
+ GET /?_rsc=turmx 200 in 116ms
+ Ôùï Compiling /admin ...
+ Ô£ô Compiled /admin in 847ms (787 modules)
+ GET /admin?_rsc=196l8 200 in 91ms
+ Ôùï Compiling /api/history ...
+ Ô£ô Compiled /api/history in 670ms (789 modules)
+ Ô£ô Compiled (791 modules)
+ GET /api/admin/summary? 200 in 1582ms
+ GET /api/history?type=bank 200 in 1582ms
+ GET /api/admin/summary? 200 in 60ms
+ GET /api/history?type=bank 200 in 87ms
+ GET /api/admin/summary? 200 in 69ms
+ GET /api/history?type=bank 200 in 101ms
+ GET /api/admin/summary? 200 in 100ms
+ GET /api/history?type=bank 200 in 92ms
+ GET /api/admin/summary?storeCode=S1 200 in 78ms
+ GET /api/history?storeCode=S1&type=bank 200 in 89ms
+ GET /api/admin/summary?storeCode=ADM 200 in 71ms
+ GET /api/history?storeCode=ADM&type=bank 200 in 87ms
+ GET /api/auth/session 200 in 2503ms
+ GET /api/auth/session 200 in 92ms
+ GET /api/auth/session 200 in 115ms
+ Ô£ô Compiled in 7.1s (1330 modules)
+ Ô£ô Compiled in 807ms (650 modules)
+ GET /?_rsc=turmx 200 in 2624ms
+ GET /?_rsc=turmx 200 in 2116ms
+ Ô£ô Compiled in 2.4s (1330 modules)
+ GET /?_rsc=turmx 200 in 208ms
+ Ô£ô Compiled in 5.2s (1330 modules)
+ GET /?_rsc=turmx 200 in 161ms
+ Ô£ô Compiled in 1106ms (1330 modules)
+ GET /?_rsc=turmx 200 in 190ms
+ Ô£ô Compiled in 1211ms (1330 modules)
+ GET /?_rsc=turmx 200 in 216ms
+ Ô£ô Compiled in 1391ms (650 modules)
+ GET /?_rsc=turmx 200 in 147ms
+ Ô£ô Compiled in 648ms (650 modules)
+ Ô£ô Compiled in 634ms (650 modules)
+ GET /?_rsc=turmx 200 in 582ms
+ GET /?_rsc=turmx 200 in 106ms
+ Ô£ô Compiled in 427ms (650 modules)
+ GET /?_rsc=turmx 200 in 129ms
+ Ô£ô Compiled in 373ms (650 modules)
+ GET /?_rsc=turmx 200 in 139ms
+ Ô£ô Compiled in 1917ms (1330 modules)
+ GET /?_rsc=turmx 200 in 316ms
+ Ôùï Compiling /api/auth/[...nextauth] ...
+ Ô£ô Compiled /api/auth/[...nextauth] in 1719ms (684 modules)
+ GET /api/auth/session 200 in 2105ms
+ GET /api/auth/session 200 in 385ms
+ GET /api/auth/session 200 in 157ms
+ GET / 200 in 463ms
+ GET /api/auth/session 200 in 88ms
+ GET /api/auth/session 200 in 41ms
+ GET /api/auth/session 200 in 68ms
+ GET /api/auth/session 200 in 77ms
+ GET /api/auth/session 200 in 98ms

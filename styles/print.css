@@ -1,0 +1,107 @@
+ .admin-print-area {
+  display: none;
+ }
+
+@media print {
+  @page {
+    size: auto;
+    margin: 12mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .print-hide,
+  .admin-screen-only,
+  nav,
+  header,
+  footer,
+  .bottom-nav,
+  .filters-panel,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-area,
+  .print-area *,
+  .admin-print-area,
+  .admin-print-area * {
+    visibility: visible !important;
+  }
+
+  .print-area {
+    position: absolute;
+    inset: 0;
+    margin: 0 auto;
+    width: 58mm;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .thermal-paper {
+    width: 58mm !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .thermal-paper * {
+    color: #000 !important;
+  }
+
+  .admin-print-area {
+    display: block !important;
+    position: static !important;
+    width: auto !important;
+    margin: 0 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .admin-print-header {
+    margin-bottom: 16px;
+  }
+
+  .admin-print-header h1 {
+    margin: 0 0 8px;
+    font-size: 22px;
+  }
+
+  .admin-print-header p {
+    margin: 4px 0;
+    font-size: 12px;
+  }
+
+  .admin-print-kicker {
+    margin: 0 0 6px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .admin-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 11px;
+  }
+
+  .admin-print-table th,
+  .admin-print-table td {
+    border: 1px solid #000;
+    padding: 6px;
+    vertical-align: top;
+    color: #000 !important;
+    word-break: break-word;
+  }
+
+  .admin-print-table thead {
+    display: table-header-group;
+  }
+
+  .admin-print-table tr {
+    page-break-inside: avoid;
+  }
+}
