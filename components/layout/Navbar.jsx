@@ -43,7 +43,7 @@ export default function Navbar({ user }) {
             </div>
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[11px] uppercase tracking-[0.22em] text-white/35 md:hidden">AHMAD</p>
+            <p className="truncate text-[2rem] font-bold uppercase tracking-[0.22em] text-white/35 md:hidden">AHMAD</p>
             <p className="hidden text-xs uppercase tracking-[0.28em] text-white/35 md:block">AHMAD Enterprises</p>
             <p className="hidden text-sm text-white/65 md:block">Store and admin remittance management</p>
           </div>

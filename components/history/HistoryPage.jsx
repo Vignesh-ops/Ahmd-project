@@ -33,7 +33,10 @@ export default function HistoryPage({
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteOrder, setDeleteOrder] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   useEffect(() => {
     async function loadOrders() {
       setLoading(true);
@@ -103,17 +106,39 @@ export default function HistoryPage({
   }
 
   async function handleDelete(order) {
-    const confirmed = window.confirm(`Delete ${order.orderNo}?`);
+    setDeleteOrder(order);
+    setShowDeleteModal(true);
+    setDeleteError(null);
+  }
 
-    if (!confirmed) {
-      return;
+  async function confirmDelete() {
+    if (!deleteOrder) return;
+
+    setDeleteLoading(true);
+    try {
+      const endpoint = `/api/orders/bank/${deleteOrder.id}`;
+      const response = await fetch(endpoint, { method: "DELETE" });
+
+      if (!response.ok) {
+        setDeleteError("Failed to delete order.");
+        setDeleteLoading(false);
+        return;
+      }
+
+      setOrders((current) =>
+        current.filter(
+          (item) =>
+            !(item.type === deleteOrder.type && item.id === deleteOrder.id)
+        )
+      );
+      setSelectedOrder(null);
+      setShowDeleteModal(false);
+      setDeleteOrder(null);
+      setDeleteLoading(false);
+    } catch (error) {
+      setDeleteError("Error deleting order.");
+      setDeleteLoading(false);
     }
-
-    const endpoint = `/api/orders/bank/${order.id}`;
-
-    await fetch(endpoint, { method: "DELETE" });
-    setOrders((current) => current.filter((item) => !(item.type === order.type && item.id === order.id)));
-    setSelectedOrder(null);
   }
 
   return (
@@ -223,7 +248,54 @@ export default function HistoryPage({
           ) : null}
         </div>
       )}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-red-500/30 p-6 max-w-sm shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white">Delete Order?</h3>
+            </div>
 
+            <p className="text-white/70 mb-6">
+              Are you sure you want to delete order <span className="font-semibold text-red-300">{deleteOrder?.orderNo}</span>? This action cannot be undone.
+            </p>
+
+            {deleteError && (
+              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                {deleteLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {selectedOrder ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="glass-panel w-full max-w-lg rounded-[32px] border border-white/10 p-6">

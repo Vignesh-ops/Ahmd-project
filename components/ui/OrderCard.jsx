@@ -18,7 +18,7 @@ export default function OrderCard({ order, href, showStore = false, children }) 
       : formatCurrency(order.amount, order.currency);
 
   const content = (
-    <div className="glass-panel w-full overflow-hidden rounded-[28px] border border-white/5 p-5 transition hover:border-gold/25">
+    <div className="glass-panel w-full relative z-[-1] overflow-hidden rounded-[28px] border border-white/5 p-5 transition hover:border-gold/25">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/55">

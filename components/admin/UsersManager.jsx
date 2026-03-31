@@ -189,21 +189,42 @@ export default function UsersManager() {
     setMessage("Store user updated.");
     loadUsers();
   }
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteUserId, setDeleteUserId] = useState(null);
+  const [deleteStoreName, setDeleteStoreName] = useState(null);
+  
   async function handleDelete(userId, storeName) {
-    const confirmed = window.confirm(`Delete ${storeName}?`);
-
-    if (!confirmed) {
-      return;
-    }
-
-    await fetch(`/api/admin/users/${userId}`, {
-      method: "DELETE"
-    });
-
-    setMessage("Store user deleted.");
-    loadUsers();
+    setDeleteUserId(userId);
+    setDeleteStoreName(storeName);
+    setShowDeleteModal(true);
   }
+  
+  async function confirmDelete() {
+    if (!deleteUserId) return;
+  
+    try {
+      const response = await fetch(`/api/admin/users/${deleteUserId}`, {
+        method: "DELETE"
+      });
+  
+      if (!response.ok) {
+        setMessage("Could not delete user.");
+        setShowDeleteModal(false);
+        return;
+      }
+  
+      setSuccessMessage("Store user deleted successfully.");
+      setShowDeleteModal(false);
+      loadUsers();
+    } catch (error) {
+      setMessage("Error deleting user.");
+      setShowDeleteModal(false);
+    }
+  }
+  
+  // ...existing code...
+  
+
 
   async function handleResetPassword(user) {
     const confirmed = window.confirm(`Generate a new temporary password for ${user.storeName}?`);
@@ -355,6 +376,41 @@ export default function UsersManager() {
           </Button>
         </div>
       </form>
+
+       {/* Fancy Delete Confirmation Modal */}
+  {showDeleteModal && (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-red-500/30 p-6 max-w-sm shadow-2xl animate-in fade-in zoom-in-95">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-red-500/20 rounded-lg">
+            <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-white">Delete Store User?</h3>
+        </div>
+  
+        <p className="text-white/70 mb-6">
+          Are you sure you want to delete <span className="font-semibold text-red-300">{deleteStoreName}</span>? This action cannot be undone.
+        </p>
+  
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowDeleteModal(false)}
+            className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmDelete}
+            className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
       {temporaryPasswordInfo ? (
         <div className="rounded-[28px] border border-gold/25 bg-gold/10 p-5 text-sm text-white/85">
