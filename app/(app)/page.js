@@ -1,19 +1,19 @@
-import Link from "next/link";
 import { ArrowRight, Landmark } from "lucide-react";
+import AppLink from "@/components/navigation/AppLink";
 import Button from "@/components/ui/Button";
 import OrderCard from "@/components/ui/OrderCard";
 import StatCard from "@/components/ui/StatCard";
-import { getCombinedOrders, summarizeOrders } from "@/lib/orders";
+import { getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 import { formatCurrency } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const session = await requireSession();
-  const [allOrders, todayOrders, recentOrders] = await Promise.all([
-    getCombinedOrders({
+  const [summary, todaySummary, recentOrders] = await Promise.all([
+    getOrderSummary({
       sessionUser: session.user
     }),
-    getCombinedOrders({
+    getOrderSummary({
       sessionUser: session.user,
       filters: {
         today: true
@@ -26,9 +26,6 @@ export default async function DashboardPage() {
       }
     })
   ]);
-
-  const summary = summarizeOrders(allOrders);
-  const todaySummary = summarizeOrders(todayOrders);
 
   return (
     <div className="page-fade space-y-6">
@@ -91,10 +88,10 @@ export default async function DashboardPage() {
             <p className="text-xs uppercase tracking-[0.22em] text-white/35">Recent Orders</p>
             <h2 className="mt-2 text-2xl font-semibold text-white">Latest activity</h2>
           </div>
-          <Link href="/history" className="inline-flex items-center gap-2 text-sm text-gold-light">
+          <AppLink href="/history" className="inline-flex items-center gap-2 text-sm text-gold-light">
             View all
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </AppLink>
         </div>
 
         <div className="space-y-4">

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { History, Home, Landmark, LogOut, Settings, Shield, Store } from "lucide-react";
+import AppLink from "@/components/navigation/AppLink";
 import { signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/theme/ThemeToggle";
@@ -27,7 +27,7 @@ export default function Navbar({ user }) {
   return (
     <header className="sticky top-0 z-30 border-b border-white/5 bg-dark-base/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
+        <AppLink href="/" className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/30 bg-white/95 shadow-[0_0_0_4px_rgba(212,168,67,0.08)] sm:h-14 sm:w-14">
             <div className="relative h-9 w-9 sm:h-11 sm:w-11">
               <Image
@@ -47,7 +47,7 @@ export default function Navbar({ user }) {
             <p className="hidden text-xs uppercase tracking-[0.28em] text-white/35 md:block">AHMAD Enterprises</p>
             <p className="hidden text-sm text-white/65 md:block">Store and admin remittance management</p>
           </div>
-        </Link>
+        </AppLink>
 
         <nav className="hidden flex-1 items-center justify-center md:flex">
           <div className="flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/5 bg-white/5 px-2 py-2">
@@ -59,7 +59,7 @@ export default function Navbar({ user }) {
               const Icon = item.icon;
 
               return (
-                <Link
+                <AppLink
                   key={item.href}
                   href={item.href}
                   className={cn(
@@ -71,7 +71,7 @@ export default function Navbar({ user }) {
                 >
                   <Icon className="h-4 w-4" />
                   <span>{item.label}</span>
-                </Link>
+                </AppLink>
               );
             })}
           </div>

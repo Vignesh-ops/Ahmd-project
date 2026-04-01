@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
+import AppLink from "@/components/navigation/AppLink";
 import { cn } from "@/lib/utils";
 
 const variants = {
@@ -32,10 +32,10 @@ export default function Button({
 
   if (href) {
     return (
-      <Link href={href} className={classes}>
+      <AppLink href={href} className={classes}>
         {Icon ? <Icon className="h-4 w-4" /> : null}
         {children}
-      </Link>
+      </AppLink>
     );
   }
 

@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, History, Landmark, Settings, Shield } from "lucide-react";
+import AppLink from "@/components/navigation/AppLink";
 import { cn } from "@/lib/utils";
 
 export default function BottomNav({ role }) {
@@ -31,7 +31,7 @@ export default function BottomNav({ role }) {
           const Icon = item.icon;
 
           return (
-            <Link
+            <AppLink
               key={item.href}
               href={item.href}
               className="flex flex-col items-center justify-center gap-1 px-1 py-2"
@@ -40,7 +40,7 @@ export default function BottomNav({ role }) {
               <span className={cn("text-[11px]", active ? "text-gold-light" : "text-white/45")}>
                 {item.label}
               </span>
-            </Link>
+            </AppLink>
           );
         })}
       </div>

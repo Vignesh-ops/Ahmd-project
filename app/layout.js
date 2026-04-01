@@ -5,11 +5,16 @@ import Providers from "./providers";
 export const metadata = {
   title: "AHMAD Enterprises",
   description: "Money remittance order management for AHMAD Enterprises",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/Ahmad_logo.png",
     shortcut: "/Ahmad_logo.png",
     apple: "/Ahmad_logo.png"
   }
+};
+
+export const viewport = {
+  themeColor: "#0a0c10"
 };
 
 export default function RootLayout({ children }) {

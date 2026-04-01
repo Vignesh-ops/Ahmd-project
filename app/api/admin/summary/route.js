@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getCombinedOrders } from "@/lib/orders";
+import { getStoreOrderSummary } from "@/lib/orders";
 import { forbidden, getApiSession, unauthorized } from "@/lib/api";
 
 export async function GET(request) {
@@ -21,9 +21,8 @@ export async function GET(request) {
     storeCode: searchParams.get("storeCode") || undefined
   };
 
-  const [orders, stores] = await Promise.all([
-    getCombinedOrders({
-      sessionUser: session.user,
+  const [summary, stores] = await Promise.all([
+    getStoreOrderSummary({
       filters
     }),
     prisma.user.findMany({
@@ -50,30 +49,25 @@ export async function GET(request) {
       return (left.storeCode || "").localeCompare(right.storeCode || "");
     })
     .map((store) => {
-    const storeOrders = orders.filter((order) => order.userId === store.id);
+    const storeSummary = summary.byStore[String(store.id)] || {
+      count: 0,
+      totalIDR: 0,
+      totalINR: 0
+    };
 
     return {
       storeCode: store.storeCode,
       storeName: store.storeName,
       role: store.role,
-      count: storeOrders.length,
-      totalIDR: storeOrders.reduce(
-        (sum, order) => sum + (order.currency === "IDR" ? Number(order.amount || 0) : 0),
-        0
-      ),
-      totalINR: storeOrders.reduce((sum, order) => {
-        if (order.type === "bank" && order.currency === "INR") {
-          return sum + Number(order.amount || 0);
-        }
-
-        return sum;
-      }, 0)
+      count: storeSummary.count,
+      totalIDR: storeSummary.totalIDR,
+      totalINR: storeSummary.totalINR
     };
   });
 
   return NextResponse.json({
-    totalToday: orders.length,
-    bankToday: orders.filter((order) => order.type === "bank").length,
+    totalToday: summary.totalOrders,
+    bankToday: summary.totalOrders,
     byStore
   });
 }

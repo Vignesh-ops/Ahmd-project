@@ -4,15 +4,19 @@ import { requireSession } from "@/lib/session";
 
 export default async function SettingsPage() {
   const session = await requireSession();
-  const settings = await prisma.settings.upsert({
+  let settings = await prisma.settings.findUnique({
     where: {
-      userId: Number(session.user.id)
-    },
-    update: {},
-    create: {
       userId: Number(session.user.id)
     }
   });
+
+  if (!settings) {
+    settings = await prisma.settings.create({
+      data: {
+        userId: Number(session.user.id)
+      }
+    });
+  }
 
   return (
     <div className="page-fade">
@@ -20,4 +24,3 @@ export default async function SettingsPage() {
     </div>
   );
 }
-
