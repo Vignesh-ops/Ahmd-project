@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const RouteFeedbackContext = createContext({
   isNavigating: false,
@@ -10,7 +10,6 @@ const RouteFeedbackContext = createContext({
 
 export function RouteFeedbackProvider({ children }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const timeoutRef = useRef(null);
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -32,7 +31,7 @@ export function RouteFeedbackProvider({ children }) {
     if (isNavigating) {
       clearNavigation();
     }
-  }, [clearNavigation, isNavigating, pathname, searchParams]);
+  }, [clearNavigation, isNavigating, pathname]);
 
   useEffect(() => {
     return () => {
