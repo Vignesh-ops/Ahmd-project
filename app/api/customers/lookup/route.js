@@ -38,7 +38,10 @@ export async function GET(request) {
   const scope = session.user.role === "admin" ? {} : { userId: Number(session.user.id) };
 
   const recentOrders = await prisma.bankOrder.findMany({
-    where: scope,
+    where: {
+      ...scope,
+      senderMobile: mobileDigits
+    },
     include: {
       user: {
         select: userSelect
@@ -47,29 +50,58 @@ export async function GET(request) {
     orderBy: {
       date: "desc"
     },
-    take: 200
+    take: 20
   });
-  const order = recentOrders.find((item) => digitsOnly(item.senderMobile) === mobileDigits);
 
-  if (!order) {
+  if (!recentOrders.length) {
     return NextResponse.json({ found: false, mobile });
   }
+
+  const matches = [];
+  const seenAccounts = new Set();
+
+  recentOrders.forEach((order) => {
+    const signature = [
+      order.country,
+      cleanString(order.accountName).toLowerCase(),
+      cleanString(order.accountNo),
+      cleanString(order.bank).toLowerCase(),
+      cleanString(order.branch).toLowerCase(),
+      cleanString(order.ifscCode).toLowerCase()
+    ].join("|");
+
+    if (seenAccounts.has(signature)) {
+      return;
+    }
+
+    seenAccounts.add(signature);
+    matches.push({
+      orderNo: order.orderNo,
+      date: order.date,
+      storeName: order.user?.storeName || "",
+      storeCode: order.user?.storeCode || "",
+      data: {
+        country: order.country,
+        senderName: order.senderName || "",
+        accountName: order.accountName,
+        accountNo: order.accountNo,
+        bank: order.bank,
+        branch: order.branch || "",
+        ifscCode: order.ifscCode || ""
+      }
+    });
+  });
+
+  const latestMatch = matches[0];
 
   return NextResponse.json({
     found: true,
     type,
-    orderNo: order.orderNo,
-    date: order.date,
-    storeName: order.user?.storeName || "",
-    storeCode: order.user?.storeCode || "",
-    data: {
-      country: order.country,
-      senderName: order.senderName || "",
-      accountName: order.accountName,
-      accountNo: order.accountNo,
-      bank: order.bank,
-      branch: order.branch || "",
-      ifscCode: order.ifscCode || ""
-    }
+    orderNo: latestMatch.orderNo,
+    date: latestMatch.date,
+    storeName: latestMatch.storeName,
+    storeCode: latestMatch.storeCode,
+    data: latestMatch.data,
+    matches
   });
 }

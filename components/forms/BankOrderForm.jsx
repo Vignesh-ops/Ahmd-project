@@ -51,6 +51,11 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     status: "idle",
     message: ""
   });
+  const [lookupChoices, setLookupChoices] = useState([]);
+  const [lookupModal, setLookupModal] = useState({
+    open: false,
+    mobile: ""
+  });
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
   const totalPayableAmount = useMemo(
@@ -83,11 +88,62 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     }));
   }
 
+  function applyLookupSelection(selection, { preserveSenderName = true } = {}) {
+    setSavedOrder(null);
+    setForm((current) => {
+      const currentDefaults = getCountryDefaults(current.country, settings);
+      const nextCountry = selection.data.country || current.country;
+      const nextDefaults = getCountryDefaults(nextCountry, settings);
+      const shouldSyncPricing =
+        nextCountry !== current.country &&
+        String(current.rate ?? "") === String(currentDefaults.rate ?? "") &&
+        String(current.serviceCharge ?? "") === String(currentDefaults.serviceCharge ?? "");
+
+      return {
+        ...current,
+        country: nextCountry,
+        senderName: preserveSenderName ? current.senderName || selection.data.senderName || "" : selection.data.senderName || "",
+        accountName: selection.data.accountName || "",
+        accountNo: selection.data.accountNo || "",
+        bank: selection.data.bank || "",
+        branch: selection.data.branch || "",
+        ifscCode: selection.data.ifscCode || "",
+        rate: shouldSyncPricing ? String(nextDefaults.rate ?? "") : current.rate,
+        serviceCharge: shouldSyncPricing ? String(nextDefaults.serviceCharge ?? "") : current.serviceCharge
+      };
+    });
+
+    setLookup({
+      status: "success",
+      message: `Loaded saved account ${selection.data.accountNo}${selection.storeCode ? ` · ${selection.storeCode}` : ""}.`
+    });
+    setLookupModal({
+      open: false,
+      mobile: ""
+    });
+  }
+
+  function closeLookupModalForManualEntry() {
+    setLookupModal({
+      open: false,
+      mobile: ""
+    });
+    setLookup({
+      status: "idle",
+      message: "Enter receiver details manually for this sender mobile."
+    });
+  }
+
   useEffect(() => {
     const mobile = form.senderMobile.trim();
     const normalizedMobile = mobile.replace(/\D/g, "");
 
     if (normalizedMobile.length < 10) {
+      setLookupChoices([]);
+      setLookupModal({
+        open: false,
+        mobile: ""
+      });
       setLookup({
         status: "idle",
         message: ""
@@ -114,6 +170,11 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
 
         if (!payload.found) {
           if (!ignore) {
+            setLookupChoices([]);
+            setLookupModal({
+              open: false,
+              mobile: ""
+            });
             setLookup({
               status: "empty",
               message: "No saved customer found for this mobile yet."
@@ -126,42 +187,29 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           return;
         }
 
-        setForm((current) => {
-          if (current.senderMobile.trim() !== mobile) {
-            return current;
-          }
+        const matches = Array.isArray(payload.matches) && payload.matches.length ? payload.matches : [payload];
+        setLookupChoices(matches);
 
-          const hasManualReceiverDetails = [current.accountName, current.accountNo, current.bank, current.branch, current.ifscCode].some(
-            Boolean
-          );
-          const currentDefaults = getCountryDefaults(current.country, settings);
-          const nextCountry = hasManualReceiverDetails ? current.country : payload.data.country || current.country;
-          const nextDefaults = getCountryDefaults(nextCountry, settings);
-          const shouldSyncPricing =
-            nextCountry !== current.country &&
-            String(current.rate ?? "") === String(currentDefaults.rate ?? "") &&
-            String(current.serviceCharge ?? "") === String(currentDefaults.serviceCharge ?? "");
+        // if (matches.length === 1) {
+        //   applyLookupSelection(matches[0]);
+        //   return;
+        // }
 
-          return {
-            ...current,
-            country: nextCountry,
-            senderName: current.senderName || payload.data.senderName || "",
-            accountName: current.accountName || payload.data.accountName || "",
-            accountNo: current.accountNo || payload.data.accountNo || "",
-            bank: current.bank || payload.data.bank || "",
-            branch: current.branch || payload.data.branch || "",
-            ifscCode: current.ifscCode || payload.data.ifscCode || "",
-            rate: shouldSyncPricing ? String(nextDefaults.rate ?? "") : current.rate,
-            serviceCharge: shouldSyncPricing ? String(nextDefaults.serviceCharge ?? "") : current.serviceCharge
-          };
+        setLookupModal({
+          open: true,
+          mobile
         });
-
         setLookup({
           status: "success",
-          message: `Loaded saved customer details from ${payload.orderNo}${payload.storeCode ? ` · ${payload.storeCode}` : ""}.`
+          message: `Found ${matches.length} saved accounts for this mobile. Choose one to autofill or continue manually.`
         });
       } catch (error) {
         if (!ignore) {
+          setLookupChoices([]);
+          setLookupModal({
+            open: false,
+            mobile: ""
+          });
           setLookup({
             status: "error",
             message: error.message || "Could not fetch customer details."
@@ -346,6 +394,11 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             <p className={`text-xs ${lookupTextClass}`}>
               {lookup.message || "Enter an existing sender mobile number to auto-fill saved sender and receiver details."}
             </p>
+            {lookupChoices.length > 1 ? (
+              <Button type="button" variant="ghost" className="min-h-0 self-start px-0 py-0 text-xs text-gold-light" onClick={() => setLookupModal({ open: true, mobile: form.senderMobile.trim() })}>
+                View saved accounts
+              </Button>
+            ) : null}
           </div>
 
           <Input
@@ -467,6 +520,52 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <p className="text-sm text-white/55">{message || "Save first to generate a permanent order and receipt."}</p>
         </div>
       </div>
+
+      {lookupModal.open ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="glass-panel w-full max-w-2xl rounded-[32px] border border-white/10 p-6">
+            <p className="text-xs uppercase tracking-[0.22em] text-gold-light/80">Saved Accounts</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Choose a saved receiver account</h2>
+            <p className="mt-2 text-sm text-white/60">
+              Multiple receiver accounts were found for {lookupModal.mobile || form.senderMobile}. Select one to autofill the form, or continue with manual entry.
+            </p>
+
+            <div className="mt-5 space-y-3">
+              {lookupChoices.map((choice) => (
+                <button
+                  key={`${choice.data.accountNo}-${choice.orderNo}`}
+                  type="button"
+                  className="w-full rounded-[24px] border border-white/10 bg-white/5 p-4 text-left transition hover:border-gold/30 hover:bg-white/10"
+                  onClick={() => applyLookupSelection(choice)}
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="font-semibold text-white">{choice.data.accountName || "Unnamed Account"}</p>
+                      <p className="mt-1 font-mono text-sm text-gold-light">{choice.data.accountNo}</p>
+                      <p className="mt-1 text-sm text-white/65">
+                        {[choice.data.bank, choice.data.branch, choice.data.ifscCode].filter(Boolean).join(" · ") || "Bank details saved"}
+                      </p>
+                    </div>
+                    <div className="text-left text-xs text-white/45 sm:text-right">
+                      <p>{choice.storeCode || "Store"}</p>
+                      <p>{choice.orderNo}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" onClick={closeLookupModalForManualEntry}>
+                Fill Manually
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setLookupModal({ open: false, mobile: "" })}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
