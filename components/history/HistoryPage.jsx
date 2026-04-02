@@ -37,6 +37,7 @@ export default function HistoryPage({
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [actionError, setActionError] = useState(null);
   useEffect(() => {
     async function loadOrders() {
       setLoading(true);
@@ -88,9 +89,10 @@ export default function HistoryPage({
     try {
       const updatedOrder = await markOrderDone(order);
       applyOrderUpdate(updatedOrder);
+      setActionError(null);
       return updatedOrder;
     } catch (error) {
-      window.alert(`Order ${order.orderNo} ${actionLabel}, but status update failed: ${error.message}`);
+      setActionError(`Order ${order.orderNo} ${actionLabel}, but status update failed: ${error.message}`);
       return order;
     }
   }
@@ -190,6 +192,12 @@ export default function HistoryPage({
         </div>
       </div>
 
+      {actionError ? (
+        <div className="rounded-[28px] border border-red-500/30 bg-red-500/10 p-4 text-sm text-white/80">
+          {actionError}
+        </div>
+      ) : null}
+
       {loading ? (
         <div className="glass-panel rounded-[32px] border border-white/5 p-8 text-center text-white/55">
           Loading orders...
@@ -250,7 +258,7 @@ export default function HistoryPage({
       )}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-red-500/30 p-6 max-w-sm shadow-2xl animate-in fade-in zoom-in-95">
+          <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-500/20 rounded-lg">
                 <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +282,7 @@ export default function HistoryPage({
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={deleteLoading}
-                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white rounded-lg transition-colors"
+                className="dialog-secondary-button flex-1 rounded-lg bg-white/10 px-4 py-2 text-white transition-colors disabled:opacity-50 hover:bg-white/15"
               >
                 Cancel
               </button>

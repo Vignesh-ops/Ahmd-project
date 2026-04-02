@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, Landmark, Printer, RotateCcw, Send, ShieldCheck } from "lucide-react";
+import { Calculator, Landmark, RotateCcw, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
@@ -496,7 +496,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             >
               Save Order
             </Button>
-            <Button
+            {/* <Button
               type="button"
               variant="secondary"
               icon={Send}
@@ -515,7 +515,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
               fullWidth
             >
               Print
-            </Button>
+            </Button> */}
           </div>
           <p className="text-sm text-white/55">{message || "Save first to generate a permanent order and receipt."}</p>
         </div>

@@ -380,7 +380,7 @@ export default function UsersManager() {
        {/* Fancy Delete Confirmation Modal */}
   {showDeleteModal && (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-red-500/30 p-6 max-w-sm shadow-2xl animate-in fade-in zoom-in-95">
+      <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-red-500/20 rounded-lg">
             <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,7 +397,7 @@ export default function UsersManager() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowDeleteModal(false)}
-            className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+            className="dialog-secondary-button flex-1 rounded-lg bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/15"
           >
             Cancel
           </button>

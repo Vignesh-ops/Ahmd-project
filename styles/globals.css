@@ -161,6 +161,44 @@ html[data-theme="light"] .placeholder\:text-white\/30::placeholder {
   color: rgba(100, 116, 139, 0.78) !important;
 }
 
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  color: rgb(15 23 42);
+  caret-color: rgb(15 23 42);
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: rgba(100, 116, 139, 0.78);
+}
+
+html[data-theme="light"] input:-webkit-autofill,
+html[data-theme="light"] input:-webkit-autofill:hover,
+html[data-theme="light"] input:-webkit-autofill:focus,
+html[data-theme="light"] textarea:-webkit-autofill,
+html[data-theme="light"] select:-webkit-autofill {
+  -webkit-text-fill-color: rgb(15 23 42);
+  box-shadow: 0 0 0 1000px rgba(248, 250, 252, 0.96) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+html[data-theme="light"] .dialog-surface {
+  border-color: rgba(148, 163, 184, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(241, 245, 249, 0.96) 100%);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+html[data-theme="light"] .dialog-secondary-button {
+  background-color: rgba(226, 232, 240, 0.95);
+  color: rgb(15 23 42) !important;
+}
+
+html[data-theme="light"] .dialog-secondary-button:hover {
+  background-color: rgba(203, 213, 225, 0.98);
+}
+
 html[data-theme="light"] .bg-red-500\/90 {
   color: #fff !important;
 }
@@ -232,6 +270,11 @@ html[data-theme="light"] .bg-red-500\/90 {
   transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
   animation: loading-shimmer 1.25s infinite;
+}
+
+.dialog-surface {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
 }
 
 .install-prompt {

@@ -57,7 +57,14 @@ export default function BankReceipt({ order, autoPrint = false }) {
     try {
       setLoading("bluetooth");
       setMessage("");
-      await bluetoothPrint(buildBankReceiptText(order));
+      const result = await bluetoothPrint(buildBankReceiptText(order));
+
+      if (result.fallback && result.error) {
+        setMessage(`Bluetooth print was unavailable, so the browser print dialog was opened instead. ${result.error}`);
+      } else if (result.fallback) {
+        setMessage("Bluetooth print was unavailable, so the browser print dialog was opened instead.");
+      }
+
       await syncDoneStatus("printed");
     } finally {
       setLoading("");

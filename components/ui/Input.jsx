@@ -20,10 +20,11 @@ export default function Input({
   const canTogglePassword = !textarea && allowPasswordToggle && props.type === "password";
   const resolvedType = canTogglePassword ? (showPassword ? "text" : "password") : props.type;
   const sharedClassName = cn(
-    "w-full rounded-2xl border border-white/10 bg-dark-input px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-gold/70 focus:ring-2 focus:ring-gold/20",
+    "w-full rounded-2xl border border-white/10 bg-dark-input px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
     mono && "font-mono",
     prefix && "pl-10",
     canTogglePassword && "pr-12",
+    props.readOnly && "bg-white/5",
     inputClassName
   );
 
