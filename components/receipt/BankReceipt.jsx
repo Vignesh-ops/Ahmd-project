@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Bluetooth, Printer, Send } from "lucide-react";
 import Button from "@/components/ui/Button";
+import InfoDialog from "@/components/ui/InfoDialog";
 import { markOrderDone } from "@/lib/orderStatus";
 import { buildBankReceiptText, bluetoothPrint } from "@/lib/print";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
@@ -14,6 +15,7 @@ const Barcode = dynamic(() => import("react-barcode"), { ssr: false });
 export default function BankReceipt({ order, autoPrint = false }) {
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   async function syncDoneStatus(actionLabel, silent = false) {
     try {
@@ -46,8 +48,11 @@ export default function BankReceipt({ order, autoPrint = false }) {
     try {
       setLoading("share");
       setMessage("");
-      shareViaWhatsApp(formatBankMessage(order));
+      const result = await shareViaWhatsApp(formatBankMessage(order));
       await syncDoneStatus("shared");
+      if (result.returned) {
+        setShowShareDialog(true);
+      }
     } finally {
       setLoading("");
     }
@@ -102,6 +107,12 @@ export default function BankReceipt({ order, autoPrint = false }) {
 
   return (
     <div className="page-fade space-y-6">
+      <InfoDialog
+        open={showShareDialog}
+        title="Back from WhatsApp"
+        description={`If the message was sent successfully for order ${order.orderNo}, tap OK to continue.`}
+        onClose={() => setShowShareDialog(false)}
+      />
       <div className="print-hide flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
         <Button
           variant="secondary"

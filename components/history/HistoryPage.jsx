@@ -10,6 +10,7 @@ import { markOrderDone } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
+import InfoDialog from "@/components/ui/InfoDialog";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -38,6 +39,7 @@ export default function HistoryPage({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [actionError, setActionError] = useState(null);
+  const [shareDialogOrderNo, setShareDialogOrderNo] = useState("");
   useEffect(() => {
     async function loadOrders() {
       setLoading(true);
@@ -98,8 +100,11 @@ export default function HistoryPage({
   }
 
   async function handleShare(order) {
-    shareViaWhatsApp(getMessage(order));
+    const result = await shareViaWhatsApp(getMessage(order));
     await syncDoneStatus(order, "shared");
+    if (result.returned) {
+      setShareDialogOrderNo(order.orderNo);
+    }
   }
 
   async function handlePrint(order) {
@@ -145,6 +150,12 @@ export default function HistoryPage({
 
   return (
     <div className="space-y-6">
+      <InfoDialog
+        open={Boolean(shareDialogOrderNo)}
+        title="Back from WhatsApp"
+        description={`If the message was sent successfully for order ${shareDialogOrderNo}, tap OK to continue.`}
+        onClose={() => setShareDialogOrderNo("")}
+      />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Total Orders" value={stats.total} />
         <StatCard label="Bank Transfers" value={stats.bank} accent="teal" />
