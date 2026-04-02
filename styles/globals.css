@@ -42,6 +42,18 @@ textarea {
   font: inherit;
 }
 
+input[type="date"]::-webkit-datetime-edit {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+input[type="date"][data-empty="true"]::-webkit-datetime-edit {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.9;
+}
+
 ::selection {
   background: rgba(212, 168, 67, 0.35);
 }
@@ -171,6 +183,14 @@ html[data-theme="light"] textarea {
 html[data-theme="light"] input::placeholder,
 html[data-theme="light"] textarea::placeholder {
   color: rgba(100, 116, 139, 0.78);
+}
+
+html[data-theme="light"] input[type="date"]::-webkit-datetime-edit {
+  color: rgb(15 23 42);
+}
+
+html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit {
+  color: rgba(100, 116, 139, 0.9);
 }
 
 html[data-theme="light"] input:-webkit-autofill,

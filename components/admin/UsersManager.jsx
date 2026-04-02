@@ -390,7 +390,7 @@ export default function UsersManager() {
           <h3 className="text-lg font-semibold text-white">Delete Store User?</h3>
         </div>
   
-        <p className="text-white/70 mb-6">
+        <p className="text-white/30 mb-6">
           Are you sure you want to delete <span className="font-semibold text-red-300">{deleteStoreName}</span>? This action cannot be undone.
         </p>
   

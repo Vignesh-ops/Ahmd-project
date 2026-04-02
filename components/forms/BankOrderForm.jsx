@@ -331,7 +331,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
               {selectedCountrySettings.label} default rate {formatNumber(selectedCountrySettings.rate)}
             </p>
             <p className="text-sm text-white/55">Default service charge {formatNumber(selectedCountrySettings.serviceCharge)}</p>
-            <p className="mt-3 inline-flex items-center gap-2 text-sm text-white/70">
+            <p className="mt-3 inline-flex items-center gap-2 text-sm text-white/30">
               <Calculator className="h-4 w-4 text-gold-light" />
               Current payable {totalPayableAmount ? formatCurrency(totalPayableAmount, "MYR") : "-"}
             </p>

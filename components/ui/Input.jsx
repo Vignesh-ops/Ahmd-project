@@ -45,7 +45,12 @@ export default function Input({
         {textarea ? (
           <textarea className={sharedClassName} {...props} />
         ) : (
-          <input className={sharedClassName} {...props} type={resolvedType} />
+          <input
+            className={sharedClassName}
+            data-empty={resolvedType === "date" && !props.value ? "true" : undefined}
+            {...props}
+            type={resolvedType}
+          />
         )}
         {canTogglePassword ? (
           <button

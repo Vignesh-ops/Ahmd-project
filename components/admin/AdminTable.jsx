@@ -34,7 +34,7 @@ export default function AdminTable({ orders = [], onDelete, printMode = false })
             {orders.map((order) => (
               <tr key={`${order.type}-${order.id}`} className={rowClassName}>
                 <td className={printMode ? "px-4 py-4 font-mono" : "px-4 py-4 font-mono text-gold-light"}>{order.orderNo}</td>
-                <td className={printMode ? "px-4 py-4" : "px-4 py-4 text-white/70"}>
+                <td className={printMode ? "px-4 py-4" : "px-4 py-4 text-white/30"}>
                   {order.storeName}
                   <div className={printMode ? "text-xs text-black/70" : "text-xs text-white/35"}>{order.storeCode}</div>
                 </td>
