@@ -50,6 +50,24 @@ input[type="date"][data-empty="true"]::-webkit-datetime-edit {
   color: rgba(255, 255, 255, 0.38);
 }
 
+input[type="date"]::-webkit-date-and-time-value,
+input[type="date"]::-webkit-datetime-edit-year-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-text {
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
+}
+
+input[type="date"][data-empty="true"]::-webkit-date-and-time-value,
+input[type="date"][data-empty="true"]::-webkit-datetime-edit-year-field,
+input[type="date"][data-empty="true"]::-webkit-datetime-edit-month-field,
+input[type="date"][data-empty="true"]::-webkit-datetime-edit-day-field,
+input[type="date"][data-empty="true"]::-webkit-datetime-edit-text {
+  color: rgba(255, 255, 255, 0.38);
+  opacity: 1;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0.9;
 }
@@ -191,6 +209,24 @@ html[data-theme="light"] input[type="date"]::-webkit-datetime-edit {
 
 html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit {
   color: rgba(100, 116, 139, 0.9);
+}
+
+html[data-theme="light"] input[type="date"]::-webkit-date-and-time-value,
+html[data-theme="light"] input[type="date"]::-webkit-datetime-edit-year-field,
+html[data-theme="light"] input[type="date"]::-webkit-datetime-edit-month-field,
+html[data-theme="light"] input[type="date"]::-webkit-datetime-edit-day-field,
+html[data-theme="light"] input[type="date"]::-webkit-datetime-edit-text {
+  color: rgb(15 23 42);
+  opacity: 1;
+}
+
+html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-date-and-time-value,
+html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-year-field,
+html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-month-field,
+html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-day-field,
+html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-text {
+  color: rgba(100, 116, 139, 0.9);
+  opacity: 1;
 }
 
 html[data-theme="light"] input:-webkit-autofill,
