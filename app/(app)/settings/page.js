@@ -20,7 +20,11 @@ export default async function SettingsPage() {
 
   return (
     <div className="page-fade">
-      <SettingsForm settings={settings} storeName={session.user.storeName || session.user.username} />
+      <SettingsForm
+        settings={settings}
+        storeName={session.user.storeName || session.user.username}
+        isAdmin={session.user.role === "admin"}
+      />
     </div>
   );
 }

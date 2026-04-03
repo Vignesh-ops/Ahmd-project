@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { badRequest, getApiSession, unauthorized } from "@/lib/api";
+import { badRequest, forbidden, getApiSession, unauthorized } from "@/lib/api";
 
 export async function GET() {
   const session = await getApiSession();
@@ -28,6 +28,10 @@ export async function PUT(request) {
 
   if (!session?.user) {
     return unauthorized();
+  }
+
+  if (session.user.role !== "admin") {
+    return forbidden("Only admin users can update settings.");
   }
 
   const body = await request.json();
