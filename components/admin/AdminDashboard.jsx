@@ -242,7 +242,7 @@ export default function AdminDashboard({ stores }) {
         <h3 className="text-lg font-semibold text-white">Delete Order?</h3>
       </div>
 
-      <p className="text-white/30 mb-6">
+    <p className="text-white/30 mb-6">
         Are you sure you want to delete order <span className="font-semibold text-red-300">{deleteOrder?.orderNo}</span>? This action cannot be undone.
       </p>
 

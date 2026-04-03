@@ -184,12 +184,14 @@ export default function HistoryPage({
           ) : null}
           <Input
             label="From"
+            placeholder="DD/MM/YYYY"
             type="date"
             value={filters.from}
             onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))}
           />
           <Input
             label="To"
+            placeholder="DD/MM/YYYY"
             type="date"
             value={filters.to}
             onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))}

@@ -530,7 +530,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
               Multiple receiver accounts were found for {lookupModal.mobile || form.senderMobile}. Select one to autofill the form, or continue with manual entry.
             </p>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-5 space-y-3 h-[45vh] overflow-y-auto">
               {lookupChoices.map((choice) => (
                 <button
                   key={`${choice.data.accountNo}-${choice.orderNo}`}
