@@ -217,7 +217,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           });
         }
       }
-    }, 450);
+    }, 250);
 
     return () => {
       ignore = true;

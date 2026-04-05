@@ -49,6 +49,8 @@ model BankOrder {
   updatedAt     DateTime @updatedAt
 
   @@index([userId, date])
+  @@index([senderMobile, date])
+  @@index([userId, senderMobile, date])
   @@index([status])
 }
 

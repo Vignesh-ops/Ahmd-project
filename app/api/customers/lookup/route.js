@@ -15,6 +15,21 @@ const userSelect = {
   storeCode: true
 };
 
+const bankOrderLookupSelect = {
+  orderNo: true,
+  date: true,
+  country: true,
+  senderName: true,
+  accountName: true,
+  accountNo: true,
+  bank: true,
+  branch: true,
+  ifscCode: true,
+  user: {
+    select: userSelect
+  }
+};
+
 export async function GET(request) {
   const session = await getApiSession();
 
@@ -42,11 +57,7 @@ export async function GET(request) {
       ...scope,
       senderMobile: mobileDigits
     },
-    include: {
-      user: {
-        select: userSelect
-      }
-    },
+    select: bankOrderLookupSelect,
     orderBy: {
       date: "desc"
     },
