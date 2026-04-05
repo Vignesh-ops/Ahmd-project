@@ -4,6 +4,7 @@ import { requireSession } from "@/lib/session";
 
 export default async function OrdersHistoryPage({ searchParams }) {
   const session = await requireSession();
+  const resolvedSearchParams = await searchParams;
   const stores =
     session.user.role === "admin"
       ? (
@@ -29,8 +30,8 @@ export default async function OrdersHistoryPage({ searchParams }) {
         })
       : [];
   const requestedStoreCode =
-    session.user.role === "admin" && typeof searchParams?.storeCode === "string"
-      ? searchParams.storeCode.toUpperCase()
+    session.user.role === "admin" && typeof resolvedSearchParams?.storeCode === "string"
+      ? resolvedSearchParams.storeCode.toUpperCase()
       : "all";
   const activeStore = stores.find((store) => store.storeCode === requestedStoreCode);
   const initialStoreCode = activeStore?.storeCode || "all";

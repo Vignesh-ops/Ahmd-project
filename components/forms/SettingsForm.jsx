@@ -36,18 +36,24 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         body: JSON.stringify(form)
       });
 
-      const payload = await response.json();
+      let payload = null;
+
+      try {
+        payload = await response.json();
+      } catch {
+        payload = null;
+      }
 
       if (!response.ok) {
-        setMessage(payload.error || "Could not save settings.");
+        setMessage(payload?.error || "Could not save settings.");
         return;
       }
 
       setForm({
-        rate1: payload.rate1,
-        rate2: payload.rate2,
-        service1: payload.service1,
-        service2: payload.service2
+        rate1: payload?.rate1,
+        rate2: payload?.rate2,
+        service1: payload?.service1,
+        service2: payload?.service2
       });
       router.refresh();
       setMessage("Settings saved. New orders will use the updated rate and service charge.");

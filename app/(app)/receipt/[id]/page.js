@@ -5,7 +5,9 @@ import { requireSession } from "@/lib/session";
 
 export default async function ReceiptPage({ params, searchParams }) {
   const session = await requireSession();
-  const order = await getOrderByOrderNo(decodeURIComponent(params.id), session.user);
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const order = await getOrderByOrderNo(decodeURIComponent(resolvedParams.id), session.user);
 
   if (!order) {
     notFound();
@@ -14,7 +16,7 @@ export default async function ReceiptPage({ params, searchParams }) {
   return (
     <div className="page-fade flex justify-center py-6">
       <div className="w-full max-w-2xl">
-        <BankReceipt order={order} autoPrint={searchParams.autoprint === "true"} />
+        <BankReceipt order={order} autoPrint={resolvedSearchParams.autoprint === "true"} />
       </div>
     </div>
   );

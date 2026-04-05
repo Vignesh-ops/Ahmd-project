@@ -43,7 +43,8 @@ export async function PUT(request, { params }) {
     return error;
   }
 
-  const id = parseRouteId(params.id);
+  const resolvedParams = await params;
+  const id = parseRouteId(resolvedParams.id);
 
   if (!id) {
     return badRequest("Invalid user id.");
@@ -146,7 +147,8 @@ export async function DELETE(request, { params }) {
     return error;
   }
 
-  const id = parseRouteId(params.id);
+  const resolvedParams = await params;
+  const id = parseRouteId(resolvedParams.id);
 
   if (!id) {
     return badRequest("Invalid user id.");

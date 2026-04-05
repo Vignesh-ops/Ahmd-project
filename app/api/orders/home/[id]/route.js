@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-export async function GET(request, { params }) {
+export async function GET() {
   return NextResponse.json({ error: "Home order feature has been removed." }, { status: 410 });
 }
 
-export async function PUT(request, { params }) {
+export async function PUT() {
   return NextResponse.json({ error: "Home order feature has been removed." }, { status: 410 });
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE() {
   return NextResponse.json({ error: "Home order feature has been removed." }, { status: 410 });
 }

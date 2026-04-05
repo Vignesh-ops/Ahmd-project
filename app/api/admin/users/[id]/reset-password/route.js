@@ -14,7 +14,8 @@ export async function POST(request, { params }) {
     return forbidden();
   }
 
-  const id = parseRouteId(params.id);
+  const resolvedParams = await params;
+  const id = parseRouteId(resolvedParams.id);
 
   if (!id) {
     return badRequest("Invalid user id.");
