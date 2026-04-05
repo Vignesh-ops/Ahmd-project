@@ -482,7 +482,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           />
           <Input
             label="Total Payable Amount (RM)"
-            hint="Calculated as deposit amount / rate + service charge"
+            hint="Calculated as deposit amount * rate + service charge"
             value={totalPayableAmount ? formatCurrency(totalPayableAmount, "MYR") : ""}
             readOnly
             className="md:col-span-2"
