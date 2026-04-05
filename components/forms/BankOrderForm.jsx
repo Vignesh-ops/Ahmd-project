@@ -43,6 +43,7 @@ function buildInitialForm(orderNo, settings, country = 1) {
 
 export default function BankOrderForm({ initialOrderNo, settings }) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState(() => buildInitialForm(initialOrderNo, settings));
   const [savedOrder, setSavedOrder] = useState(null);
   const [loading, setLoading] = useState("");
@@ -314,6 +315,20 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
         ? "text-teal"
         : "text-white/45";
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const displayDefaultRate = mounted ? formatNumber(selectedCountrySettings.rate) : String(selectedCountrySettings.rate ?? "");
+  const displayDefaultServiceCharge = mounted
+    ? formatNumber(selectedCountrySettings.serviceCharge)
+    : String(selectedCountrySettings.serviceCharge ?? "");
+  const displayCurrentPayable = totalPayableAmount
+    ? mounted
+      ? formatCurrency(totalPayableAmount, "MYR")
+      : totalPayableAmount.toFixed(2)
+    : "-";
+
   return (
     <div className="space-y-6">
       <div className="glass-panel rounded-[32px] border border-white/5 p-6">
@@ -328,12 +343,12 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <div className="w-full rounded-[28px] border border-gold/20 bg-gold/10 px-5 py-4 md:max-w-sm">
             <p className="text-xs uppercase tracking-[0.22em] text-gold-light/75">Rate Setup</p>
             <p className="mt-2 text-sm font-semibold text-white">
-              {selectedCountrySettings.label} default rate {formatNumber(selectedCountrySettings.rate)}
+              {selectedCountrySettings.label} default rate {displayDefaultRate}
             </p>
-            <p className="text-sm text-white/55">Default service charge {formatNumber(selectedCountrySettings.serviceCharge)}</p>
+            <p className="text-sm text-white/55">Default service charge {displayDefaultServiceCharge}</p>
             <p className="mt-3 inline-flex items-center gap-2 text-sm text-white/30">
               <Calculator className="h-4 w-4 text-gold-light" />
-              Current payable {totalPayableAmount ? formatCurrency(totalPayableAmount, "MYR") : "-"}
+              Current payable {displayCurrentPayable}
             </p>
           </div>
         </div>
