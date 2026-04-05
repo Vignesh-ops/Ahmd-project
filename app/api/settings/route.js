@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { badRequest, forbidden, getApiSession, unauthorized } from "@/lib/api";
+import { getGlobalSettings, updateGlobalSettings } from "@/lib/settings";
 
 export async function GET() {
   const session = await getApiSession();
@@ -10,15 +10,7 @@ export async function GET() {
     return unauthorized();
   }
 
-  const settings = await prisma.settings.upsert({
-    where: {
-      userId: Number(session.user.id)
-    },
-    update: {},
-    create: {
-      userId: Number(session.user.id)
-    }
-  });
+  const settings = await getGlobalSettings();
 
   return NextResponse.json(settings);
 }
@@ -44,23 +36,11 @@ export async function PUT(request) {
     return badRequest("Rate and service charge values must be valid numbers.");
   }
 
-  const settings = await prisma.settings.upsert({
-    where: {
-      userId: Number(session.user.id)
-    },
-    update: {
-      rate1,
-      rate2,
-      service1,
-      service2
-    },
-    create: {
-      userId: Number(session.user.id),
-      rate1,
-      rate2,
-      service1,
-      service2
-    }
+  const settings = await updateGlobalSettings({
+    rate1,
+    rate2,
+    service1,
+    service2
   });
 
   revalidatePath("/settings");

@@ -20,7 +20,6 @@ model User {
 
   bankOrders BankOrder[]
   homeOrders HomeOrder[]
-  settings   Settings?
 
   @@index([role])
   @@index([storeCode])
@@ -79,9 +78,7 @@ model HomeOrder {
 }
 
 model Settings {
-  id       Int    @id @default(autoincrement())
-  userId   Int    @unique
-  user     User   @relation(fields: [userId], references: [id])
+  id       Int    @id
   rate1    Float  @default(195)
   rate2    Float  @default(198)
   service1 Float  @default(2)

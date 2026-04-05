@@ -19,15 +19,7 @@ const safeUserSelect = {
   storeName: true,
   storeCode: true,
   isActive: true,
-  createdAt: true,
-  settings: {
-    select: {
-      rate1: true,
-      rate2: true,
-      service1: true,
-      service2: true
-    }
-  }
+  createdAt: true
 };
 
 async function requireAdminSession() {
@@ -172,13 +164,31 @@ export async function DELETE(request, { params }) {
     return forbidden("Admin account cannot be deleted.");
   }
 
-  await prisma.settings.deleteMany({
-    where: { userId: id }
-  });
+  const [bankOrderCount, homeOrderCount] = await Promise.all([
+    prisma.bankOrder.count({
+      where: { userId: id }
+    }),
+    prisma.homeOrder.count({
+      where: { userId: id }
+    })
+  ]);
 
-  await prisma.user.delete({
-    where: { id }
-  });
+  const totalOrderCount = bankOrderCount + homeOrderCount;
+
+  if (totalOrderCount > 0) {
+    return badRequest(
+      `Cannot delete this store user because ${totalOrderCount} order${totalOrderCount === 1 ? "" : "s"} still belong to this account. Delete or reassign those orders first, or mark the user inactive instead.`
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.settings.deleteMany({
+      where: { userId: id }
+    }),
+    prisma.user.delete({
+      where: { id }
+    })
+  ]);
 
   return NextResponse.json({ success: true });
 }

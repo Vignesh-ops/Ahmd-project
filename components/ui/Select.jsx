@@ -56,7 +56,7 @@ export default function Select({ label, options = [], className, ...props }) {
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 right-0 top-full z-[9999] mt-2 overflow-hidden rounded-2xl border border-gold/30 bg-dark-elevated shadow-2xl animate-in fade-in zoom-in-95">
+          <div style={{zIndex:'9999'}} className="left-0 right-0 top-full z-[9999] mt-2 overflow-hidden rounded-2xl border border-gold/30 bg-dark-elevated shadow-2xl animate-in fade-in zoom-in-95">
             <div className="max-h-64 overflow-y-auto">
               {options.map((option) => (
                 <button

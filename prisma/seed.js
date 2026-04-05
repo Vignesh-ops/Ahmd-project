@@ -5,6 +5,12 @@ const bcrypt = require("bcryptjs");
 loadEnvConfig(process.cwd());
 
 const prisma = new PrismaClient();
+const defaultSettingsData = {
+  rate1: 195,
+  rate2: 198,
+  service1: 2,
+  service2: 3
+};
 
 async function main() {
   const saltRounds = 10;
@@ -40,17 +46,16 @@ async function main() {
       }
     });
 
-    await prisma.settings.upsert({
-      where: { userId: createdUser.id },
-      update: {},
-      create: {
-        userId: createdUser.id,
-        rate1: 195,
-        rate2: 198,
-        service1: 2,
-        service2: 3
-      }
-    });
+    if (user.role === "admin") {
+      await prisma.settings.upsert({
+        where: { userId: createdUser.id },
+        update: {},
+        create: {
+          userId: createdUser.id,
+          ...defaultSettingsData
+        }
+      });
+    }
   }
 }
 

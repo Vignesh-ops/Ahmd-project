@@ -192,6 +192,14 @@ export default function UsersManager() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [deleteStoreName, setDeleteStoreName] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  function resetDeleteState() {
+    setShowDeleteModal(false);
+    setDeleteUserId(null);
+    setDeleteStoreName(null);
+    setDeletingId(null);
+  }
   
   async function handleDelete(userId, storeName) {
     setDeleteUserId(userId);
@@ -203,27 +211,27 @@ export default function UsersManager() {
     if (!deleteUserId) return;
   
     try {
+      setDeletingId(deleteUserId);
+      setMessage("");
       const response = await fetch(`/api/admin/users/${deleteUserId}`, {
         method: "DELETE"
       });
+      const payload = await response.json();
   
       if (!response.ok) {
-        setMessage("Could not delete user.");
-        setShowDeleteModal(false);
+        setMessage(payload.error || "Could not delete user.");
+        resetDeleteState();
         return;
       }
-  
-      setSuccessMessage("Store user deleted successfully.");
-      setShowDeleteModal(false);
-      loadUsers();
+
+      setUsers((current) => current.filter((user) => user.id !== deleteUserId));
+      setMessage(`Store user "${deleteStoreName}" deleted successfully.`);
+      resetDeleteState();
     } catch (error) {
       setMessage("Error deleting user.");
-      setShowDeleteModal(false);
+      resetDeleteState();
     }
   }
-  
-  // ...existing code...
-  
 
 
   async function handleResetPassword(user) {
@@ -396,16 +404,17 @@ export default function UsersManager() {
   
         <div className="flex gap-3">
           <button
-            onClick={() => setShowDeleteModal(false)}
+            onClick={resetDeleteState}
             className="dialog-secondary-button flex-1 rounded-lg bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/15"
           >
             Cancel
           </button>
           <button
             onClick={confirmDelete}
+            disabled={deletingId === deleteUserId}
             className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium"
           >
-            Delete
+            {deletingId === deleteUserId ? "Deleting..." : "Delete"}
           </button>
         </div>
       </div>

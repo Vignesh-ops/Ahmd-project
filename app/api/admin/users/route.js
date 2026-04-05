@@ -17,15 +17,7 @@ const safeUserSelect = {
   storeName: true,
   storeCode: true,
   isActive: true,
-  createdAt: true,
-  settings: {
-    select: {
-      rate1: true,
-      rate2: true,
-      service1: true,
-      service2: true
-    }
-  }
+  createdAt: true
 };
 
 function toStorePayload(body) {
@@ -116,15 +108,7 @@ export async function POST(request) {
       role: "store",
       storeName: payload.storeName,
       storeCode: payload.storeCode,
-      isActive: true,
-      settings: {
-        create: {
-          rate1: 195,
-          rate2: 198,
-          service1: 2,
-          service2: 3
-        }
-      }
+      isActive: true
     },
     select: safeUserSelect
   });
