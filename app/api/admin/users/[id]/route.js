@@ -181,14 +181,9 @@ export async function DELETE(request, { params }) {
     );
   }
 
-  await prisma.$transaction([
-    prisma.settings.deleteMany({
-      where: { userId: id }
-    }),
-    prisma.user.delete({
-      where: { id }
-    })
-  ]);
+  await prisma.user.delete({
+    where: { id }
+  });
 
   return NextResponse.json({ success: true });
 }

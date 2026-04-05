@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 loadEnvConfig(process.cwd());
 
 const prisma = new PrismaClient();
+const GLOBAL_SETTINGS_ID = 1;
 const defaultSettingsData = {
   rate1: 195,
   rate2: 198,
@@ -48,10 +49,10 @@ async function main() {
 
     if (user.role === "admin") {
       await prisma.settings.upsert({
-        where: { userId: createdUser.id },
+        where: { id: GLOBAL_SETTINGS_ID },
         update: {},
         create: {
-          userId: createdUser.id,
+          id: GLOBAL_SETTINGS_ID,
           ...defaultSettingsData
         }
       });
