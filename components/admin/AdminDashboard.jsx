@@ -8,7 +8,8 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
-import { exportCsv, formatCurrency, formatDate } from "@/lib/utils";
+import { exportCsv, exportXlsx } from "@/lib/client-export";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 const typeOptions = [
   { label: "Bank Transfer", value: "bank" }
@@ -125,8 +126,8 @@ export default function AdminDashboard({ stores }) {
       setDeleteLoading(false);
     }
   }
-  function handleExport() {
-    const rows = [
+  function buildExportRows() {
+    return [
       ["OrderNo", "Store", "Type", "Customer", "Details", "Amount", "Status", "Date"],
       ...orders.map((order) => [
         order.orderNo,
@@ -139,8 +140,14 @@ export default function AdminDashboard({ stores }) {
         formatDate(order.date)
       ])
     ];
+  }
 
-    exportCsv("ubi-orders.csv", rows);
+  function handleExportCsv() {
+    exportCsv("ubi-orders.csv", buildExportRows());
+  }
+
+  async function handleExportXlsx() {
+    await exportXlsx("ubi-orders.xlsx", buildExportRows(), "Orders");
   }
 
   const activeStore = stores.find((store) => store.storeCode === filters.storeCode);
@@ -221,8 +228,11 @@ export default function AdminDashboard({ stores }) {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" icon={Download} onClick={handleExport}>
+            <Button variant="secondary" icon={Download} onClick={handleExportCsv}>
               Export CSV
+            </Button>
+            <Button variant="secondary" icon={Download} onClick={() => void handleExportXlsx()}>
+              Export XLSX
             </Button>
             <Button variant="secondary" icon={Printer} onClick={() => window.print()}>
               Print All
