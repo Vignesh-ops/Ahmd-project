@@ -8,6 +8,7 @@ import StatCard from "@/components/ui/StatCard";
 import StoreFilter from "@/components/admin/StoreFilter";
 import { markOrderDone } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
+import { openInAppOrTab } from "@/lib/native";
 import { formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import InfoDialog from "@/components/ui/InfoDialog";
@@ -108,7 +109,7 @@ export default function HistoryPage({
   }
 
   async function handlePrint(order) {
-    window.open(`/receipt/${order.orderNo}?autoprint=true`, "_blank", "noopener,noreferrer");
+    openInAppOrTab(`/receipt/${order.orderNo}?autoprint=true`);
     await syncDoneStatus(order, "sent to print");
   }
 
@@ -343,7 +344,7 @@ export default function HistoryPage({
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button variant="secondary" onClick={() => window.open(`/receipt/${selectedOrder.orderNo}`, "_blank")}>
+              <Button variant="secondary" onClick={() => openInAppOrTab(`/receipt/${selectedOrder.orderNo}`)}>
                 Open Receipt
               </Button>
               <Button variant="secondary" onClick={() => handleShare(selectedOrder)}>

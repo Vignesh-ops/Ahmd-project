@@ -47,6 +47,19 @@ export default function BankReceipt({ order, autoPrint = false }) {
       if (!silent) {
         setMessage("");
       }
+      if (bluetoothReady) {
+        const result = await bluetoothPrint(buildBankReceiptText(order));
+        if (result.fallback) {
+          if (!silent) {
+            setMessage(`Bluetooth print failed: ${result.error || "No preferred printer available"}`);
+          }
+        } else if (!silent) {
+          setMessage(`Printed to ${result.deviceName}.`);
+        }
+        await syncDoneStatus("printed", silent);
+        return;
+      }
+
       window.print();
       await syncDoneStatus("printed", silent);
     } finally {
@@ -140,7 +153,11 @@ export default function BankReceipt({ order, autoPrint = false }) {
     async function runAutoPrint() {
       try {
         setLoading("print");
-        window.print();
+        if (canUseBluetoothPrinting()) {
+          await bluetoothPrint(buildBankReceiptText(order));
+        } else {
+          window.print();
+        }
         await markOrderDone(order);
       } finally {
         if (active) {

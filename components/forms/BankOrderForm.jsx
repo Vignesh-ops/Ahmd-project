@@ -8,6 +8,7 @@ import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
 import { markOrderDone } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
+import { openInAppOrTab } from "@/lib/native";
 import { calculateTotalPayable, formatCurrency, formatNumber } from "@/lib/utils";
 
 const countryOptions = [
@@ -294,12 +295,12 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
       }
 
       if (intent === "share") {
-        shareViaWhatsApp(formatBankMessage(order));
+        await shareViaWhatsApp(formatBankMessage(order));
         await syncDoneStatus(order, "shared");
         return;
       }
 
-      window.open(`/receipt/${order.orderNo}?autoprint=true`, "_blank", "noopener,noreferrer");
+      openInAppOrTab(`/receipt/${order.orderNo}?autoprint=true`);
       await syncDoneStatus(order, "sent to print");
     } catch (error) {
       setMessage(error.message);

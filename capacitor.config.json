@@ -1,0 +1,15 @@
+{
+  "appId": "com.ahmad.enterprises",
+  "appName": "AHMAD Enterprises",
+  "webDir": "public",
+  "server": {
+    "url": "https://ahmd-project.vercel.app/",
+    "cleartext": false,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
