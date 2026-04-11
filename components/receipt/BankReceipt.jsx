@@ -2,18 +2,11 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Bluetooth, Plus, Printer, RefreshCw, Send } from "lucide-react";
+import { Printer, Send } from "lucide-react";
 import Button from "@/components/ui/Button";
 import InfoDialog from "@/components/ui/InfoDialog";
 import { markOrderDone } from "@/lib/orderStatus";
-import {
-  bluetoothPrint,
-  buildBankReceiptText,
-  canListGrantedBluetoothDevices,
-  canUseBluetoothPrinting,
-  getSavedBluetoothDevices,
-  requestBluetoothDevice
-} from "@/lib/print";
+import { buildBankReceiptText, printReceipt } from "@/lib/print";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/utils";
 
@@ -23,9 +16,6 @@ export default function BankReceipt({ order, autoPrint = false }) {
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [savedPrinters, setSavedPrinters] = useState([]);
-  const [bluetoothReady, setBluetoothReady] = useState(false);
-  const [canListSavedPrinters, setCanListSavedPrinters] = useState(false);
 
   async function syncDoneStatus(actionLabel, silent = false) {
     try {
@@ -47,20 +37,12 @@ export default function BankReceipt({ order, autoPrint = false }) {
       if (!silent) {
         setMessage("");
       }
-      if (bluetoothReady) {
-        const result = await bluetoothPrint(buildBankReceiptText(order));
-        if (result.fallback) {
-          if (!silent) {
-            setMessage(`Bluetooth print failed: ${result.error || "No preferred printer available"}`);
-          }
-        } else if (!silent) {
-          setMessage(`Printed to ${result.deviceName}.`);
-        }
-        await syncDoneStatus("printed", silent);
-        return;
+      const result = await printReceipt(buildBankReceiptText(order));
+      if (result.fallback && !silent) {
+        setMessage(`Print failed: ${result.error || "No preferred printer available"}`);
+      } else if (!silent) {
+        setMessage(`Printed to ${result.deviceName}.`);
       }
-
-      window.print();
       await syncDoneStatus("printed", silent);
     } finally {
       setLoading("");
@@ -81,68 +63,6 @@ export default function BankReceipt({ order, autoPrint = false }) {
     }
   }
 
-  async function refreshSavedPrinters(silent = false) {
-    if (!canUseBluetoothPrinting() || !canListGrantedBluetoothDevices()) {
-      setSavedPrinters([]);
-      return;
-    }
-
-    try {
-      const devices = await getSavedBluetoothDevices();
-      setSavedPrinters(devices);
-
-      if (!silent && devices.length === 0) {
-        setMessage("No saved Bluetooth printers yet. Use Pair New Device to choose one.");
-      }
-    } catch (error) {
-      if (!silent) {
-        setMessage(`Could not load saved Bluetooth printers: ${error.message}`);
-      }
-    }
-  }
-
-  async function handleBluetoothPrint(device) {
-    try {
-      setLoading("bluetooth");
-      setMessage("");
-      const result = await bluetoothPrint(buildBankReceiptText(order), device);
-
-      if (result.fallback && result.error) {
-        setMessage(`Bluetooth print was unavailable, so the browser print dialog was opened instead. ${result.error}`);
-      } else if (result.fallback) {
-        setMessage("Bluetooth print was unavailable, so the browser print dialog was opened instead.");
-      } else {
-        setMessage(`Printed to ${result.deviceName}.`);
-        await refreshSavedPrinters(true);
-      }
-
-      await syncDoneStatus("printed");
-    } finally {
-      setLoading("");
-    }
-  }
-
-  async function handlePairNewDevice() {
-    try {
-      setLoading("pair");
-      setMessage("");
-
-      const device = await requestBluetoothDevice();
-      await refreshSavedPrinters(true);
-      await handleBluetoothPrint(device);
-    } catch (error) {
-      setMessage(`Could not pair a new Bluetooth printer: ${error.message}`);
-    } finally {
-      setLoading("");
-    }
-  }
-
-  useEffect(() => {
-    setBluetoothReady(canUseBluetoothPrinting());
-    setCanListSavedPrinters(canListGrantedBluetoothDevices());
-    void refreshSavedPrinters(true);
-  }, []);
-
   useEffect(() => {
     if (!autoPrint) {
       return undefined;
@@ -153,11 +73,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
     async function runAutoPrint() {
       try {
         setLoading("print");
-        if (canUseBluetoothPrinting()) {
-          await bluetoothPrint(buildBankReceiptText(order));
-        } else {
-          window.print();
-        }
+        await printReceipt(buildBankReceiptText(order));
         await markOrderDone(order);
       } finally {
         if (active) {
@@ -203,75 +119,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
         >
           WhatsApp Share
         </Button>
-        <Button
-          icon={Bluetooth}
-          loading={loading === "bluetooth"}
-          onClick={() => handleBluetoothPrint()}
-          className="w-full sm:w-auto"
-        >
-          Bluetooth Print
-        </Button>
-        {bluetoothReady ? (
-          <Button
-            variant="secondary"
-            icon={Plus}
-            loading={loading === "pair"}
-            onClick={() => handlePairNewDevice()}
-            className="w-full sm:w-auto"
-          >
-            Pair New Device
-          </Button>
-        ) : null}
       </div>
-      {bluetoothReady ? (
-        <div className="print-hide mx-auto max-w-3xl rounded-3xl border border-white/10 bg-dark-elevated/70 p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-white">Saved Bluetooth Printers</p>
-              <p className="text-xs text-white/55">
-                {canListSavedPrinters
-                  ? "Previously allowed printers can be reused here."
-                  : "This browser can print by Bluetooth, but it cannot list saved devices."}
-              </p>
-            </div>
-            {canListSavedPrinters ? (
-              <Button
-                variant="ghost"
-                icon={RefreshCw}
-                onClick={() => refreshSavedPrinters()}
-                className="w-full sm:w-auto"
-              >
-                Refresh Printers
-              </Button>
-            ) : null}
-          </div>
-          {canListSavedPrinters ? (
-            savedPrinters.length > 0 ? (
-              <div className="mt-4 flex flex-col gap-2">
-                {savedPrinters.map((device) => (
-                  <button
-                    key={device.id}
-                    type="button"
-                    onClick={() => handleBluetoothPrint(device)}
-                    disabled={loading === "bluetooth" || loading === "pair"}
-                    className="flex min-h-[52px] items-center justify-between rounded-2xl border border-white/10 bg-black/15 px-4 py-3 text-left transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <span>
-                      <span className="block text-sm font-medium text-white">{device.name || "Unnamed printer"}</span>
-                      <span className="block text-xs text-white/45">Tap to print without pairing again</span>
-                    </span>
-                    <Bluetooth className="h-4 w-4 text-gold-light" />
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-4 text-sm text-white/55">
-                No saved printers yet. Tap Pair New Device to choose a printer from Android&apos;s Bluetooth picker.
-              </p>
-            )
-          ) : null}
-        </div>
-      ) : null}
       <p className="print-hide text-center text-sm text-white/55">
         {message || "Sharing or printing this receipt will mark the order as done."}
       </p>

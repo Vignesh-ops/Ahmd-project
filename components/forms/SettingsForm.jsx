@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bluetooth, Check, Plus, RefreshCw } from "lucide-react";
+import { Bluetooth, Check, Plus, RefreshCw, Usb, Wifi } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import {
-  bluetoothPrint,
-  canListGrantedBluetoothDevices,
-  canUseBluetoothPrinting,
-  getSavedBluetoothDevices,
+  canUseNativePrinters,
+  getAvailablePrinters,
+  pairBluetoothPrinter,
+  printTestSlip,
+  requestBluetoothPermissions,
   setPreferredPrinter,
-  requestBluetoothDevice
+  startBluetoothDiscovery
 } from "@/lib/print";
 
 export default function SettingsForm({ settings, storeName, isAdmin }) {
@@ -26,51 +27,47 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
   const [message, setMessage] = useState("");
   const [printerLoading, setPrinterLoading] = useState("");
   const [printerMessage, setPrinterMessage] = useState("");
-  const [savedPrinters, setSavedPrinters] = useState([]);
-  const [bluetoothReady, setBluetoothReady] = useState(false);
-  const [canListSavedPrinters, setCanListSavedPrinters] = useState(false);
+  const [printerTab, setPrinterTab] = useState("choose");
+  const [nativeReady, setNativeReady] = useState(false);
+  const [availablePrinters, setAvailablePrinters] = useState({ bluetooth: [], usb: [], preferred: null });
+  const [scanResults, setScanResults] = useState([]);
+  const [scanActive, setScanActive] = useState(false);
+  const discoveryRef = useRef(null);
 
-  async function refreshSavedPrinters(silent = false) {
-    if (!canUseBluetoothPrinting() || !canListGrantedBluetoothDevices()) {
-      setSavedPrinters([]);
+  const preferredLabel = availablePrinters.preferred?.name || "No preferred printer yet";
+
+  function getPrinterKey(printer) {
+    return `${printer.type}-${printer.id}`;
+  }
+
+  async function refreshPrinters(silent = false) {
+    if (!canUseNativePrinters()) {
+      setAvailablePrinters({ bluetooth: [], usb: [], preferred: null });
+      if (!silent) {
+        setPrinterMessage("Printer setup is only available inside the Android app.");
+      }
       return;
     }
-
     try {
-      const devices = await getSavedBluetoothDevices();
-      setSavedPrinters(devices);
-      if (!silent && devices.length === 0) {
-        setPrinterMessage("No saved printers yet. Pair one to make it preferred.");
+      const data = await getAvailablePrinters();
+      setAvailablePrinters(data);
+      if (!silent && !data.preferred) {
+        setPrinterMessage("Choose a printer to make it the default for all prints.");
       }
     } catch (error) {
       if (!silent) {
-        setPrinterMessage(`Could not load saved printers: ${error.message}`);
+        setPrinterMessage(`Could not load printers: ${error.message}`);
       }
     }
   }
 
-  async function handlePairPrinter() {
+  async function handleSelectPreferred(printer) {
     try {
-      setPrinterLoading("pair");
+      setPrinterLoading(getPrinterKey(printer));
       setPrinterMessage("");
-      const device = await requestBluetoothDevice();
-      await setPreferredPrinter(device.deviceId || device.id);
-      await refreshSavedPrinters(true);
-      setPrinterMessage(`${device.name || "Printer"} paired and set as preferred.`);
-    } catch (error) {
-      setPrinterMessage(`Could not pair printer: ${error.message}`);
-    } finally {
-      setPrinterLoading("");
-    }
-  }
-
-  async function handleSelectPreferred(device) {
-    try {
-      setPrinterLoading(device.deviceId || device.id);
-      setPrinterMessage("");
-      await setPreferredPrinter(device.deviceId || device.id);
-      await refreshSavedPrinters(true);
-      setPrinterMessage(`${device.name || "Printer"} is now preferred.`);
+      await setPreferredPrinter(printer);
+      await refreshPrinters(true);
+      setPrinterMessage(`${printer.name} is now preferred.`);
     } catch (error) {
       setPrinterMessage(`Could not set preferred printer: ${error.message}`);
     } finally {
@@ -78,19 +75,74 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     }
   }
 
-  async function handleTestPrint(device) {
+  async function handleTestPrint(printer) {
     try {
-      setPrinterLoading(`test-${device.deviceId || device.id}`);
+      setPrinterLoading(`test-${getPrinterKey(printer)}`);
       setPrinterMessage("");
-      const result = await bluetoothPrint("TEST PRINT\nAHMAD ENTERPRISES\nBluetooth printer connected.\n\n\n", device);
+      const result = await printTestSlip(printer);
       if (result.fallback) {
-        setPrinterMessage(`Bluetooth test print failed: ${result.error || "Unknown error"}`);
+        setPrinterMessage(`Test print failed: ${result.error || "Unknown error"}`);
       } else {
         setPrinterMessage(`Printed test slip to ${result.deviceName}.`);
       }
-      await refreshSavedPrinters(true);
     } catch (error) {
       setPrinterMessage(`Could not print test slip: ${error.message}`);
+    } finally {
+      setPrinterLoading("");
+    }
+  }
+
+  async function handleStartScan() {
+    if (!canUseNativePrinters()) {
+      setPrinterMessage("Bluetooth scan is only available inside the Android app.");
+      return;
+    }
+    setPrinterMessage("");
+    setScanResults([]);
+    setScanActive(true);
+
+    try {
+      const permission = await requestBluetoothPermissions();
+      if (!permission.granted) {
+        setScanActive(false);
+        setPrinterMessage("Bluetooth permission is required to scan for printers.");
+        return;
+      }
+
+      if (discoveryRef.current) {
+        await discoveryRef.current.remove();
+        discoveryRef.current = null;
+      }
+
+      discoveryRef.current = await startBluetoothDiscovery({
+        onDeviceFound: (device) => {
+          if (!device?.address) return;
+          setScanResults((current) => {
+            if (current.some((item) => item.address === device.address)) {
+              return current;
+            }
+            return [...current, device];
+          });
+        },
+        onFinished: () => {
+          setScanActive(false);
+        }
+      });
+    } catch (error) {
+      setScanActive(false);
+      setPrinterMessage(`Bluetooth scan failed: ${error.message}`);
+    }
+  }
+
+  async function handleAddPrinter(device) {
+    try {
+      setPrinterLoading(`add-${device.address}`);
+      setPrinterMessage("");
+      await pairBluetoothPrinter(device.address);
+      await refreshPrinters(true);
+      setPrinterMessage(`${device.name || "Printer"} paired. Choose it in the list to set preferred.`);
+    } catch (error) {
+      setPrinterMessage(`Could not pair printer: ${error.message}`);
     } finally {
       setPrinterLoading("");
     }
@@ -145,9 +197,15 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
   }
 
   useEffect(() => {
-    setBluetoothReady(canUseBluetoothPrinting());
-    setCanListSavedPrinters(canListGrantedBluetoothDevices());
-    void refreshSavedPrinters(true);
+    setNativeReady(canUseNativePrinters());
+    void refreshPrinters(true);
+
+    return () => {
+      if (discoveryRef.current) {
+        discoveryRef.current.remove();
+        discoveryRef.current = null;
+      }
+    };
   }, []);
 
   return (
@@ -216,13 +274,36 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       </div>
 
       <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Bluetooth Printer</p>
+            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Printer Setup</p>
             <h3 className="mt-1 text-lg font-semibold text-white">Preferred Printer</h3>
+            <p className="text-sm text-white/50">{preferredLabel}</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            {canListSavedPrinters ? (
+            <Button
+              type="button"
+              variant={printerTab === "choose" ? "secondary" : "ghost"}
+              onClick={() => setPrinterTab("choose")}
+            >
+              Choose Printer
+            </Button>
+            <Button
+              type="button"
+              variant={printerTab === "add" ? "secondary" : "ghost"}
+              onClick={() => setPrinterTab("add")}
+            >
+              Add New Printer
+            </Button>
+          </div>
+        </div>
+
+        {printerTab === "choose" ? (
+          <div className="mt-4 space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-white/60">
+                Choose a Bluetooth or USB printer to make it the default for all prints.
+              </p>
               <Button
                 type="button"
                 variant="ghost"
@@ -230,78 +311,163 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
                 loading={printerLoading === "refresh"}
                 onClick={async () => {
                   setPrinterLoading("refresh");
-                  await refreshSavedPrinters();
+                  await refreshPrinters();
                   setPrinterLoading("");
                 }}
               >
                 Refresh
               </Button>
-            ) : null}
-            {bluetoothReady ? (
+            </div>
+
+            {!nativeReady ? (
+              <p className="text-sm text-white/55">Printer setup is only available inside the Android app.</p>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-black/15 p-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <Bluetooth className="h-4 w-4 text-gold-light" />
+                    Bluetooth Printers
+                  </div>
+                  {availablePrinters.bluetooth.length > 0 ? (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {availablePrinters.bluetooth.map((printer) => (
+                        <div
+                          key={getPrinterKey(printer)}
+                          className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/20 p-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-white">{printer.name}</p>
+                            <p className="text-xs text-white/45">
+                              {printer.preferred ? "Preferred printer" : "Tap Set Preferred to use this printer"}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            {!printer.preferred ? (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                icon={Check}
+                                loading={printerLoading === getPrinterKey(printer)}
+                                onClick={() => handleSelectPreferred(printer)}
+                              >
+                                Set Preferred
+                              </Button>
+                            ) : null}
+                            <Button
+                              type="button"
+                              icon={Bluetooth}
+                              loading={printerLoading === `test-${getPrinterKey(printer)}`}
+                              onClick={() => handleTestPrint(printer)}
+                            >
+                              Test Print
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-white/55">No paired Bluetooth printers yet.</p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-black/15 p-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <Usb className="h-4 w-4 text-gold-light" />
+                    USB Printers
+                  </div>
+                  {availablePrinters.usb.length > 0 ? (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {availablePrinters.usb.map((printer) => (
+                        <div
+                          key={getPrinterKey(printer)}
+                          className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/20 p-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-white">{printer.name}</p>
+                            <p className="text-xs text-white/45">
+                              {printer.preferred ? "Preferred printer" : "Tap Set Preferred to use this printer"}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            {!printer.preferred ? (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                icon={Check}
+                                loading={printerLoading === getPrinterKey(printer)}
+                                onClick={() => handleSelectPreferred(printer)}
+                              >
+                                Set Preferred
+                              </Button>
+                            ) : null}
+                            <Button
+                              type="button"
+                              icon={Usb}
+                              loading={printerLoading === `test-${getPrinterKey(printer)}`}
+                              onClick={() => handleTestPrint(printer)}
+                            >
+                              Test Print
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-white/55">No USB printers detected.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-4 space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-white/60">
+                Allow Bluetooth, then scan for nearby printers to add them.
+              </p>
               <Button
                 type="button"
                 variant="secondary"
-                icon={Plus}
-                loading={printerLoading === "pair"}
-                onClick={handlePairPrinter}
+                icon={Wifi}
+                loading={scanActive}
+                onClick={handleStartScan}
               >
-                Pair Printer
+                {scanActive ? "Scanning..." : "Scan for Printers"}
               </Button>
-            ) : null}
-          </div>
-        </div>
+            </div>
 
-        {bluetoothReady && canListSavedPrinters ? (
-          savedPrinters.length > 0 ? (
-            <div className="mt-4 flex flex-col gap-2">
-              {savedPrinters.map((device) => (
-                <div
-                  key={device.id}
-                  className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/15 p-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-white">{device.name || "Unnamed printer"}</p>
-                    <p className="text-xs text-white/45">
-                      {device.preferred ? "Preferred printer for all print actions" : "Tap Set Preferred to use this printer"}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    {!device.preferred ? (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        icon={Check}
-                        loading={printerLoading === (device.deviceId || device.id)}
-                        onClick={() => handleSelectPreferred(device)}
-                      >
-                        Set Preferred
-                      </Button>
-                    ) : null}
+            {scanResults.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                {scanResults.map((device) => (
+                  <div
+                    key={device.address}
+                    className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/20 p-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-white">{device.name || "Bluetooth printer"}</p>
+                      <p className="text-xs text-white/45">{device.address}</p>
+                    </div>
                     <Button
                       type="button"
-                      icon={Bluetooth}
-                      loading={printerLoading === `test-${device.deviceId || device.id}`}
-                      onClick={() => handleTestPrint(device)}
+                      icon={Plus}
+                      loading={printerLoading === `add-${device.address}`}
+                      onClick={() => handleAddPrinter(device)}
                     >
-                      Test Print
+                      Add Printer
                     </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-white/55">
-              No saved printer. Tap Pair Printer and allow Bluetooth permissions.
-            </p>
-          )
-        ) : (
-          <p className="mt-4 text-sm text-white/55">
-            Bluetooth printer setup is only available on supported Android devices.
-          </p>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-white/55">
+                {scanActive ? "Scanning for nearby Bluetooth printers..." : "No printers found yet. Start a scan."}
+              </p>
+            )}
+          </div>
         )}
 
         <p className="mt-4 text-sm text-red/55">
-          {printerMessage || "After selecting preferred printer, all print actions will use it automatically."}
+          {printerMessage || "After selecting a preferred printer, all print actions will use it automatically."}
         </p>
       </div>
     </form>
