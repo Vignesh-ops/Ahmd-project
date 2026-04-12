@@ -320,9 +320,9 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     setMounted(true);
   }, []);
 
-  const displayDefaultRate = mounted ? formatNumber(selectedCountrySettings.rate) : String(selectedCountrySettings.rate ?? "");
+  const displayDefaultRate = mounted ? formatNumber(selectedCountrySettings.rate, 5) : String(selectedCountrySettings.rate ?? "");
   const displayDefaultServiceCharge = mounted
-    ? formatNumber(selectedCountrySettings.serviceCharge)
+    ? formatNumber(selectedCountrySettings.serviceCharge, 5)
     : String(selectedCountrySettings.serviceCharge ?? "");
   const displayCurrentPayable = totalPayableAmount
     ? mounted
@@ -439,7 +439,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <Input
             label="Deposit Amount"
             type="number"
-            step="0.01"
+            step="0.00001"
             prefix={form.country === 1 ? "Rp" : "₹"}
             placeholder="0"
             value={form.depositAmount}
@@ -468,7 +468,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             label="Rate"
             hint="From store settings by default"
             type="number"
-            step="0.01"
+            step="0.00001"
             placeholder="0"
             value={form.rate}
             onChange={(event) => updateField("rate", event.target.value)}
@@ -476,7 +476,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <Input
             label="Service Charge"
             type="number"
-            step="0.01"
+            step="0.00001"
             placeholder="0"
             value={form.serviceCharge}
             onChange={(event) => updateField("serviceCharge", event.target.value)}

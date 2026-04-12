@@ -219,7 +219,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         <Input
           label="INDONASIA Exchange Rate"
           type="number"
-          step="0.01"
+          step="0.00001"
           value={form.rate1}
           readOnly={!isAdmin}
           onChange={
@@ -229,7 +229,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         <Input
           label="INDIA Exchange Rate"
           type="number"
-          step="0.01"
+          step="0.00001"
           value={form.rate2}
           readOnly={!isAdmin}
           onChange={
@@ -239,7 +239,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         <Input
           label="INDONASIA Service Charge"
           type="number"
-          step="0.01"
+          step="0.00001"
           value={form.service1}
           readOnly={!isAdmin}
           onChange={
@@ -249,7 +249,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         <Input
           label="INDIA Service Charge"
           type="number"
-          step="0.01"
+          step="0.00001"
           value={form.service2}
           readOnly={!isAdmin}
           onChange={

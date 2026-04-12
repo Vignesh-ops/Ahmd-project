@@ -151,8 +151,8 @@ export default function BankReceipt({ order, autoPrint = false }) {
             {order.ifscCode ? <p>IFSC: {order.ifscCode}</p> : null}
             <p>Sender: {order.senderName || "-"}</p>
             <p>Mobile: {order.senderMobile}</p>
-            <p>Rate: {formatNumber(order.rate)}</p>
-            <p>Service: {formatNumber(order.serviceCharge)}</p>
+            <p>Rate: {formatNumber(order.rate, 5)}</p>
+            <p>Service: {formatNumber(order.serviceCharge, 5)}</p>
           </div>
 
           <div className="thermal-divider" />
