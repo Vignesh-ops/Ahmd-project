@@ -78,6 +78,14 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     }));
   }
 
+  function updateDecimalField(name, value) {
+    const normalized = String(value).replace(/,/g, "");
+    if (!/^\d*\.?\d*$/.test(normalized)) {
+      return;
+    }
+    updateField(name, normalized);
+  }
+
   function updateCountry(country) {
     const defaults = getCountryDefaults(country, settings);
 
@@ -330,7 +338,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
   const displayCurrentPayable = totalPayableAmount
     ? mounted
       ? formatCurrency(totalPayableAmount, "MYR")
-      : totalPayableAmount.toFixed(2)
+      : String(totalPayableAmount)
     : "-";
 
   return (
@@ -441,12 +449,12 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           />
           <Input
             label="Deposit Amount"
-            type="number"
-            step="any"
+            type="text"
+            inputMode="decimal"
             prefix={form.country === 1 ? "Rp" : "₹"}
             placeholder="0"
             value={form.depositAmount}
-            onChange={(event) => updateField("depositAmount", event.target.value)}
+            onChange={(event) => updateDecimalField("depositAmount", event.target.value)}
           />
 
           {form.country === 2 ? (
@@ -470,19 +478,19 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <Input
             label="Rate"
             hint="From store settings by default"
-            type="number"
-            step="any"
+            type="text"
+            inputMode="decimal"
             placeholder="0"
             value={form.rate}
-            onChange={(event) => updateField("rate", event.target.value)}
+            onChange={(event) => updateDecimalField("rate", event.target.value)}
           />
           <Input
             label="Service Charge"
-            type="number"
-            step="any"
+            type="text"
+            inputMode="decimal"
             placeholder="0"
             value={form.serviceCharge}
-            onChange={(event) => updateField("serviceCharge", event.target.value)}
+            onChange={(event) => updateDecimalField("serviceCharge", event.target.value)}
           />
           <Input
             label="Total Payable Amount (RM)"
