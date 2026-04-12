@@ -142,8 +142,8 @@ export default function AdminDashboard({ stores }) {
     ];
   }
 
-  function handleExportCsv() {
-    exportCsv("ubi-orders.csv", buildExportRows());
+  async function handleExportCsv() {
+    await exportCsv("ubi-orders.csv", buildExportRows());
   }
 
   async function handleExportXlsx() {
@@ -228,7 +228,7 @@ export default function AdminDashboard({ stores }) {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" icon={Download} onClick={handleExportCsv}>
+            <Button variant="secondary" icon={Download} onClick={() => void handleExportCsv()}>
               Export CSV
             </Button>
             <Button variant="secondary" icon={Download} onClick={() => void handleExportXlsx()}>
