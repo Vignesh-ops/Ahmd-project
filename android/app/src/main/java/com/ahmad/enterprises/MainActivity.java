@@ -1,5 +1,6 @@
 package com.ahmad.enterprises;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.ahmad.enterprises.plugins.BluetoothPrinterPlugin;
@@ -12,5 +13,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(BluetoothPrinterPlugin.class);
         registerPlugin(WebPrintPlugin.class);
         super.onCreate(savedInstanceState);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 }
