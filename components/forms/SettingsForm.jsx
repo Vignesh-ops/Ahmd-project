@@ -10,7 +10,7 @@ import {
   getAvailablePrinters,
   pairBluetoothPrinter,
   printTestSlip,
-  requestBluetoothPermissions,
+  requestBluetoothScanPermissions,
   setPreferredPrinter,
   startBluetoothDiscovery
 } from "@/lib/print";
@@ -102,7 +102,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     setScanActive(true);
 
     try {
-      const permission = await requestBluetoothPermissions();
+      const permission = await requestBluetoothScanPermissions();
       if (!permission.granted) {
         setScanActive(false);
         setPrinterMessage("Bluetooth permission is required to scan for printers.");

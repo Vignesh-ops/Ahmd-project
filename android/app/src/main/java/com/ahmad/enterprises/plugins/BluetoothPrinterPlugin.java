@@ -9,16 +9,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.util.Base64;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 
+import java.util.Map;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
@@ -52,6 +56,36 @@ public class BluetoothPrinterPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void requestScanPermissions(PluginCall call) {
+        if (hasScanPermission()) {
+            call.resolve(permissionStatesToJs());
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requestPermissionForAliases(new String[] { "bluetoothScan", "bluetoothConnect" }, call, "permissionRequestCallback");
+            return;
+        }
+
+        requestPermissionForAliases(new String[] { "bluetoothLegacy", "location" }, call, "permissionRequestCallback");
+    }
+
+    @PluginMethod
+    public void requestConnectPermissions(PluginCall call) {
+        if (hasConnectPermission()) {
+            call.resolve(permissionStatesToJs());
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requestPermissionForAlias("bluetoothConnect", call, "permissionRequestCallback");
+            return;
+        }
+
+        requestPermissionForAlias("bluetoothLegacy", call, "permissionRequestCallback");
+    }
+
+    @PluginMethod
     public void isEnabled(PluginCall call) {
         JSObject result = new JSObject();
         result.put("enabled", adapter != null && adapter.isEnabled());
@@ -62,6 +96,10 @@ public class BluetoothPrinterPlugin extends Plugin {
     public void getPairedDevices(PluginCall call) {
         if (adapter == null) {
             call.reject("Bluetooth not available");
+            return;
+        }
+        if (!hasConnectPermission()) {
+            call.reject("Bluetooth permission denied");
             return;
         }
         if (!adapter.isEnabled()) {
@@ -91,6 +129,10 @@ public class BluetoothPrinterPlugin extends Plugin {
     public void startDiscovery(PluginCall call) {
         if (adapter == null) {
             call.reject("Bluetooth not available");
+            return;
+        }
+        if (!hasScanPermission()) {
+            call.reject("Bluetooth permission denied");
             return;
         }
         if (!adapter.isEnabled()) {
@@ -137,6 +179,10 @@ public class BluetoothPrinterPlugin extends Plugin {
             call.reject("Bluetooth not available");
             return;
         }
+        if (!hasConnectPermission()) {
+            call.reject("Bluetooth permission denied");
+            return;
+        }
         if (!adapter.isEnabled()) {
             call.reject("Bluetooth is disabled");
             return;
@@ -159,6 +205,10 @@ public class BluetoothPrinterPlugin extends Plugin {
     public void connect(PluginCall call) {
         if (adapter == null) {
             call.reject("Bluetooth not available");
+            return;
+        }
+        if (!hasConnectPermission()) {
+            call.reject("Bluetooth permission denied");
             return;
         }
         if (!adapter.isEnabled()) {
@@ -217,6 +267,10 @@ public class BluetoothPrinterPlugin extends Plugin {
             call.reject("Bluetooth not available");
             return;
         }
+        if (!hasConnectPermission()) {
+            call.reject("Bluetooth permission denied");
+            return;
+        }
         if (!adapter.isEnabled()) {
             call.reject("Bluetooth is disabled");
             return;
@@ -271,6 +325,37 @@ public class BluetoothPrinterPlugin extends Plugin {
             try { getContext().unregisterReceiver(discoveryReceiver); } catch (Exception ignored) {}
             discoveryReceiver = null;
         }
+    }
+
+    @PermissionCallback
+    private void permissionRequestCallback(PluginCall call) {
+        call.resolve(permissionStatesToJs());
+    }
+
+    private boolean hasScanPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return getPermissionState("bluetoothScan") == PermissionState.GRANTED
+                && getPermissionState("bluetoothConnect") == PermissionState.GRANTED;
+        }
+
+        return getPermissionState("bluetoothLegacy") == PermissionState.GRANTED
+            && getPermissionState("location") == PermissionState.GRANTED;
+    }
+
+    private boolean hasConnectPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return getPermissionState("bluetoothConnect") == PermissionState.GRANTED;
+        }
+
+        return getPermissionState("bluetoothLegacy") == PermissionState.GRANTED;
+    }
+
+    private JSObject permissionStatesToJs() {
+        JSObject result = new JSObject();
+        for (Map.Entry<String, PermissionState> entry : getPermissionStates().entrySet()) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
     }
 
     private JSObject deviceToJs(BluetoothDevice device) {
