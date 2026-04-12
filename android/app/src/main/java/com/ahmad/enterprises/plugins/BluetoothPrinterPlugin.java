@@ -223,21 +223,9 @@ public class BluetoothPrinterPlugin extends Plugin {
         }
 
         try {
-            BluetoothSocket socket = sockets.get(address);
-            if (socket != null && socket.isConnected()) {
-                JSObject result = new JSObject();
-                result.put("connected", true);
-                call.resolve(result);
-                return;
-            }
-
-            BluetoothDevice device = adapter.getRemoteDevice(address);
-            adapter.cancelDiscovery();
-            socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-            socket.connect();
-            sockets.put(address, socket);
+            BluetoothSocket socket = ensureConnectedSocket(address, false);
             JSObject result = new JSObject();
-            result.put("connected", true);
+            result.put("connected", socket != null && socket.isConnected());
             call.resolve(result);
         } catch (Exception e) {
             call.reject("Failed to connect", e);
@@ -288,19 +276,8 @@ public class BluetoothPrinterPlugin extends Plugin {
         }
 
         try {
-            BluetoothSocket socket = sockets.get(address);
-            if (socket == null || !socket.isConnected()) {
-                BluetoothDevice device = adapter.getRemoteDevice(address);
-                adapter.cancelDiscovery();
-                socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-                socket.connect();
-                sockets.put(address, socket);
-            }
-
             byte[] bytes = Base64.decode(data, Base64.DEFAULT);
-            OutputStream stream = socket.getOutputStream();
-            stream.write(bytes);
-            stream.flush();
+            writeToSocket(address, bytes, false);
             call.resolve();
         } catch (Exception e) {
             call.reject("Failed to print", e);
@@ -356,6 +333,50 @@ public class BluetoothPrinterPlugin extends Plugin {
             result.put(entry.getKey(), entry.getValue());
         }
         return result;
+    }
+
+    private BluetoothSocket ensureConnectedSocket(String address, boolean forceReconnect) throws Exception {
+        BluetoothSocket socket = sockets.get(address);
+        if (!forceReconnect && socket != null && socket.isConnected()) {
+            return socket;
+        }
+
+        closeSocket(address);
+
+        BluetoothDevice device = adapter.getRemoteDevice(address);
+        adapter.cancelDiscovery();
+        BluetoothSocket freshSocket = device.createRfcommSocketToServiceRecord(SPP_UUID);
+        freshSocket.connect();
+        sockets.put(address, freshSocket);
+        return freshSocket;
+    }
+
+    private void writeToSocket(String address, byte[] bytes, boolean hasRetried) throws Exception {
+        try {
+            BluetoothSocket socket = ensureConnectedSocket(address, false);
+            OutputStream stream = socket.getOutputStream();
+            stream.write(bytes);
+            stream.flush();
+        } catch (Exception e) {
+            closeSocket(address);
+            if (hasRetried) {
+                throw e;
+            }
+
+            BluetoothSocket socket = ensureConnectedSocket(address, true);
+            OutputStream stream = socket.getOutputStream();
+            stream.write(bytes);
+            stream.flush();
+        }
+    }
+
+    private void closeSocket(String address) {
+        BluetoothSocket socket = sockets.remove(address);
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (Exception ignored) {}
+        }
     }
 
     private JSObject deviceToJs(BluetoothDevice device) {
