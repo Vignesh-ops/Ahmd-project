@@ -287,6 +287,9 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     try {
       setLoading(intent);
       setMessage("");
+      if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
       const order = savedOrder || (await persistOrder());
 
       if (intent === "save") {
@@ -439,7 +442,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <Input
             label="Deposit Amount"
             type="number"
-            step="0.00001"
+            step="any"
             prefix={form.country === 1 ? "Rp" : "₹"}
             placeholder="0"
             value={form.depositAmount}
@@ -468,7 +471,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             label="Rate"
             hint="From store settings by default"
             type="number"
-            step="0.00001"
+            step="any"
             placeholder="0"
             value={form.rate}
             onChange={(event) => updateField("rate", event.target.value)}
@@ -476,7 +479,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <Input
             label="Service Charge"
             type="number"
-            step="0.00001"
+            step="any"
             placeholder="0"
             value={form.serviceCharge}
             onChange={(event) => updateField("serviceCharge", event.target.value)}

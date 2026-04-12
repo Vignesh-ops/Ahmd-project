@@ -9,6 +9,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
 import { exportCsv, exportXlsx } from "@/lib/client-export";
+import { printCurrentPage } from "@/lib/print";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const typeOptions = [
@@ -150,6 +151,10 @@ export default function AdminDashboard({ stores }) {
     await exportXlsx("ubi-orders.xlsx", buildExportRows(), "Orders");
   }
 
+  async function handlePrintAll() {
+    await printCurrentPage({ title: "Filtered Orders Report" });
+  }
+
   const activeStore = stores.find((store) => store.storeCode === filters.storeCode);
   const reportScopeLabel =
     filters.storeCode === "all"
@@ -234,7 +239,7 @@ export default function AdminDashboard({ stores }) {
             <Button variant="secondary" icon={Download} onClick={() => void handleExportXlsx()}>
               Export XLSX
             </Button>
-            <Button variant="secondary" icon={Printer} onClick={() => window.print()}>
+            <Button variant="secondary" icon={Printer} onClick={() => void handlePrintAll()}>
               Print All
             </Button>
           </div>
