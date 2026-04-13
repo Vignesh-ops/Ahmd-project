@@ -7,6 +7,9 @@ import { getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 import { formatCurrency } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DashboardPage() {
   const session = await requireSession();
   const [summary, todaySummary, recentOrders] = await Promise.all([

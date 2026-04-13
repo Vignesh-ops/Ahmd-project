@@ -8,7 +8,7 @@ import InfoDialog from "@/components/ui/InfoDialog";
 import { markOrderDone } from "@/lib/orderStatus";
 import { buildBankReceiptText, printReceipt } from "@/lib/print";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
-import { formatCurrency, formatDate, formatPreciseNumber } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 const Barcode = dynamic(() => import("react-barcode"), { ssr: false });
 
@@ -151,8 +151,6 @@ export default function BankReceipt({ order, autoPrint = false }) {
             {order.ifscCode ? <p>IFSC: {order.ifscCode}</p> : null}
             <p>Sender: {order.senderName || "-"}</p>
             <p>Mobile: {order.senderMobile}</p>
-            <p>Rate: {formatPreciseNumber(order.rate, 5)}</p>
-            <p>Service: {formatPreciseNumber(order.serviceCharge, 5)}</p>
           </div>
 
           <div className="thermal-divider" />

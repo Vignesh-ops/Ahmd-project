@@ -7,8 +7,8 @@ export default async function AppLayout({ children }) {
   const session = await requireSession();
   const warmRoutes =
     session.user.role === "admin"
-      ? ["/", "/bank-order", "/history", "/settings", "/admin"]
-      : ["/", "/bank-order", "/history", "/settings"];
+      ? ["/bank-order", "/history", "/settings", "/admin"]
+      : ["/bank-order", "/history", "/settings"];
 
   return (
     <div className="app-shell">

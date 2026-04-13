@@ -13,8 +13,10 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(BluetoothPrinterPlugin.class);
         registerPlugin(WebPrintPlugin.class);
         super.onCreate(savedInstanceState);
+        getWindow().setStatusBarColor(Color.BLACK);
+        getWindow().setNavigationBarColor(Color.BLACK);
         if (getBridge() != null && getBridge().getWebView() != null) {
-            getBridge().getWebView().setBackgroundColor(Color.TRANSPARENT);
+            getBridge().getWebView().setBackgroundColor(Color.BLACK);
         }
     }
 }

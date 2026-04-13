@@ -78,6 +78,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .app-shell {
   min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
   background:
     radial-gradient(circle at top left, rgba(30, 207, 176, 0.08), transparent 28%),
     radial-gradient(circle at top right, rgba(212, 168, 67, 0.08), transparent 22%);

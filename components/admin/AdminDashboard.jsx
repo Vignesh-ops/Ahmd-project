@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
-import { exportCsv, exportXlsx } from "@/lib/client-export";
+import { exportXlsx } from "@/lib/client-export";
 import { printCurrentPage } from "@/lib/print";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -42,6 +42,7 @@ export default function AdminDashboard({ stores }) {
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [exportMessage, setExportMessage] = useState("");
   useEffect(() => {
     const controller = new AbortController();
 
@@ -174,12 +175,19 @@ export default function AdminDashboard({ stores }) {
     ];
   }
 
-  async function handleExportCsv() {
-    await exportCsv("ubi-orders.csv", buildExportRows());
-  }
-
   async function handleExportXlsx() {
-    await exportXlsx("ubi-orders.xlsx", buildExportRows(), "Orders");
+    try {
+      setExportMessage("");
+      const result = await exportXlsx("ubi-orders.xlsx", buildExportRows(), "Orders");
+
+      if (result?.path) {
+        setExportMessage(`XLSX saved to Documents/${result.path}`);
+      } else {
+        setExportMessage("XLSX downloaded successfully.");
+      }
+    } catch (error) {
+      setExportMessage(error?.message || "Failed to export XLSX.");
+    }
   }
 
   async function handlePrintAll() {
@@ -264,9 +272,6 @@ export default function AdminDashboard({ stores }) {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" icon={Download} onClick={() => void handleExportCsv()}>
-              Export CSV
-            </Button>
             <Button variant="secondary" icon={Download} onClick={() => void handleExportXlsx()}>
               Export XLSX
             </Button>
@@ -274,6 +279,7 @@ export default function AdminDashboard({ stores }) {
               Print All
             </Button>
           </div>
+          {exportMessage ? <p className="mt-3 text-sm text-white/65">{exportMessage}</p> : null}
         </div>
 {/* Fancy Delete Confirmation Modal */}
 {showDeleteModal && (

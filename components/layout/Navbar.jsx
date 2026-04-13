@@ -27,7 +27,7 @@ export default function Navbar({ user }) {
   return (
     <header className="sticky top-0 z-30 border-b border-white/5 bg-dark-base/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-        <AppLink href="/" className="flex min-w-0 items-center gap-3">
+        <AppLink href="/" prefetch={false} className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/30 bg-white/95 shadow-[0_0_0_4px_rgba(212,168,67,0.08)] sm:h-14 sm:w-14">
             <div className="relative h-9 w-9 sm:h-11 sm:w-11">
               <Image
@@ -62,6 +62,7 @@ export default function Navbar({ user }) {
                 <AppLink
                   key={item.href}
                   href={item.href}
+                  prefetch={item.href !== "/"}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm transition",
                     active
