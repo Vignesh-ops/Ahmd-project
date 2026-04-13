@@ -162,6 +162,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     }
 
     let ignore = false;
+    const controller = new AbortController();
     const timeoutId = window.setTimeout(async () => {
       try {
         setLookup({
@@ -170,7 +171,8 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
         });
 
         const response = await fetch(`/api/customers/lookup?type=bank&mobile=${encodeURIComponent(mobile)}`, {
-          cache: "no-store"
+          cache: "no-store",
+          signal: controller.signal
         });
         const payload = await response.json();
 
@@ -214,6 +216,9 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           message: `Found ${matches.length} saved accounts for this mobile. Choose one to autofill or continue manually.`
         });
       } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
         if (!ignore) {
           setLookupChoices([]);
           setLookupModal({
@@ -231,8 +236,9 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     return () => {
       ignore = true;
       window.clearTimeout(timeoutId);
+      controller.abort();
     };
-  }, [form.senderMobile, settings]);
+  }, [form.senderMobile]);
 
   async function fetchFreshOrderNo() {
     const response = await fetch("/api/orders/bank?preview=true");

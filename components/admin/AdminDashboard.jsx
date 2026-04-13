@@ -43,6 +43,8 @@ export default function AdminDashboard({ stores }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadSummary() {
       const params = new URLSearchParams();
 
@@ -50,15 +52,29 @@ export default function AdminDashboard({ stores }) {
         params.set("storeCode", filters.storeCode);
       }
 
-      const response = await fetch(`/api/admin/summary?${params.toString()}`);
-      const payload = await response.json();
-      setSummary(payload);
+      try {
+        const response = await fetch(`/api/admin/summary?${params.toString()}`, {
+          signal: controller.signal
+        });
+        const payload = await response.json();
+        setSummary(payload);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Failed to load admin summary", error);
+        }
+      }
     }
 
     loadSummary();
+
+    return () => {
+      controller.abort();
+    };
   }, [filters.storeCode]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadOrders() {
       setLoading(true);
       const params = new URLSearchParams();
@@ -69,13 +85,28 @@ export default function AdminDashboard({ stores }) {
         }
       });
 
-      const response = await fetch(`/api/history?${params.toString()}`);
-      const payload = await response.json();
-      setOrders(payload);
-      setLoading(false);
+      try {
+        const response = await fetch(`/api/history?${params.toString()}`, {
+          signal: controller.signal
+        });
+        const payload = await response.json();
+        setOrders(payload);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Failed to load admin orders", error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
     }
 
     loadOrders();
+
+    return () => {
+      controller.abort();
+    };
   }, [filters]);
 
   const filteredStats = useMemo(() => {

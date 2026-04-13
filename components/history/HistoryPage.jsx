@@ -42,6 +42,8 @@ export default function HistoryPage({
   const [actionError, setActionError] = useState(null);
   const [shareDialogOrderNo, setShareDialogOrderNo] = useState("");
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadOrders() {
       setLoading(true);
       const params = new URLSearchParams();
@@ -52,13 +54,28 @@ export default function HistoryPage({
         }
       });
 
-      const response = await fetch(`/api/history?${params.toString()}`);
-      const payload = await response.json();
-      setOrders(payload);
-      setLoading(false);
+      try {
+        const response = await fetch(`/api/history?${params.toString()}`, {
+          signal: controller.signal
+        });
+        const payload = await response.json();
+        setOrders(payload);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Failed to load history orders", error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
     }
 
     loadOrders();
+
+    return () => {
+      controller.abort();
+    };
   }, [filters]);
 
   const stats = useMemo(() => {
