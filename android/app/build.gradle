@@ -16,8 +16,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    def hasReleaseSigning =
+            project.hasProperty('MYAPP_UPLOAD_STORE_FILE') &&
+            project.hasProperty('MYAPP_UPLOAD_STORE_PASSWORD') &&
+            project.hasProperty('MYAPP_UPLOAD_KEY_ALIAS') &&
+            project.hasProperty('MYAPP_UPLOAD_KEY_PASSWORD')
+
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig hasReleaseSigning ? signingConfigs.release : signingConfigs.debug
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
