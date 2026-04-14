@@ -14,7 +14,9 @@ html[data-theme="light"] {
 
 * {
   box-sizing: border-box;
+  -webkit-touch-callout: default;
 }
+
 
 html,
 body {
@@ -353,5 +355,11 @@ html[data-theme="light"] .bg-red-500\/90 {
 @keyframes loading-shimmer {
   100% {
     transform: translateX(100%);
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .glass-panel {
+    backdrop-filter: none !important;
   }
 }
