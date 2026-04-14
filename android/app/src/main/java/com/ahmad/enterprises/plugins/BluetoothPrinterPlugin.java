@@ -10,7 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Base64;
 
 import androidx.annotation.Keep;
@@ -55,6 +57,19 @@ public class BluetoothPrinterPlugin extends Plugin {
     @PluginMethod
     public void requestPermissions(PluginCall call) {
         super.requestPermissions(call);
+    }
+
+    @PluginMethod
+    public void openAppSettings(PluginCall call) {
+        try {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.fromParts("package", getContext().getPackageName(), null));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("Failed to open app settings.", error);
+        }
     }
 
     @PluginMethod

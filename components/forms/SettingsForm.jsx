@@ -11,7 +11,9 @@ import {
   pairBluetoothPrinter,
   printTestSlip,
   requestBluetoothConnectPermissions,
+  requestBluetoothAllPermissions,
   requestBluetoothScanPermissions,
+  openBluetoothPermissionSettings,
   setPreferredPrinter,
   startBluetoothDiscovery
 } from "@/lib/print";
@@ -33,6 +35,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
   const [availablePrinters, setAvailablePrinters] = useState({ bluetooth: [], usb: [], preferred: null });
   const [scanResults, setScanResults] = useState([]);
   const [scanActive, setScanActive] = useState(false);
+  const [needsPermissionHelp, setNeedsPermissionHelp] = useState(false);
   const discoveryRef = useRef(null);
 
   const preferredLabel = availablePrinters.preferred?.name || "No preferred printer yet";
@@ -52,6 +55,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     try {
       const connectPermission = await requestBluetoothConnectPermissions();
       if (!connectPermission.granted) {
+        setNeedsPermissionHelp(true);
         if (!silent) {
           setPrinterMessage("Bluetooth permission is required to list paired printers.");
         }
@@ -61,6 +65,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
 
       const data = await getAvailablePrinters();
       setAvailablePrinters(data);
+      setNeedsPermissionHelp(false);
       if (!silent && !data.preferred) {
         setPrinterMessage("Choose a printer to make it the default for all prints.");
       }
@@ -115,9 +120,11 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       const permission = await requestBluetoothScanPermissions();
       if (!permission.granted) {
         setScanActive(false);
+        setNeedsPermissionHelp(true);
         setPrinterMessage("Bluetooth permission is required to scan for printers.");
         return;
       }
+      setNeedsPermissionHelp(false);
 
       if (discoveryRef.current) {
         await discoveryRef.current.remove();
@@ -226,12 +233,18 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
 
     async function ensurePrinterPermissionsOnLoad() {
       try {
-        const permission = await requestBluetoothConnectPermissions();
+        const permission = await requestBluetoothAllPermissions();
         if (!cancelled && !permission.granted) {
+          setNeedsPermissionHelp(true);
           setPrinterMessage("Allow Nearby devices permission to manage Bluetooth printers.");
+          return;
+        }
+        if (!cancelled) {
+          setNeedsPermissionHelp(false);
         }
       } catch (error) {
         if (!cancelled) {
+          setNeedsPermissionHelp(true);
           setPrinterMessage(`Could not request Bluetooth permission: ${error.message}`);
         }
       }
@@ -332,10 +345,13 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
               variant={printerTab === "add" ? "secondary" : "ghost"}
               onClick={async () => {
                 setPrinterTab("add");
-                const permission = await requestBluetoothScanPermissions();
+                const permission = await requestBluetoothAllPermissions();
                 if (!permission.granted) {
+                  setNeedsPermissionHelp(true);
                   setPrinterMessage("Bluetooth permission is required to scan for printers.");
+                  return;
                 }
+                setNeedsPermissionHelp(false);
               }}
             >
               Add New Printer
@@ -514,6 +530,21 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         <p className="mt-4 text-sm text-red/55">
           {printerMessage || "After selecting a preferred printer, all print actions will use it automatically."}
         </p>
+        {needsPermissionHelp ? (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={async () => {
+              try {
+                await openBluetoothPermissionSettings();
+              } catch (error) {
+                setPrinterMessage(error.message || "Could not open permission settings.");
+              }
+            }}
+          >
+            Open Bluetooth Permission Settings
+          </Button>
+        ) : null}
       </div>
     </form>
   );
