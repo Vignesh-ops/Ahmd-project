@@ -101,10 +101,10 @@ export default function AppUpdatePrompt() {
       <div className="dialog-surface w-full max-w-md rounded-xl border border-gold/20 p-6 shadow-2xl">
         <p className="text-xs uppercase tracking-[0.22em] text-gold-light/80">App Update</p>
         <h3 className="mt-2 text-lg font-semibold text-white">Update Available</h3>
-        <p className="mt-3 text-sm text-white/70">
+        <p className="mt-3 text-sm text-white/80">
           New version v{updateInfo.latestVersion} is available. Current version is v{updateInfo.currentVersion}.
         </p>
-        <p className="mt-2 text-xs text-white/50">
+        <p className="mt-2 text-xs text-white/60">
           Tap Download, then open the APK to install.
         </p>
         <div className="mt-6 flex justify-end gap-2">
