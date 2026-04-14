@@ -25,8 +25,9 @@ export default function Navbar({ user }) {
   }
 
   return (
+
     <header
-      className="sticky top-0 z-30 border-b border-white/5 backdrop-blur-xl"
+      className="sticky top-0 z-30 border-b bg-dark-base/85 border-white/5 backdrop-blur-xl"
       style={{
         paddingTop: "env(safe-area-inset-top)",
         backgroundColor: "#000"
