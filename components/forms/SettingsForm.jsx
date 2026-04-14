@@ -10,6 +10,7 @@ import {
   getAvailablePrinters,
   pairBluetoothPrinter,
   printTestSlip,
+  requestBluetoothConnectPermissions,
   requestBluetoothScanPermissions,
   setPreferredPrinter,
   startBluetoothDiscovery
@@ -49,6 +50,15 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       return;
     }
     try {
+      const connectPermission = await requestBluetoothConnectPermissions();
+      if (!connectPermission.granted) {
+        if (!silent) {
+          setPrinterMessage("Bluetooth permission is required to list paired printers.");
+        }
+        setAvailablePrinters((current) => ({ ...current, bluetooth: [] }));
+        return;
+      }
+
       const data = await getAvailablePrinters();
       setAvailablePrinters(data);
       if (!silent && !data.preferred) {
@@ -198,7 +208,6 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
 
   useEffect(() => {
     setNativeReady(canUseNativePrinters());
-    void refreshPrinters(true);
 
     return () => {
       if (discoveryRef.current) {
@@ -284,7 +293,10 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             <Button
               type="button"
               variant={printerTab === "choose" ? "secondary" : "ghost"}
-              onClick={() => setPrinterTab("choose")}
+              onClick={() => {
+                setPrinterTab("choose");
+                void refreshPrinters();
+              }}
             >
               Choose Printer
             </Button>
