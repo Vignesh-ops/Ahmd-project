@@ -1,3 +1,4 @@
+// MainActivity.java
 package com.ahmad.enterprises;
 
 import android.graphics.Color;

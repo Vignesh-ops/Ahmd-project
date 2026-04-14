@@ -11,7 +11,6 @@ import {
   pairBluetoothPrinter,
   printTestSlip,
   requestBluetoothConnectPermissions,
-  requestBluetoothAllPermissions,
   requestBluetoothScanPermissions,
   openBluetoothPermissionSettings,
   setPreferredPrinter,
@@ -107,11 +106,15 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     }
   }
 
+  // Permission request + scan are combined here so the permission dialog
+  // is always triggered by a direct user tap on "Scan for Printers" —
+  // never on tab switch (which is not a direct user gesture on Android 15).
   async function handleStartScan() {
     if (!canUseNativePrinters()) {
       setPrinterMessage("Bluetooth scan is only available inside the Android app.");
       return;
     }
+
     setPrinterMessage("");
     setScanResults([]);
     setScanActive(true);
@@ -121,7 +124,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       if (!permission.granted) {
         setScanActive(false);
         setNeedsPermissionHelp(true);
-        setPrinterMessage("Bluetooth permission is required to scan for printers.");
+        setPrinterMessage("Bluetooth permission is required to scan for printers. Tap the button below to open settings.");
         return;
       }
       setNeedsPermissionHelp(false);
@@ -179,14 +182,11 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     try {
       const response = await fetch("/api/settings", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
       });
 
       let payload = null;
-
       try {
         payload = await response.json();
       } catch {
@@ -223,39 +223,6 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       }
     };
   }, []);
-
-  // useEffect(() => {
-  //   if (!nativeReady) {
-  //     return;
-  //   }
-
-  //   let cancelled = false;
-
-  //   async function ensurePrinterPermissionsOnLoad() {
-  //     try {
-  //       const permission = await requestBluetoothAllPermissions();
-  //       if (!cancelled && !permission.granted) {
-  //         setNeedsPermissionHelp(true);
-  //         setPrinterMessage("Allow Nearby devices permission to manage Bluetooth printers.");
-  //         return;
-  //       }
-  //       if (!cancelled) {
-  //         setNeedsPermissionHelp(false);
-  //       }
-  //     } catch (error) {
-  //       if (!cancelled) {
-  //         setNeedsPermissionHelp(true);
-  //         setPrinterMessage(`Could not request Bluetooth permission: ${error.message}`);
-  //       }
-  //     }
-  //   }
-
-  //   void ensurePrinterPermissionsOnLoad();
-
-  //   return () => {
-  //     cancelled = true;
-  //   };
-  // }, [nativeReady]);
 
   return (
     <form onSubmit={handleSave} className="glass-panel rounded-[32px] border border-white/5 p-6">
@@ -330,6 +297,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             <p className="text-sm text-white/50">{preferredLabel}</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
+            {/* "Choose Printer" — triggers permission + load on click */}
             <Button
               type="button"
               variant={printerTab === "choose" ? "secondary" : "ghost"}
@@ -340,18 +308,18 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             >
               Choose Printer
             </Button>
+
+            {/* "Add New Printer" — only switches the tab, NO permission call here.
+                The permission is requested when the user taps "Scan for Printers",
+                which is an explicit user gesture that Android 15 requires. */}
             <Button
               type="button"
               variant={printerTab === "add" ? "secondary" : "ghost"}
-              onClick={async () => {
+              onClick={() => {
                 setPrinterTab("add");
-                const permission = await requestBluetoothAllPermissions();
-                if (!permission.granted) {
-                  setNeedsPermissionHelp(true);
-                  setPrinterMessage("Bluetooth permission is required to scan for printers.");
-                  return;
-                }
+                setPrinterMessage("");
                 setNeedsPermissionHelp(false);
+                setScanResults([]);
               }}
             >
               Add New Printer
@@ -484,7 +452,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
           <div className="mt-4 space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-white/60">
-                Allow Bluetooth, then scan for nearby printers to add them.
+                Tap Scan to find nearby Bluetooth printers. You will be asked to allow Bluetooth access.
               </p>
               <Button
                 type="button"
@@ -521,7 +489,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
               </div>
             ) : (
               <p className="text-sm text-white/55">
-                {scanActive ? "Scanning for nearby Bluetooth printers..." : "No printers found yet. Start a scan."}
+                {scanActive ? "Scanning for nearby Bluetooth printers..." : "No printers found yet. Tap Scan for Printers to start."}
               </p>
             )}
           </div>
@@ -534,6 +502,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
           <Button
             type="button"
             variant="secondary"
+            className="mt-2"
             onClick={async () => {
               try {
                 await openBluetoothPermissionSettings();
