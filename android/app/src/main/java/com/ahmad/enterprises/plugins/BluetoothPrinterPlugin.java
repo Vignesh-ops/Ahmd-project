@@ -115,25 +115,27 @@ public class BluetoothPrinterPlugin extends Plugin {
         }
     }
 
-    @PluginMethod
-    public void requestScanPermissions(PluginCall call) {
-        if (hasScanPermission()) {
-            call.resolve(permissionStatesToJs());
-            return;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!hasConnectPermission()) {
-                requestPermissionForAlias("bluetoothConnect", call, "onConnectForScanResult");
-            } else {
-                requestPermissionForAlias("bluetoothScan", call, "permissionRequestCallback");
-            }
-        } else {
-            requestPermissionForAliases(
-                new String[]{ "bluetoothLegacy", "location" },
-                call, "permissionRequestCallback"
-            );
-        }
+@PluginMethod
+public void requestScanPermissions(PluginCall call) {
+    if (hasScanPermission()) {
+        call.resolve(permissionStatesToJs());
+        return;
     }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        requestPermissionForAliases(
+            new String[] { "bluetoothScan", "bluetoothConnect" },
+            call,
+            "permissionRequestCallback"
+        );
+    } else {
+        requestPermissionForAliases(
+            new String[] { "bluetoothLegacy", "location" },
+            call,
+            "permissionRequestCallback"
+        );
+    }
+}
 
     @PermissionCallback
     @Keep
@@ -206,9 +208,11 @@ public class BluetoothPrinterPlugin extends Plugin {
         try {
             if (adapter == null)       { call.reject("Bluetooth not available"); return; }
             if (!hasScanPermission()) {
-            call.reject("Bluetooth permission denied. Please grant Nearby Devices permission.");
-            return;
-           }
+    JSObject result = new JSObject();
+    result.put("error", "permission_denied");
+    call.resolve(result);
+    return;
+}
             if (!adapter.isEnabled())  { call.reject("Bluetooth is disabled"); return; }
 
             stopDiscoveryInternal();

@@ -49,10 +49,10 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       if (!silent) setPrinterMessage("Printer setup is only available inside the Android app.");
       return;
     }
-  
+
     try {
       const connectPermission = await requestBluetoothConnectPermissions();
-  
+
       if (!connectPermission?.granted) {
         setNeedsPermissionHelp(true);
         if (!silent) {
@@ -61,11 +61,11 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         setAvailablePrinters((current) => ({ ...current, bluetooth: [] }));
         return;
       }
-  
+
       const data = await getAvailablePrinters();
       setAvailablePrinters(data);
       setNeedsPermissionHelp(false);
-  
+
       if (!silent && !data.preferred) {
         setPrinterMessage("Choose a printer to make it the default for all prints.");
       }
@@ -73,7 +73,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       setPrinterMessage(`Could not load printers: ${error.message}`);
     }
   }
- 
+
   async function handleSelectPreferred(printer) {
     try {
       setPrinterLoading(getPrinterKey(printer));
@@ -156,18 +156,18 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
 
   async function handleAddPrinter(device) {
     if (!device?.address) return;
-  
+
     try {
       setPrinterLoading(`add-${device.address}`);
       setPrinterMessage("");
-  
+
       const permission = await requestBluetoothConnectPermissions();
       if (!permission?.granted) {
         setNeedsPermissionHelp(true);
         setPrinterMessage("Bluetooth permission is required before pairing.");
         return;
       }
-  
+
       await pairBluetoothPrinter(device.address);
       await refreshPrinters(true);
       setPrinterMessage(`${device.name || "Printer"} paired. Choose it in the list to set preferred.`);
@@ -238,17 +238,17 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     setPrinterMessage("");
     setScanResults([]);
     setScanActive(true);
-  
+
     try {
       if (discoveryRef.current) {
         await discoveryRef.current.remove();
         discoveryRef.current = null;
       }
-  
+
       discoveryRef.current = await startBluetoothDiscovery({
         onDeviceFound: (device) => {
           if (!device?.address) return;
-  
+
           setScanResults((current) => {
             if (current.some((item) => item.address === device.address)) return current;
             return [...current, device];
@@ -269,22 +269,22 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       setPrinterMessage("Bluetooth scan is only available inside the Android app.");
       return;
     }
-  
+
     setPrinterTab("add");
     setPrinterMessage("");
     setScanResults([]);
     setScanActive(false);
     setNeedsPermissionHelp(false);
-  
+
     const permission = await requestBluetoothScanPermissions();
-  
+
     // 🔥 KEY CHANGE
     if (!permission?.granted) {
       setNeedsPermissionHelp(true);
       setPrinterMessage("Please allow Nearby devices permission.");
       return;
     }
-  
+
     // 🔥 ADD DELAY (CRITICAL FOR ANDROID 14/15)
     setTimeout(() => {
       startScanAfterPermission();
@@ -379,7 +379,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             {/* "Add New Printer" — only switches the tab, NO permission call here.
                 The permission is requested when the user taps "Scan for Printers",
                 which is an explicit user gesture that Android 15 requires. */}
-            {/* <Button
+            <Button
               type="button"
               variant={printerTab === "add" ? "secondary" : "ghost"}
               onClick={() => {
@@ -389,16 +389,16 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
                 setScanResults([]);
               }}
             >
-              Add New Printer
-            </Button> */}
+              Add New Printer old
+            </Button>
 
-<Button
-  type="button"
-  variant={printerTab === "add" ? "secondary" : "ghost"}
-  onClick={handleAddPrinterClick}
->
-  Add New Printer
-</Button>
+            <Button
+              type="button"
+              variant={printerTab === "add" ? "secondary" : "ghost"}
+              onClick={handleAddPrinterClick}
+            >
+              Add New Printer
+            </Button>
           </div>
         </div>
 
