@@ -224,38 +224,38 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!nativeReady) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!nativeReady) {
+  //     return;
+  //   }
 
-    let cancelled = false;
+  //   let cancelled = false;
 
-    async function ensurePrinterPermissionsOnLoad() {
-      try {
-        const permission = await requestBluetoothAllPermissions();
-        if (!cancelled && !permission.granted) {
-          setNeedsPermissionHelp(true);
-          setPrinterMessage("Allow Nearby devices permission to manage Bluetooth printers.");
-          return;
-        }
-        if (!cancelled) {
-          setNeedsPermissionHelp(false);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setNeedsPermissionHelp(true);
-          setPrinterMessage(`Could not request Bluetooth permission: ${error.message}`);
-        }
-      }
-    }
+  //   async function ensurePrinterPermissionsOnLoad() {
+  //     try {
+  //       const permission = await requestBluetoothAllPermissions();
+  //       if (!cancelled && !permission.granted) {
+  //         setNeedsPermissionHelp(true);
+  //         setPrinterMessage("Allow Nearby devices permission to manage Bluetooth printers.");
+  //         return;
+  //       }
+  //       if (!cancelled) {
+  //         setNeedsPermissionHelp(false);
+  //       }
+  //     } catch (error) {
+  //       if (!cancelled) {
+  //         setNeedsPermissionHelp(true);
+  //         setPrinterMessage(`Could not request Bluetooth permission: ${error.message}`);
+  //       }
+  //     }
+  //   }
 
-    void ensurePrinterPermissionsOnLoad();
+  //   void ensurePrinterPermissionsOnLoad();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [nativeReady]);
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [nativeReady]);
 
   return (
     <form onSubmit={handleSave} className="glass-panel rounded-[32px] border border-white/5 p-6">
