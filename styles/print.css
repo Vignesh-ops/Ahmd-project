@@ -1,4 +1,4 @@
- /* .admin-print-area {
+ .admin-print-area {
   display: none;
  }
 
@@ -104,4 +104,4 @@
   .admin-print-table tr {
     page-break-inside: avoid;
   }
-} */
+}
