@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
+@Keep
 @CapacitorPlugin(
     name = "BluetoothPrinter",
     permissions = {

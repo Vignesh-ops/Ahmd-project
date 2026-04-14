@@ -25,7 +25,7 @@ export default function Navbar({ user }) {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/5 bg-dark-base/85 backdrop-blur-xl">
+    <header className="sticky top-15 z-30 border-b border-white/5 bg-dark-base/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <AppLink href="/" prefetch={false} className="flex min-w-0 items-center gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/30 bg-white/95 shadow-[0_0_0_4px_rgba(212,168,67,0.08)] sm:h-14 sm:w-14">

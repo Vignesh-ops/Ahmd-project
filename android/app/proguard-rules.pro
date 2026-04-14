@@ -1,24 +1,26 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Keep all Capacitor core classes
+-keep class com.getcapacitor.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-# Keep custom Capacitor plugins and callback methods used via string lookup.
+# Keep your custom plugin (IMPORTANT)
 -keep class com.ahmad.enterprises.plugins.** { *; }
+
+# Keep all methods annotated with @PluginMethod
+-keepclassmembers class * {
+    @com.getcapacitor.annotation.PluginMethod <methods>;
+}
+
+# Keep Capacitor plugin annotations
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+
+# Keep annotation metadata (VERY IMPORTANT)
+-keepattributes *Annotation*
+
+# Keep reflection-used methods (extra safety)
+-keepclassmembers class * {
+    public *;
+}
+
+# Prevent stripping of JS bridge calls
+-keepclassmembers class com.getcapacitor.Plugin {
+    public *;
+}
