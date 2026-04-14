@@ -379,7 +379,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             {/* "Add New Printer" — only switches the tab, NO permission call here.
                 The permission is requested when the user taps "Scan for Printers",
                 which is an explicit user gesture that Android 15 requires. */}
-            <Button
+            {/* <Button
               type="button"
               variant={printerTab === "add" ? "secondary" : "ghost"}
               onClick={() => {
@@ -390,7 +390,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
               }}
             >
               Add New Printer old
-            </Button>
+            </Button> */}
 
             <Button
               type="button"
