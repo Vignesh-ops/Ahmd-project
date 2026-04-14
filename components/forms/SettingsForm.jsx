@@ -46,14 +46,14 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
   async function refreshPrinters(silent = false) {
     if (!canUseNativePrinters()) {
       setAvailablePrinters({ bluetooth: [], usb: [], preferred: null });
-      if (!silent) {
-        setPrinterMessage("Printer setup is only available inside the Android app.");
-      }
+      if (!silent) setPrinterMessage("Printer setup is only available inside the Android app.");
       return;
     }
+  
     try {
       const connectPermission = await requestBluetoothConnectPermissions();
-      if (!connectPermission.granted) {
+  
+      if (!connectPermission?.granted) {
         setNeedsPermissionHelp(true);
         if (!silent) {
           setPrinterMessage("Bluetooth permission is required to list paired printers.");
@@ -61,19 +61,49 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
         setAvailablePrinters((current) => ({ ...current, bluetooth: [] }));
         return;
       }
-
+  
       const data = await getAvailablePrinters();
       setAvailablePrinters(data);
       setNeedsPermissionHelp(false);
+  
       if (!silent && !data.preferred) {
         setPrinterMessage("Choose a printer to make it the default for all prints.");
       }
     } catch (error) {
-      if (!silent) {
-        setPrinterMessage(`Could not load printers: ${error.message}`);
-      }
+      setPrinterMessage(`Could not load printers: ${error.message}`);
     }
   }
+  // async function refreshPrinters(silent = false) {
+  //   if (!canUseNativePrinters()) {
+  //     setAvailablePrinters({ bluetooth: [], usb: [], preferred: null });
+  //     if (!silent) {
+  //       setPrinterMessage("Printer setup is only available inside the Android app.");
+  //     }
+  //     return;
+  //   }
+  //   try {
+  //     const connectPermission = await requestBluetoothConnectPermissions();
+  //     if (!connectPermission.granted) {
+  //       setNeedsPermissionHelp(true);
+  //       if (!silent) {
+  //         setPrinterMessage("Bluetooth permission is required to list paired printers.");
+  //       }
+  //       setAvailablePrinters((current) => ({ ...current, bluetooth: [] }));
+  //       return;
+  //     }
+
+  //     const data = await getAvailablePrinters();
+  //     setAvailablePrinters(data);
+  //     setNeedsPermissionHelp(false);
+  //     if (!silent && !data.preferred) {
+  //       setPrinterMessage("Choose a printer to make it the default for all prints.");
+  //     }
+  //   } catch (error) {
+  //     if (!silent) {
+  //       setPrinterMessage(`Could not load printers: ${error.message}`);
+  //     }
+  //   }
+  // }
 
   async function handleSelectPreferred(printer) {
     try {
@@ -154,10 +184,34 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     }
   }
 
+  // async function handleAddPrinter(device) {
+  //   try {
+  //     setPrinterLoading(`add-${device.address}`);
+  //     setPrinterMessage("");
+  //     await pairBluetoothPrinter(device.address);
+  //     await refreshPrinters(true);
+  //     setPrinterMessage(`${device.name || "Printer"} paired. Choose it in the list to set preferred.`);
+  //   } catch (error) {
+  //     setPrinterMessage(`Could not pair printer: ${error.message}`);
+  //   } finally {
+  //     setPrinterLoading("");
+  //   }
+  // }
+
   async function handleAddPrinter(device) {
+    if (!device?.address) return;
+  
     try {
       setPrinterLoading(`add-${device.address}`);
       setPrinterMessage("");
+  
+      const permission = await requestBluetoothConnectPermissions();
+      if (!permission?.granted) {
+        setNeedsPermissionHelp(true);
+        setPrinterMessage("Bluetooth permission is required before pairing.");
+        return;
+      }
+  
       await pairBluetoothPrinter(device.address);
       await refreshPrinters(true);
       setPrinterMessage(`${device.name || "Printer"} paired. Choose it in the list to set preferred.`);
@@ -223,6 +277,66 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       }
     };
   }, []);
+
+  async function startScanAfterPermission() {
+    setPrinterMessage("");
+    setScanResults([]);
+    setScanActive(true);
+  
+    try {
+      if (discoveryRef.current) {
+        await discoveryRef.current.remove();
+        discoveryRef.current = null;
+      }
+  
+      discoveryRef.current = await startBluetoothDiscovery({
+        onDeviceFound: (device) => {
+          if (!device?.address) return;
+  
+          setScanResults((current) => {
+            if (current.some((item) => item.address === device.address)) return current;
+            return [...current, device];
+          });
+        },
+        onFinished: () => {
+          setScanActive(false);
+        },
+      });
+    } catch (error) {
+      setScanActive(false);
+      setPrinterMessage(`Bluetooth scan failed: ${error.message}`);
+    }
+  }
+
+  async function handleAddPrinterClick() {
+    if (!canUseNativePrinters()) {
+      setPrinterMessage("Bluetooth scan is only available inside the Android app.");
+      return;
+    }
+  
+    setPrinterTab("add");
+    setPrinterMessage("");
+    setScanResults([]);
+    setScanActive(false);
+    setNeedsPermissionHelp(false);
+  
+    try {
+      const permission = await requestBluetoothScanPermissions();
+  
+      if (!permission?.granted) {
+        setNeedsPermissionHelp(true);
+        setPrinterMessage(
+          "Bluetooth permission is required to scan for printers. Please allow Nearby devices."
+        );
+        return;
+      }
+  
+      await startScanAfterPermission();
+    } catch (error) {
+      setScanActive(false);
+      setPrinterMessage(`Bluetooth permission request failed: ${error.message}`);
+    }
+  }
 
   return (
     <form onSubmit={handleSave} className="glass-panel rounded-[32px] border border-white/5 p-6">
@@ -312,7 +426,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             {/* "Add New Printer" — only switches the tab, NO permission call here.
                 The permission is requested when the user taps "Scan for Printers",
                 which is an explicit user gesture that Android 15 requires. */}
-            <Button
+            {/* <Button
               type="button"
               variant={printerTab === "add" ? "secondary" : "ghost"}
               onClick={() => {
@@ -323,7 +437,15 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
               }}
             >
               Add New Printer
-            </Button>
+            </Button> */}
+
+<Button
+  type="button"
+  variant={printerTab === "add" ? "secondary" : "ghost"}
+  onClick={handleAddPrinterClick}
+>
+  Add New Printer
+</Button>
           </div>
         </div>
 
