@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep custom Capacitor plugins and callback methods used via string lookup.
+-keep class com.ahmad.enterprises.plugins.** { *; }

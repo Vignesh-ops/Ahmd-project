@@ -12,6 +12,8 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.util.Base64;
 
+import androidx.annotation.Keep;
+
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
@@ -57,32 +59,40 @@ public class BluetoothPrinterPlugin extends Plugin {
 
     @PluginMethod
     public void requestScanPermissions(PluginCall call) {
-        if (hasScanPermission()) {
-            call.resolve(permissionStatesToJs());
-            return;
-        }
+        try {
+            if (hasScanPermission()) {
+                call.resolve(permissionStatesToJs());
+                return;
+            }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requestPermissionForAliases(new String[] { "bluetoothScan", "bluetoothConnect" }, call, "permissionRequestCallback");
-            return;
-        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                requestPermissionForAliases(new String[] { "bluetoothScan", "bluetoothConnect" }, call, "permissionRequestCallback");
+                return;
+            }
 
-        requestPermissionForAliases(new String[] { "bluetoothLegacy", "location" }, call, "permissionRequestCallback");
+            requestPermissionForAliases(new String[] { "bluetoothLegacy", "location" }, call, "permissionRequestCallback");
+        } catch (Exception error) {
+            call.reject("Failed to request Bluetooth scan permissions.", error);
+        }
     }
 
     @PluginMethod
     public void requestConnectPermissions(PluginCall call) {
-        if (hasConnectPermission()) {
-            call.resolve(permissionStatesToJs());
-            return;
-        }
+        try {
+            if (hasConnectPermission()) {
+                call.resolve(permissionStatesToJs());
+                return;
+            }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requestPermissionForAlias("bluetoothConnect", call, "permissionRequestCallback");
-            return;
-        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                requestPermissionForAlias("bluetoothConnect", call, "permissionRequestCallback");
+                return;
+            }
 
-        requestPermissionForAlias("bluetoothLegacy", call, "permissionRequestCallback");
+            requestPermissionForAlias("bluetoothLegacy", call, "permissionRequestCallback");
+        } catch (Exception error) {
+            call.reject("Failed to request Bluetooth connect permissions.", error);
+        }
     }
 
     @PluginMethod
@@ -127,44 +137,59 @@ public class BluetoothPrinterPlugin extends Plugin {
 
     @PluginMethod
     public void startDiscovery(PluginCall call) {
-        if (adapter == null) {
-            call.reject("Bluetooth not available");
-            return;
-        }
-        if (!hasScanPermission()) {
-            call.reject("Bluetooth permission denied");
-            return;
-        }
-        if (!adapter.isEnabled()) {
-            call.reject("Bluetooth is disabled");
-            return;
-        }
-
-        stopDiscoveryInternal();
-        discoveryReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    if (device != null) {
-                        notifyListeners("deviceFound", deviceToJs(device));
-                    }
-                    return;
-                }
-                if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    notifyListeners("discoveryFinished", new JSObject());
-                }
+        try {
+            if (adapter == null) {
+                call.reject("Bluetooth not available");
+                return;
             }
-        };
+            if (!hasScanPermission()) {
+                call.reject("Bluetooth permission denied");
+                return;
+            }
+            if (!adapter.isEnabled()) {
+                call.reject("Bluetooth is disabled");
+                return;
+            }
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        getContext().registerReceiver(discoveryReceiver, filter);
+            stopDiscoveryInternal();
+            discoveryReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                        if (device != null) {
+                            notifyListeners("deviceFound", deviceToJs(device));
+                        }
+                        return;
+                    }
+                    if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                        notifyListeners("discoveryFinished", new JSObject());
+                    }
+                }
+            };
 
-        adapter.startDiscovery();
-        call.resolve();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BluetoothDevice.ACTION_FOUND);
+            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                getContext().registerReceiver(discoveryReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                getContext().registerReceiver(discoveryReceiver, filter);
+            }
+
+            boolean started = adapter.startDiscovery();
+            if (!started) {
+                call.reject("Bluetooth discovery could not start.");
+                return;
+            }
+
+            call.resolve();
+        } catch (Exception error) {
+            stopDiscoveryInternal();
+            call.reject("Failed to start Bluetooth discovery.", error);
+        }
     }
 
     @PluginMethod
@@ -175,30 +200,34 @@ public class BluetoothPrinterPlugin extends Plugin {
 
     @PluginMethod
     public void pair(PluginCall call) {
-        if (adapter == null) {
-            call.reject("Bluetooth not available");
-            return;
-        }
-        if (!hasConnectPermission()) {
-            call.reject("Bluetooth permission denied");
-            return;
-        }
-        if (!adapter.isEnabled()) {
-            call.reject("Bluetooth is disabled");
-            return;
-        }
+        try {
+            if (adapter == null) {
+                call.reject("Bluetooth not available");
+                return;
+            }
+            if (!hasConnectPermission()) {
+                call.reject("Bluetooth permission denied");
+                return;
+            }
+            if (!adapter.isEnabled()) {
+                call.reject("Bluetooth is disabled");
+                return;
+            }
 
-        String address = call.getString("address", "");
-        if (address.isEmpty()) {
-            call.reject("Missing address");
-            return;
-        }
+            String address = call.getString("address", "");
+            if (address.isEmpty()) {
+                call.reject("Missing address");
+                return;
+            }
 
-        BluetoothDevice device = adapter.getRemoteDevice(address);
-        boolean started = device.createBond();
-        JSObject result = new JSObject();
-        result.put("started", started);
-        call.resolve(result);
+            BluetoothDevice device = adapter.getRemoteDevice(address);
+            boolean started = device.createBond();
+            JSObject result = new JSObject();
+            result.put("started", started);
+            call.resolve(result);
+        } catch (Exception error) {
+            call.reject("Failed to pair Bluetooth printer.", error);
+        }
     }
 
     @PluginMethod
@@ -305,7 +334,8 @@ public class BluetoothPrinterPlugin extends Plugin {
     }
 
     @PermissionCallback
-    private void permissionRequestCallback(PluginCall call) {
+    @Keep
+    public void permissionRequestCallback(PluginCall call) {
         call.resolve(permissionStatesToJs());
     }
 
@@ -330,7 +360,7 @@ public class BluetoothPrinterPlugin extends Plugin {
     private JSObject permissionStatesToJs() {
         JSObject result = new JSObject();
         for (Map.Entry<String, PermissionState> entry : getPermissionStates().entrySet()) {
-            result.put(entry.getKey(), entry.getValue());
+            result.put(entry.getKey(), entry.getValue() != null ? entry.getValue().toString().toLowerCase() : "prompt");
         }
         return result;
     }
@@ -381,9 +411,21 @@ public class BluetoothPrinterPlugin extends Plugin {
 
     private JSObject deviceToJs(BluetoothDevice device) {
         JSObject data = new JSObject();
-        data.put("name", device.getName() != null ? device.getName() : "");
-        data.put("address", device.getAddress());
-        data.put("bonded", device.getBondState() == BluetoothDevice.BOND_BONDED);
+        try {
+            data.put("name", device.getName() != null ? device.getName() : "");
+        } catch (SecurityException ignored) {
+            data.put("name", "");
+        }
+        try {
+            data.put("address", device.getAddress());
+        } catch (SecurityException ignored) {
+            data.put("address", "");
+        }
+        try {
+            data.put("bonded", device.getBondState() == BluetoothDevice.BOND_BONDED);
+        } catch (SecurityException ignored) {
+            data.put("bonded", false);
+        }
         return data;
     }
 }
