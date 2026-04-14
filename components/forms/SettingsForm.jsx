@@ -73,38 +73,7 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
       setPrinterMessage(`Could not load printers: ${error.message}`);
     }
   }
-  // async function refreshPrinters(silent = false) {
-  //   if (!canUseNativePrinters()) {
-  //     setAvailablePrinters({ bluetooth: [], usb: [], preferred: null });
-  //     if (!silent) {
-  //       setPrinterMessage("Printer setup is only available inside the Android app.");
-  //     }
-  //     return;
-  //   }
-  //   try {
-  //     const connectPermission = await requestBluetoothConnectPermissions();
-  //     if (!connectPermission.granted) {
-  //       setNeedsPermissionHelp(true);
-  //       if (!silent) {
-  //         setPrinterMessage("Bluetooth permission is required to list paired printers.");
-  //       }
-  //       setAvailablePrinters((current) => ({ ...current, bluetooth: [] }));
-  //       return;
-  //     }
-
-  //     const data = await getAvailablePrinters();
-  //     setAvailablePrinters(data);
-  //     setNeedsPermissionHelp(false);
-  //     if (!silent && !data.preferred) {
-  //       setPrinterMessage("Choose a printer to make it the default for all prints.");
-  //     }
-  //   } catch (error) {
-  //     if (!silent) {
-  //       setPrinterMessage(`Could not load printers: ${error.message}`);
-  //     }
-  //   }
-  // }
-
+ 
   async function handleSelectPreferred(printer) {
     try {
       setPrinterLoading(getPrinterKey(printer));
@@ -184,19 +153,6 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     }
   }
 
-  // async function handleAddPrinter(device) {
-  //   try {
-  //     setPrinterLoading(`add-${device.address}`);
-  //     setPrinterMessage("");
-  //     await pairBluetoothPrinter(device.address);
-  //     await refreshPrinters(true);
-  //     setPrinterMessage(`${device.name || "Printer"} paired. Choose it in the list to set preferred.`);
-  //   } catch (error) {
-  //     setPrinterMessage(`Could not pair printer: ${error.message}`);
-  //   } finally {
-  //     setPrinterLoading("");
-  //   }
-  // }
 
   async function handleAddPrinter(device) {
     if (!device?.address) return;
@@ -320,22 +276,19 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     setScanActive(false);
     setNeedsPermissionHelp(false);
   
-    try {
-      const permission = await requestBluetoothScanPermissions();
+    const permission = await requestBluetoothScanPermissions();
   
-      if (!permission?.granted) {
-        setNeedsPermissionHelp(true);
-        setPrinterMessage(
-          "Bluetooth permission is required to scan for printers. Please allow Nearby devices."
-        );
-        return;
-      }
-  
-      await startScanAfterPermission();
-    } catch (error) {
-      setScanActive(false);
-      setPrinterMessage(`Bluetooth permission request failed: ${error.message}`);
+    // 🔥 KEY CHANGE
+    if (!permission?.granted) {
+      setNeedsPermissionHelp(true);
+      setPrinterMessage("Please allow Nearby devices permission.");
+      return;
     }
+  
+    // 🔥 ADD DELAY (CRITICAL FOR ANDROID 14/15)
+    setTimeout(() => {
+      startScanAfterPermission();
+    }, 300);
   }
 
   return (

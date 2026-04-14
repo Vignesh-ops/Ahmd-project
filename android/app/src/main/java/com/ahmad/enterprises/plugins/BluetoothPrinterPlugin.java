@@ -205,7 +205,10 @@ public class BluetoothPrinterPlugin extends Plugin {
     public void startDiscovery(PluginCall call) {
         try {
             if (adapter == null)       { call.reject("Bluetooth not available"); return; }
-            if (!hasScanPermission())  { call.reject("Bluetooth permission denied"); return; }
+            if (!hasScanPermission()) {
+            call.reject("Bluetooth permission denied. Please grant Nearby Devices permission.");
+            return;
+           }
             if (!adapter.isEnabled())  { call.reject("Bluetooth is disabled"); return; }
 
             stopDiscoveryInternal();
