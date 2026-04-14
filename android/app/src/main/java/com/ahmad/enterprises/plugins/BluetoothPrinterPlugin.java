@@ -9,14 +9,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Base64;
 
 import androidx.annotation.Keep;
+import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
-import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -24,7 +25,6 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 
-import java.util.Map;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
@@ -341,30 +341,33 @@ public class BluetoothPrinterPlugin extends Plugin {
 
     private boolean hasScanPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            return getPermissionState("bluetoothScan") == PermissionState.GRANTED
-                && getPermissionState("bluetoothConnect") == PermissionState.GRANTED;
+            return isPermissionGranted(Manifest.permission.BLUETOOTH_SCAN)
+                && isPermissionGranted(Manifest.permission.BLUETOOTH_CONNECT);
         }
 
-        return getPermissionState("bluetoothLegacy") == PermissionState.GRANTED
-            && getPermissionState("location") == PermissionState.GRANTED;
+        return isPermissionGranted(Manifest.permission.BLUETOOTH)
+            && isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
     private boolean hasConnectPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            return getPermissionState("bluetoothConnect") == PermissionState.GRANTED;
+            return isPermissionGranted(Manifest.permission.BLUETOOTH_CONNECT);
         }
 
-        return getPermissionState("bluetoothLegacy") == PermissionState.GRANTED;
+        return isPermissionGranted(Manifest.permission.BLUETOOTH);
     }
 
     private JSObject permissionStatesToJs() {
         JSObject result = new JSObject();
-        for (Map.Entry<String, PermissionState> entry : getPermissionStates().entrySet()) {
-            result.put(entry.getKey(), entry.getValue() != null ? entry.getValue().toString().toLowerCase() : "prompt");
-        }
         result.put("connectGranted", hasConnectPermission());
         result.put("scanGranted", hasScanPermission());
+        result.put("bluetoothConnect", hasConnectPermission() ? "granted" : "denied");
+        result.put("bluetoothScan", hasScanPermission() ? "granted" : "denied");
         return result;
+    }
+
+    private boolean isPermissionGranted(String permission) {
+        return ContextCompat.checkSelfPermission(getContext(), permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     private BluetoothSocket ensureConnectedSocket(String address, boolean forceReconnect) throws Exception {

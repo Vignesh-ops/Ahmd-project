@@ -217,6 +217,33 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!nativeReady) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function ensurePrinterPermissionsOnLoad() {
+      try {
+        const permission = await requestBluetoothConnectPermissions();
+        if (!cancelled && !permission.granted) {
+          setPrinterMessage("Allow Nearby devices permission to manage Bluetooth printers.");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPrinterMessage(`Could not request Bluetooth permission: ${error.message}`);
+        }
+      }
+    }
+
+    void ensurePrinterPermissionsOnLoad();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [nativeReady]);
+
   return (
     <form onSubmit={handleSave} className="glass-panel rounded-[32px] border border-white/5 p-6">
       <div className="mb-6">
@@ -303,7 +330,13 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
             <Button
               type="button"
               variant={printerTab === "add" ? "secondary" : "ghost"}
-              onClick={() => setPrinterTab("add")}
+              onClick={async () => {
+                setPrinterTab("add");
+                const permission = await requestBluetoothScanPermissions();
+                if (!permission.granted) {
+                  setPrinterMessage("Bluetooth permission is required to scan for printers.");
+                }
+              }}
             >
               Add New Printer
             </Button>
