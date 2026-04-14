@@ -362,6 +362,8 @@ public class BluetoothPrinterPlugin extends Plugin {
         for (Map.Entry<String, PermissionState> entry : getPermissionStates().entrySet()) {
             result.put(entry.getKey(), entry.getValue() != null ? entry.getValue().toString().toLowerCase() : "prompt");
         }
+        result.put("connectGranted", hasConnectPermission());
+        result.put("scanGranted", hasScanPermission());
         return result;
     }
 
