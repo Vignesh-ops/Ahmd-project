@@ -81,6 +81,14 @@ export async function POST(request) {
   const depositAmount = Number(body.depositAmount || 0);
   const rate = Number(body.rate || 0);
   const serviceCharge = Number(body.serviceCharge || 0);
+  const totalPayableAmount =
+    body.totalPayableAmount !== undefined
+      ? Number(body.totalPayableAmount)
+      : calculateTotalPayable({
+          depositAmount,
+          rate,
+          serviceCharge
+        });
 
   if (!senderName || !accountName || !accountNo || !bank || !senderMobile) {
     return badRequest("Please fill all required bank order fields.");
@@ -106,11 +114,9 @@ export async function POST(request) {
     return badRequest("Service charge must be zero or greater.");
   }
 
-  const totalPayableAmount = calculateTotalPayable({
-    depositAmount,
-    rate,
-    serviceCharge
-  });
+  if (!Number.isFinite(totalPayableAmount) || totalPayableAmount < 0) {
+    return badRequest("Total payable amount must be zero or greater.");
+  }
 
   const orderNo = await generateOrderNo("B", session.user.storeCode, prisma);
   const order = await prisma.bankOrder.create({

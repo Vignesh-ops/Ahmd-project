@@ -24,6 +24,11 @@ function getCountryDefaults(country, settings) {
 
 function buildInitialForm(orderNo, settings, country = 1) {
   const defaults = getCountryDefaults(country, settings);
+  const initialTotalPayableAmount = calculateTotalPayable({
+    depositAmount: "",
+    rate: defaults.rate,
+    serviceCharge: defaults.serviceCharge
+  });
 
   return {
     orderNo,
@@ -37,6 +42,7 @@ function buildInitialForm(orderNo, settings, country = 1) {
     depositAmount: "",
     rate: String(defaults.rate ?? ""),
     serviceCharge: String(defaults.serviceCharge ?? ""),
+    totalPayableAmount: initialTotalPayableAmount > 0 ? String(initialTotalPayableAmount) : "",
     senderMobile: "",
     notes: ""
   };
@@ -60,7 +66,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
   });
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
-  const totalPayableAmount = useMemo(
+  const calculatedTotalPayableAmount = useMemo(
     () =>
       calculateTotalPayable({
         depositAmount: form.depositAmount,
@@ -69,6 +75,10 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
       }),
     [form.depositAmount, form.rate, form.serviceCharge]
   );
+
+  function formatCalculatedTotalPayable(amount) {
+    return amount > 0 ? String(amount) : "";
+  }
 
   function updateField(name, value) {
     setSavedOrder(null);
@@ -86,16 +96,51 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
     updateField(name, normalized);
   }
 
+  function updatePricingField(name, value) {
+    const normalized = String(value).replace(/,/g, "");
+    if (!/^\d*\.?\d*$/.test(normalized)) {
+      return;
+    }
+
+    setSavedOrder(null);
+    setForm((current) => {
+      const nextForm = {
+        ...current,
+        [name]: normalized
+      };
+
+      return {
+        ...nextForm,
+        totalPayableAmount: formatCalculatedTotalPayable(
+          calculateTotalPayable({
+            depositAmount: nextForm.depositAmount,
+            rate: nextForm.rate,
+            serviceCharge: nextForm.serviceCharge
+          })
+        )
+      };
+    });
+  }
+
   function updateCountry(country) {
     const defaults = getCountryDefaults(country, settings);
 
     setSavedOrder(null);
-    setForm((current) => ({
-      ...current,
-      country,
-      rate: String(defaults.rate ?? ""),
-      serviceCharge: String(defaults.serviceCharge ?? "")
-    }));
+    setForm((current) => {
+      const nextTotalPayableAmount = calculateTotalPayable({
+        depositAmount: current.depositAmount,
+        rate: defaults.rate,
+        serviceCharge: defaults.serviceCharge
+      });
+
+      return {
+        ...current,
+        country,
+        rate: String(defaults.rate ?? ""),
+        serviceCharge: String(defaults.serviceCharge ?? ""),
+        totalPayableAmount: formatCalculatedTotalPayable(nextTotalPayableAmount)
+      };
+    });
   }
 
   function applyLookupSelection(selection, { preserveSenderName = true } = {}) {
@@ -119,7 +164,16 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
         branch: selection.data.branch || "",
         ifscCode: selection.data.ifscCode || "",
         rate: shouldSyncPricing ? String(nextDefaults.rate ?? "") : current.rate,
-        serviceCharge: shouldSyncPricing ? String(nextDefaults.serviceCharge ?? "") : current.serviceCharge
+        serviceCharge: shouldSyncPricing ? String(nextDefaults.serviceCharge ?? "") : current.serviceCharge,
+        totalPayableAmount: shouldSyncPricing
+          ? formatCalculatedTotalPayable(
+              calculateTotalPayable({
+                depositAmount: current.depositAmount,
+                rate: nextDefaults.rate,
+                serviceCharge: nextDefaults.serviceCharge
+              })
+            )
+          : current.totalPayableAmount
       };
     });
 
@@ -265,7 +319,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
       },
       body: JSON.stringify({
         ...form,
-        totalPayableAmount
+        totalPayableAmount: Number(form.totalPayableAmount || 0)
       })
     });
 
@@ -341,10 +395,10 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
   const displayDefaultServiceCharge = mounted
     ? formatNumber(selectedCountrySettings.serviceCharge, 5)
     : String(selectedCountrySettings.serviceCharge ?? "");
-  const displayCurrentPayable = totalPayableAmount
+  const displayCurrentPayable = calculatedTotalPayableAmount
     ? mounted
-      ? formatCurrency(totalPayableAmount, "MYR")
-      : String(totalPayableAmount)
+      ? formatCurrency(calculatedTotalPayableAmount, "MYR")
+      : String(calculatedTotalPayableAmount)
     : "-";
 
   return (
@@ -460,7 +514,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             prefix={form.country === 1 ? "Rp" : "₹"}
             placeholder="0"
             value={form.depositAmount}
-            onChange={(event) => updateDecimalField("depositAmount", event.target.value)}
+            onChange={(event) => updatePricingField("depositAmount", event.target.value)}
           />
 
           {form.country === 2 ? (
@@ -488,7 +542,7 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             inputMode="decimal"
             placeholder="0"
             value={form.rate}
-            onChange={(event) => updateDecimalField("rate", event.target.value)}
+            onChange={(event) => updatePricingField("rate", event.target.value)}
           />
           <Input
             label="Service Charge"
@@ -496,13 +550,16 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
             inputMode="decimal"
             placeholder="0"
             value={form.serviceCharge}
-            onChange={(event) => updateDecimalField("serviceCharge", event.target.value)}
+            onChange={(event) => updatePricingField("serviceCharge", event.target.value)}
           />
           <Input
             label="Total Payable Amount (RM)"
             hint="Calculated as deposit amount * rate + service charge"
-            value={totalPayableAmount ? formatCurrency(totalPayableAmount, "MYR") : ""}
-            readOnly
+            type="text"
+            inputMode="decimal"
+            placeholder="0"
+            value={form.totalPayableAmount}
+            onChange={(event) => updateDecimalField("totalPayableAmount", event.target.value)}
             className="md:col-span-2"
             inputClassName="font-semibold text-gold-light"
           />

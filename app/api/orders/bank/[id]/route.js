@@ -167,6 +167,16 @@ export async function PUT(request, { params }) {
     updates.serviceCharge = serviceCharge;
   }
 
+  if (body.totalPayableAmount !== undefined) {
+    const totalPayableAmount = Number(body.totalPayableAmount);
+
+    if (!Number.isFinite(totalPayableAmount) || totalPayableAmount < 0) {
+      return badRequest("Total payable amount must be zero or greater.");
+    }
+
+    updates.totalPayableAmount = totalPayableAmount;
+  }
+
   if (body.status !== undefined) {
     const status = cleanString(body.status);
 
@@ -177,7 +187,10 @@ export async function PUT(request, { params }) {
     updates.status = status;
   }
 
-  if (updates.depositAmount !== undefined || updates.rate !== undefined || updates.serviceCharge !== undefined) {
+  if (
+    updates.totalPayableAmount === undefined &&
+    (updates.depositAmount !== undefined || updates.rate !== undefined || updates.serviceCharge !== undefined)
+  ) {
     updates.totalPayableAmount = calculateTotalPayable({
       depositAmount: updates.depositAmount ?? existing.depositAmount,
       rate: updates.rate ?? existing.rate,
