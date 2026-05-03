@@ -68,6 +68,11 @@ export async function GET(request) {
   return NextResponse.json({
     totalToday: summary.totalOrders,
     bankToday: summary.totalOrders,
+    profitIDR: summary.profitIDR,
+    profitINR: summary.profitINR,
+    profitIDRMYR: summary.profitIDRMYR,
+    profitINRMYR: summary.profitINRMYR,
+    totalProfitMYR: summary.totalProfitMYR,
     byStore
   });
 }

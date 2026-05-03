@@ -88,9 +88,9 @@ export default async function DashboardPage({ searchParams }) {
             <h1 className="text-3xl font-semibold text-white">
               Hello, {session.user.role === "admin" ? "Admin" : session.user.storeName}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/55">
+            {/* <p className="mt-2 max-w-2xl text-sm text-white/55">
               Full activity snapshot across your remittance workflow, with quick access to new bank transfer orders.
-            </p>
+            </p> */}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <MonthFilter months={monthOptions} value={selectedMonth} />

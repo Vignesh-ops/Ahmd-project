@@ -29,6 +29,11 @@ export default function AdminDashboard({ stores }) {
   const [summary, setSummary] = useState({
     totalToday: 0,
     bankToday: 0,
+    profitIDR: 0,
+    profitINR: 0,
+    profitIDRMYR: 0,
+    profitINRMYR: 0,
+    totalProfitMYR: 0,
     byStore: []
   });
   const [orders, setOrders] = useState([]);
@@ -338,7 +343,18 @@ export default function AdminDashboard({ stores }) {
       <div className="admin-screen-only space-y-6">
         <div className="grid gap-4 md:grid-cols-3">
           <StatCard label="Total Orders Today" value={summary.totalToday} />
-          <StatCard label="Bank Transfers Today" value={summary.bankToday} accent="teal" />
+          <StatCard
+            label="Profit Today"
+            value={
+              <CurrencyPairSummary
+                idr={summary.profitIDR}
+                idrMyr={summary.profitIDRMYR}
+                inr={summary.profitINR}
+                inrMyr={summary.profitINRMYR}
+              />
+            }
+            accent="teal"
+          />
           <StatCard
             label="Filtered Volume"
             value={
