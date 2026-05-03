@@ -53,8 +53,9 @@ export default function BankReceipt({ order, autoPrint = false }) {
     try {
       setLoading("share");
       setMessage("");
-      const result = await shareViaWhatsApp(formatBankMessage(order));
+      const sharePromise = shareViaWhatsApp(formatBankMessage(order));
       await syncDoneStatus("shared");
+      const result = await sharePromise;
       if (result.returned) {
         setShowShareDialog(true);
       }

@@ -61,6 +61,15 @@ export default function AdminTable({ orders = [], onDelete, printMode = false })
                       >
                         View Receipt
                       </Button>
+                      {order.status === "pending" ? (
+                        <Button
+                          variant="secondary"
+                          className="px-3 py-2 text-xs"
+                          href={`/bank-order?edit=${order.id}`}
+                        >
+                          Edit
+                        </Button>
+                      ) : null}
                       <Button
                         variant="danger"
                         className="px-3 py-2 text-xs"

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, Landmark, RotateCcw, ShieldCheck } from "lucide-react";
+import { Calculator, Landmark, RotateCcw, Save, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
@@ -48,11 +48,37 @@ function buildInitialForm(orderNo, settings, country = 1) {
   };
 }
 
-export default function BankOrderForm({ initialOrderNo, settings }) {
+function buildFormFromOrder(order, settings) {
+  if (!order) {
+    return buildInitialForm("", settings);
+  }
+
+  return {
+    orderNo: order.orderNo,
+    country: Number(order.country || 1),
+    senderName: order.senderName || "",
+    accountName: order.accountName || "",
+    accountNo: order.accountNo || "",
+    bank: order.bank || "",
+    branch: order.branch || "",
+    ifscCode: order.ifscCode || "",
+    depositAmount: String(order.depositAmount ?? order.amount ?? ""),
+    rate: String(order.rate ?? ""),
+    serviceCharge: String(order.serviceCharge ?? ""),
+    totalPayableAmount: String(order.totalPayableAmount ?? ""),
+    senderMobile: order.senderMobile || "",
+    notes: order.notes || ""
+  };
+}
+
+export default function BankOrderForm({ initialOrderNo, settings, initialOrder = null }) {
   const router = useRouter();
+  const isEditing = Boolean(initialOrder);
   const [mounted, setMounted] = useState(false);
-  const [form, setForm] = useState(() => buildInitialForm(initialOrderNo, settings));
-  const [savedOrder, setSavedOrder] = useState(null);
+  const [form, setForm] = useState(() =>
+    initialOrder ? buildFormFromOrder(initialOrder, settings) : buildInitialForm(initialOrderNo, settings)
+  );
+  const [savedOrder, setSavedOrder] = useState(initialOrder);
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
   const [lookup, setLookup] = useState({
@@ -318,8 +344,8 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
   }
 
   async function persistOrder() {
-    const response = await fetch("/api/orders/bank", {
-      method: "POST",
+    const response = await fetch(isEditing ? `/api/orders/bank/${initialOrder.id}` : "/api/orders/bank", {
+      method: isEditing ? "PUT" : "POST",
       headers: {
         "Content-Type": "application/json"
       },
@@ -372,8 +398,9 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
       }
 
       if (intent === "share") {
-        await shareViaWhatsApp(formatBankMessage(order));
+        const sharePromise = shareViaWhatsApp(formatBankMessage(order));
         await syncDoneStatus(order, "shared");
+        await sharePromise;
         return;
       }
 
@@ -413,9 +440,13 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.24em] text-white/35">Bank Transfer</p>
-            <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">Create bank order</h1>
+            <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
+              {isEditing ? "Edit bank order" : "Create bank order"}
+            </h1>
             <p className="mt-2 max-w-2xl text-sm text-white/55">
-              Sender details, pricing, and receiver details are saved together, so repeated mobile numbers can prefill the form on the next order.
+              {isEditing
+                ? "Pending orders can be updated before they are shared or printed."
+                : "Sender details, pricing, and receiver details are saved together, so repeated mobile numbers can prefill the form on the next order."}
             </p>
           </div>
           <div className="w-full rounded-[28px] border border-gold/20 bg-gold/10 px-5 py-4 md:max-w-sm">
@@ -443,9 +474,11 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
               <Button variant="secondary" icon={ShieldCheck} href={`/receipt/${savedOrder.orderNo}`}>
                 Open Receipt
               </Button>
-              <Button variant="ghost" icon={RotateCcw} onClick={startNewOrder}>
-                Create Another
-              </Button>
+              {!isEditing ? (
+                <Button variant="ghost" icon={RotateCcw} onClick={startNewOrder}>
+                  Create Another
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>
@@ -585,12 +618,12 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
           <div className="flex flex-col gap-3 lg:flex-row">
             <Button
               type="button"
-              icon={Landmark}
+              icon={isEditing ? Save : Landmark}
               loading={loading === "save"}
               onClick={() => handleAction("save")}
               fullWidth
             >
-              Save Order
+              {isEditing ? "Update Order" : "Save Order"}
             </Button>
             {/* <Button
               type="button"
@@ -613,7 +646,12 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
               Print
             </Button> */}
           </div>
-          <p className="text-sm text-white/55">{message || "Save first to generate a permanent order and receipt."}</p>
+          <p className="text-sm text-white/55">
+            {message ||
+              (isEditing
+                ? "Update the pending order to refresh its receipt."
+                : "Save first to generate a permanent order and receipt.")}
+          </p>
         </div>
       </div>
 

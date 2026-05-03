@@ -5,12 +5,13 @@ import { Download, Printer } from "lucide-react";
 import AdminTable from "@/components/admin/AdminTable";
 import StoreFilter from "@/components/admin/StoreFilter";
 import Button from "@/components/ui/Button";
+import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
 import { exportXlsx } from "@/lib/client-export";
 import { printCurrentPage } from "@/lib/print";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatCurrencyPlain, formatDate } from "@/lib/utils";
 
 const typeOptions = [
   { label: "Bank Transfer", value: "bank" }
@@ -36,7 +37,9 @@ export default function AdminDashboard({ stores }) {
     bankOrders: 0,
     totalIDR: 0,
     totalINR: 0,
-    totalPayableMYR: 0
+    totalPayableMYR: 0,
+    totalPayableIDRMYR: 0,
+    totalPayableINRMYR: 0
   });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -112,7 +115,9 @@ export default function AdminDashboard({ stores }) {
           bankOrders: 0,
           totalIDR: 0,
           totalINR: 0,
-          totalPayableMYR: 0
+          totalPayableMYR: 0,
+          totalPayableIDRMYR: 0,
+          totalPayableINRMYR: 0
         });
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
@@ -138,7 +143,9 @@ export default function AdminDashboard({ stores }) {
   const filteredStats = useMemo(() => {
     return {
       idr: filteredSummary.totalIDR,
-      inr: filteredSummary.totalINR
+      inr: filteredSummary.totalINR,
+      idrMyr: filteredSummary.totalPayableIDRMYR,
+      inrMyr: filteredSummary.totalPayableINRMYR
     };
   }, [filteredSummary]);
 
@@ -217,7 +224,15 @@ export default function AdminDashboard({ stores }) {
       bankOrders: Math.max(0, current.bankOrders - 1),
       totalIDR: current.totalIDR - (order.currency === "IDR" ? Number(order.amount || 0) : 0),
       totalINR: current.totalINR - (order.currency === "INR" ? Number(order.amount || 0) : 0),
-      totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0))
+      totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0)),
+      totalPayableIDRMYR:
+        order.currency === "IDR"
+          ? Math.max(0, current.totalPayableIDRMYR - Number(order.totalPayableAmount || 0))
+          : current.totalPayableIDRMYR,
+      totalPayableINRMYR:
+        order.currency === "INR"
+          ? Math.max(0, current.totalPayableINRMYR - Number(order.totalPayableAmount || 0))
+          : current.totalPayableINRMYR
     }));
   }
   
@@ -307,7 +322,14 @@ export default function AdminDashboard({ stores }) {
           <StatCard label="Bank Transfers Today" value={summary.bankToday} accent="teal" />
           <StatCard
             label="Filtered Volume"
-            value={`${formatCurrency(filteredStats.idr, "IDR")} / ${formatCurrency(filteredStats.inr, "INR")}`}
+            value={
+              <CurrencyPairSummary
+                idr={filteredStats.idr}
+                idrMyr={filteredStats.idrMyr}
+                inr={filteredStats.inr}
+                inrMyr={filteredStats.inrMyr}
+              />
+            }
           />
         </div>
 
@@ -454,7 +476,8 @@ export default function AdminDashboard({ stores }) {
           <p>Date Range: {reportDateLabel}</p>
           <p>Status: {filters.status === "all" ? "All Statuses" : filters.status}</p>
           <p>
-            Volume: {formatCurrency(filteredStats.idr, "IDR")} / {formatCurrency(filteredStats.inr, "INR")}
+            Volume: {formatCurrency(filteredStats.idr, "IDR")} / {formatCurrencyPlain(filteredStats.idrMyr, "MYR")} |{" "}
+            {formatCurrencyPlain(filteredStats.inr, "INR")} / {formatCurrencyPlain(filteredStats.inrMyr, "MYR")}
           </p>
         </div>
 

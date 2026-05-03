@@ -1,11 +1,11 @@
 import { ArrowRight, Landmark } from "lucide-react";
 import AppLink from "@/components/navigation/AppLink";
 import Button from "@/components/ui/Button";
+import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import OrderCard from "@/components/ui/OrderCard";
 import StatCard from "@/components/ui/StatCard";
 import { getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
-import { formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -56,7 +56,14 @@ export default async function DashboardPage() {
         <StatCard label="Bank Transfers" value={summary.bankOrders} accent="teal" />
         <StatCard
           label="Total Amount"
-          value={`${formatCurrency(summary.totalIDR, "IDR")} / ${formatCurrency(summary.totalINR, "INR")}`}
+          value={
+            <CurrencyPairSummary
+              idr={summary.totalIDR}
+              idrMyr={summary.totalPayableIDRMYR}
+              inr={summary.totalINR}
+              inrMyr={summary.totalPayableINRMYR}
+            />
+          }
         />
       </section>
 
@@ -78,7 +85,13 @@ export default async function DashboardPage() {
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.18em] text-white/35">Amount</p>
               <p className="mt-2 text-lg font-semibold text-white">
-                {formatCurrency(todaySummary.totalIDR, "IDR")} / {formatCurrency(todaySummary.totalINR, "INR")}
+                <CurrencyPairSummary
+                  idr={todaySummary.totalIDR}
+                  idrMyr={todaySummary.totalPayableIDRMYR}
+                  inr={todaySummary.totalINR}
+                  inrMyr={todaySummary.totalPayableINRMYR}
+                  compact
+                />
               </p>
             </div>
           </div>
@@ -99,7 +112,16 @@ export default async function DashboardPage() {
 
         <div className="space-y-4">
           {recentOrders.map((order) => (
-            <OrderCard key={`${order.type}-${order.id}`} order={order} href={`/receipt/${order.orderNo}`} />
+            <OrderCard key={`${order.type}-${order.id}`} order={order}>
+              <Button variant="secondary" href={`/receipt/${order.orderNo}`}>
+                View Receipt
+              </Button>
+              {order.status === "pending" ? (
+                <Button variant="secondary" href={`/bank-order?edit=${order.id}`}>
+                  Edit
+                </Button>
+              ) : null}
+            </OrderCard>
           ))}
 
           {!recentOrders.length ? (

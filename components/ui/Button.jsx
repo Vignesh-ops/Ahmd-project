@@ -32,7 +32,7 @@ export default function Button({
 
   if (href) {
     return (
-      <AppLink href={href} className={classes}>
+      <AppLink href={href} className={classes} {...props}>
         {Icon ? <Icon className="h-4 w-4" /> : null}
         {children}
       </AppLink>

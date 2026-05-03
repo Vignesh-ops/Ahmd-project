@@ -82,6 +82,26 @@ export async function PUT(request, { params }) {
 
   const body = await request.json();
   const updates = {};
+  const editableFields = [
+    "senderName",
+    "accountName",
+    "accountNo",
+    "bank",
+    "branch",
+    "ifscCode",
+    "senderMobile",
+    "notes",
+    "country",
+    "depositAmount",
+    "rate",
+    "serviceCharge",
+    "totalPayableAmount"
+  ];
+  const hasEditableField = editableFields.some((field) => body[field] !== undefined);
+
+  if (hasEditableField && existing.status !== "pending") {
+    return badRequest("Only pending orders can be edited.");
+  }
 
   if (body.senderName !== undefined) {
     const senderName = cleanString(body.senderName);

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Button from "@/components/ui/Button";
+import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
 import OrderCard from "@/components/ui/OrderCard";
 import StatCard from "@/components/ui/StatCard";
@@ -39,7 +40,9 @@ export default function HistoryPage({
     bankOrders: 0,
     totalIDR: 0,
     totalINR: 0,
-    totalPayableMYR: 0
+    totalPayableMYR: 0,
+    totalPayableIDRMYR: 0,
+    totalPayableINRMYR: 0
   });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -80,7 +83,9 @@ export default function HistoryPage({
           bankOrders: 0,
           totalIDR: 0,
           totalINR: 0,
-          totalPayableMYR: 0
+          totalPayableMYR: 0,
+          totalPayableIDRMYR: 0,
+          totalPayableINRMYR: 0
         });
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
@@ -110,7 +115,9 @@ export default function HistoryPage({
       bank: summary.bankOrders,
       idr: summary.totalIDR,
       inr: summary.totalINR,
-      myrPayable: summary.totalPayableMYR
+      myrPayable: summary.totalPayableMYR,
+      idrMyr: summary.totalPayableIDRMYR,
+      inrMyr: summary.totalPayableINRMYR
     };
   }, [summary]);
 
@@ -169,7 +176,15 @@ export default function HistoryPage({
       bankOrders: Math.max(0, current.bankOrders - 1),
       totalIDR: current.totalIDR - (order.currency === "IDR" ? Number(order.amount || 0) : 0),
       totalINR: current.totalINR - (order.currency === "INR" ? Number(order.amount || 0) : 0),
-      totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0))
+      totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0)),
+      totalPayableIDRMYR:
+        order.currency === "IDR"
+          ? Math.max(0, current.totalPayableIDRMYR - Number(order.totalPayableAmount || 0))
+          : current.totalPayableIDRMYR,
+      totalPayableINRMYR:
+        order.currency === "INR"
+          ? Math.max(0, current.totalPayableINRMYR - Number(order.totalPayableAmount || 0))
+          : current.totalPayableINRMYR
     }));
   }
 
@@ -186,8 +201,9 @@ export default function HistoryPage({
   }
 
   async function handleShare(order) {
-    const result = await shareViaWhatsApp(getMessage(order));
+    const sharePromise = shareViaWhatsApp(getMessage(order));
     await syncDoneStatus(order, "shared");
+    const result = await sharePromise;
     if (result.returned) {
       setShareDialogOrderNo(order.orderNo);
     }
@@ -237,12 +253,13 @@ export default function HistoryPage({
         description={`If the message was sent successfully for order ${shareDialogOrderNo}, tap OK to continue.`}
         onClose={() => setShareDialogOrderNo("")}
       />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total Orders" value={stats.total} />
         <StatCard label="Bank Transfers" value={stats.bank} accent="teal" />
-        <StatCard label="IDR Volume" value={formatCurrency(stats.idr, "IDR")} />
-        <StatCard label="INR Volume" value={formatCurrency(stats.inr, "INR")} />
-        <StatCard label="Payable (RM)" value={formatCurrency(stats.myrPayable, "MYR")} />
+        <StatCard
+          label="Total Amount"
+          value={<CurrencyPairSummary idr={stats.idr} idrMyr={stats.idrMyr} inr={stats.inr} inrMyr={stats.inrMyr} />}
+        />
       </div>
 
       {isAdmin && initialStoreCode !== "all" ? (
@@ -330,6 +347,15 @@ export default function HistoryPage({
                 >
                   Print
                 </Button>
+                {order.status === "pending" ? (
+                  <Button
+                    variant="secondary"
+                    href={`/bank-order?edit=${order.id}`}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    Edit
+                  </Button>
+                ) : null}
                 <Button
                   variant="danger"
                   onClick={(event) => {
@@ -446,6 +472,11 @@ export default function HistoryPage({
               <Button variant="secondary" onClick={() => handlePrint(selectedOrder)}>
                 Print
               </Button>
+              {selectedOrder.status === "pending" ? (
+                <Button variant="secondary" href={`/bank-order?edit=${selectedOrder.id}`}>
+                  Edit
+                </Button>
+              ) : null}
               <Button variant="ghost" onClick={() => setSelectedOrder(null)}>
                 Close
               </Button>
