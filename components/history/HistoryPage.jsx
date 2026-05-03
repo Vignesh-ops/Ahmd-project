@@ -11,7 +11,7 @@ import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { markOrderDone } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { openInAppOrTab } from "@/lib/native";
-import { formatCurrency } from "@/lib/utils";
+import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import InfoDialog from "@/components/ui/InfoDialog";
 
@@ -43,7 +43,12 @@ export default function HistoryPage({
     totalINR: 0,
     totalPayableMYR: 0,
     totalPayableIDRMYR: 0,
-    totalPayableINRMYR: 0
+    totalPayableINRMYR: 0,
+    profitIDR: 0,
+    profitINR: 0,
+    profitIDRMYR: 0,
+    profitINRMYR: 0,
+    totalProfitMYR: 0
   });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -86,7 +91,12 @@ export default function HistoryPage({
           totalINR: 0,
           totalPayableMYR: 0,
           totalPayableIDRMYR: 0,
-          totalPayableINRMYR: 0
+          totalPayableINRMYR: 0,
+          profitIDR: 0,
+          profitINR: 0,
+          profitIDRMYR: 0,
+          profitINRMYR: 0,
+          totalProfitMYR: 0
         });
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
@@ -118,7 +128,11 @@ export default function HistoryPage({
       inr: summary.totalINR,
       myrPayable: summary.totalPayableMYR,
       idrMyr: summary.totalPayableIDRMYR,
-      inrMyr: summary.totalPayableINRMYR
+      inrMyr: summary.totalPayableINRMYR,
+      profitIDR: summary.profitIDR,
+      profitINR: summary.profitINR,
+      profitIDRMYR: summary.profitIDRMYR,
+      profitINRMYR: summary.profitINRMYR
     };
   }, [summary]);
 
@@ -169,6 +183,8 @@ export default function HistoryPage({
   }
 
   function removeOrderFromLocalState(order) {
+    const profitMYR = calculateProfitMYR(order);
+
     setOrders((current) => current.filter((item) => !(item.type === order.type && item.id === order.id)));
     setTotalCount((current) => Math.max(0, current - 1));
     setSummary((current) => ({
@@ -185,7 +201,14 @@ export default function HistoryPage({
       totalPayableINRMYR:
         order.currency === "INR"
           ? Math.max(0, current.totalPayableINRMYR - Number(order.totalPayableAmount || 0))
-          : current.totalPayableINRMYR
+          : current.totalPayableINRMYR,
+      totalProfitMYR: Math.max(0, current.totalProfitMYR - profitMYR),
+      profitIDR: order.currency === "IDR" ? Math.max(0, current.profitIDR - Number(order.serviceCharge || 0)) : current.profitIDR,
+      profitINR: order.currency === "INR" ? Math.max(0, current.profitINR - Number(order.serviceCharge || 0)) : current.profitINR,
+      profitIDRMYR:
+        order.currency === "IDR" ? Math.max(0, current.profitIDRMYR - profitMYR) : current.profitIDRMYR,
+      profitINRMYR:
+        order.currency === "INR" ? Math.max(0, current.profitINRMYR - profitMYR) : current.profitINRMYR
     }));
   }
 
@@ -256,7 +279,18 @@ export default function HistoryPage({
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total Orders" value={stats.total} />
-        <StatCard label="Bank Transfers" value={stats.bank} accent="teal" />
+        <StatCard
+          label="Profit"
+          value={
+            <CurrencyPairSummary
+              idr={stats.profitIDR}
+              idrMyr={stats.profitIDRMYR}
+              inr={stats.profitINR}
+              inrMyr={stats.profitINRMYR}
+            />
+          }
+          accent="teal"
+        />
         <StatCard
           label="Total Amount"
           value={<CurrencyPairSummary idr={stats.idr} idrMyr={stats.idrMyr} inr={stats.inr} inrMyr={stats.inrMyr} />}

@@ -1,20 +1,63 @@
 import { ArrowRight, Landmark } from "lucide-react";
+import MonthFilter from "@/components/dashboard/MonthFilter";
 import AppLink from "@/components/navigation/AppLink";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import OrderCard from "@/components/ui/OrderCard";
 import StatCard from "@/components/ui/StatCard";
-import { getCombinedOrders, getOrderSummary } from "@/lib/orders";
+import { getAvailableOrderMonths, getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function DashboardPage() {
+function getCurrentMonthValue() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function buildMonthRange(monthValue) {
+  const [yearValue, monthIndexValue] = String(monthValue || "").split("-");
+  const year = Number(yearValue);
+  const monthIndex = Number(monthIndexValue) - 1;
+
+  if (!Number.isInteger(year) || !Number.isInteger(monthIndex) || monthIndex < 0 || monthIndex > 11) {
+    return buildMonthRange(getCurrentMonthValue());
+  }
+
+  return {
+    from: new Date(year, monthIndex, 1),
+    to: new Date(year, monthIndex + 1, 0)
+  };
+}
+
+function ensureSelectedMonthOption(months, selectedMonth) {
+  if (months.some((month) => month.value === selectedMonth)) {
+    return months;
+  }
+
+  const { from } = buildMonthRange(selectedMonth);
+  const label = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric"
+  }).format(from);
+
+  return [{ value: selectedMonth, label }, ...months];
+}
+
+export default async function DashboardPage({ searchParams }) {
   const session = await requireSession();
-  const [summary, todaySummary, recentOrders] = await Promise.all([
+  const resolvedSearchParams = await searchParams;
+  const selectedMonth = resolvedSearchParams?.month || getCurrentMonthValue();
+  const monthRange = buildMonthRange(selectedMonth);
+  const monthFilters = {
+    from: monthRange.from,
+    to: monthRange.to
+  };
+  const [monthSummary, todaySummary, recentOrders, availableMonths] = await Promise.all([
     getOrderSummary({
-      sessionUser: session.user
+      sessionUser: session.user,
+      filters: monthFilters
     }),
     getOrderSummary({
       sessionUser: session.user,
@@ -25,10 +68,16 @@ export default async function DashboardPage() {
     getCombinedOrders({
       sessionUser: session.user,
       filters: {
+        ...monthFilters,
         limit: 5
       }
+    }),
+    getAvailableOrderMonths({
+      sessionUser: session.user
     })
   ]);
+  const monthOptions = ensureSelectedMonthOption(availableMonths, selectedMonth);
+  const selectedMonthLabel = monthOptions.find((month) => month.value === selectedMonth)?.label || "Selected Month";
 
   return (
     <div className="page-fade space-y-6">
@@ -44,27 +93,12 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
+            <MonthFilter months={monthOptions} value={selectedMonth} />
             <Button href="/bank-order" icon={Landmark}>
               New Bank Order
             </Button>
           </div>
         </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Total Orders" value={summary.totalOrders} />
-        <StatCard label="Bank Transfers" value={summary.bankOrders} accent="teal" />
-        <StatCard
-          label="Total Amount"
-          value={
-            <CurrencyPairSummary
-              idr={summary.totalIDR}
-              idrMyr={summary.totalPayableIDRMYR}
-              inr={summary.totalINR}
-              inrMyr={summary.totalPayableINRMYR}
-            />
-          }
-        />
       </section>
 
       <section className="glass-panel rounded-[32px] border border-white/5 p-5">
@@ -79,8 +113,16 @@ export default async function DashboardPage() {
               <p className="mt-2 text-lg font-semibold text-white">{todaySummary.totalOrders}</p>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Transfers</p>
-              <p className="mt-2 text-lg font-semibold text-white">{todaySummary.bankOrders}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Profit</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                <CurrencyPairSummary
+                  idr={todaySummary.profitIDR}
+                  idrMyr={todaySummary.profitIDRMYR}
+                  inr={todaySummary.profitINR}
+                  inrMyr={todaySummary.profitINRMYR}
+                  compact
+                />
+              </p>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.18em] text-white/35">Amount</p>
@@ -95,6 +137,39 @@ export default async function DashboardPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-white">Month activity</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard label="Total Orders" value={monthSummary.totalOrders} />
+          <StatCard
+            label="Profit"
+            value={
+              <CurrencyPairSummary
+                idr={monthSummary.profitIDR}
+                idrMyr={monthSummary.profitIDRMYR}
+                inr={monthSummary.profitINR}
+                inrMyr={monthSummary.profitINRMYR}
+              />
+            }
+            accent="teal"
+          />
+          <StatCard
+            label="Total Amount"
+            value={
+              <CurrencyPairSummary
+                idr={monthSummary.totalIDR}
+                idrMyr={monthSummary.totalPayableIDRMYR}
+                inr={monthSummary.totalINR}
+                inrMyr={monthSummary.totalPayableINRMYR}
+              />
+            }
+          />
         </div>
       </section>
 

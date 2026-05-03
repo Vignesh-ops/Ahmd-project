@@ -11,7 +11,7 @@ import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
 import { exportXlsx } from "@/lib/client-export";
 import { printCurrentPage } from "@/lib/print";
-import { formatCurrency, formatCurrencyPlain, formatDate } from "@/lib/utils";
+import { calculateProfitMYR, formatCurrency, formatCurrencyPlain, formatDate } from "@/lib/utils";
 
 const typeOptions = [
   { label: "Bank Transfer", value: "bank" }
@@ -39,7 +39,12 @@ export default function AdminDashboard({ stores }) {
     totalINR: 0,
     totalPayableMYR: 0,
     totalPayableIDRMYR: 0,
-    totalPayableINRMYR: 0
+    totalPayableINRMYR: 0,
+    profitIDR: 0,
+    profitINR: 0,
+    profitIDRMYR: 0,
+    profitINRMYR: 0,
+    totalProfitMYR: 0
   });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -117,7 +122,12 @@ export default function AdminDashboard({ stores }) {
           totalINR: 0,
           totalPayableMYR: 0,
           totalPayableIDRMYR: 0,
-          totalPayableINRMYR: 0
+          totalPayableINRMYR: 0,
+          profitIDR: 0,
+          profitINR: 0,
+          profitIDRMYR: 0,
+          profitINRMYR: 0,
+          totalProfitMYR: 0
         });
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
@@ -216,6 +226,8 @@ export default function AdminDashboard({ stores }) {
   }
 
   function removeOrderFromLocalState(order) {
+    const profitMYR = calculateProfitMYR(order);
+
     setOrders((current) => current.filter((item) => !(item.type === order.type && item.id === order.id)));
     setTotalCount((current) => Math.max(0, current - 1));
     setFilteredSummary((current) => ({
@@ -232,7 +244,14 @@ export default function AdminDashboard({ stores }) {
       totalPayableINRMYR:
         order.currency === "INR"
           ? Math.max(0, current.totalPayableINRMYR - Number(order.totalPayableAmount || 0))
-          : current.totalPayableINRMYR
+          : current.totalPayableINRMYR,
+      totalProfitMYR: Math.max(0, current.totalProfitMYR - profitMYR),
+      profitIDR: order.currency === "IDR" ? Math.max(0, current.profitIDR - Number(order.serviceCharge || 0)) : current.profitIDR,
+      profitINR: order.currency === "INR" ? Math.max(0, current.profitINR - Number(order.serviceCharge || 0)) : current.profitINR,
+      profitIDRMYR:
+        order.currency === "IDR" ? Math.max(0, current.profitIDRMYR - profitMYR) : current.profitIDRMYR,
+      profitINRMYR:
+        order.currency === "INR" ? Math.max(0, current.profitINRMYR - profitMYR) : current.profitINRMYR
     }));
   }
   
