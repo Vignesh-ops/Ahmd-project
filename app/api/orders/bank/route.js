@@ -118,37 +118,49 @@ export async function POST(request) {
     return badRequest("Total payable amount must be zero or greater.");
   }
 
-  const orderNo = await generateOrderNo("B", session.user.storeCode, prisma);
-  const order = await prisma.bankOrder.create({
-    data: {
-      orderNo,
-      userId: Number(session.user.id),
-      country,
-      senderName,
-      accountName,
-      accountNo,
-      bank,
-      branch,
-      ifscCode,
-      depositAmount,
-      rate,
-      serviceCharge,
-      totalPayableAmount,
-      senderMobile,
-      notes,
-      status: "pending"
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          username: true,
-          storeName: true,
-          storeCode: true
+  let order = null;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const orderNo = await generateOrderNo("B", session.user.storeCode, prisma);
+
+    try {
+      order = await prisma.bankOrder.create({
+        data: {
+          orderNo,
+          userId: Number(session.user.id),
+          country,
+          senderName,
+          accountName,
+          accountNo,
+          bank,
+          branch,
+          ifscCode,
+          depositAmount,
+          rate,
+          serviceCharge,
+          totalPayableAmount,
+          senderMobile,
+          notes,
+          status: "pending"
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              storeName: true,
+              storeCode: true
+            }
+          }
         }
+      });
+      break;
+    } catch (error) {
+      if (error?.code !== "P2002" || !String(error?.meta?.target || "").includes("orderNo") || attempt === 2) {
+        throw error;
       }
     }
-  });
+  }
 
   return NextResponse.json(normalizeBankOrder(order), { status: 201 });
 }
