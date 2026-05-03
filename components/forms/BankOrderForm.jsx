@@ -77,7 +77,13 @@ export default function BankOrderForm({ initialOrderNo, settings }) {
   );
 
   function formatCalculatedTotalPayable(amount) {
-    return amount > 0 ? String(amount) : "";
+    if (!(amount > 0)) {
+      return "";
+    }
+
+    const truncatedAmount = Math.trunc(amount * 1000) / 1000;
+    console.log('truncatedAmoun',truncatedAmount)
+    return truncatedAmount.toString();
   }
 
   function updateField(name, value) {
