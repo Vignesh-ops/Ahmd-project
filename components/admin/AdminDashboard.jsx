@@ -24,13 +24,25 @@ const statusOptions = [
 ];
 
 export default function AdminDashboard({ stores }) {
+  const pageSize = 5;
   const [summary, setSummary] = useState({
     totalToday: 0,
     bankToday: 0,
     byStore: []
   });
   const [orders, setOrders] = useState([]);
+  const [filteredSummary, setFilteredSummary] = useState({
+    totalOrders: 0,
+    bankOrders: 0,
+    totalIDR: 0,
+    totalINR: 0,
+    totalPayableMYR: 0
+  });
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     storeCode: "all",
     from: "",
@@ -85,13 +97,26 @@ export default function AdminDashboard({ stores }) {
           params.set(key, value);
         }
       });
+      params.set("paginated", "true");
+      params.set("page", "1");
+      params.set("pageSize", String(pageSize));
 
       try {
         const response = await fetch(`/api/history?${params.toString()}`, {
           signal: controller.signal
         });
         const payload = await response.json();
-        setOrders(payload);
+        setOrders(payload.items || []);
+        setFilteredSummary(payload.summary || {
+          totalOrders: 0,
+          bankOrders: 0,
+          totalIDR: 0,
+          totalINR: 0,
+          totalPayableMYR: 0
+        });
+        setHasMore(Boolean(payload.hasMore));
+        setTotalCount(Number(payload.totalCount || 0));
+        setCurrentPage(Number(payload.page || 1));
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Failed to load admin orders", error);
@@ -112,23 +137,88 @@ export default function AdminDashboard({ stores }) {
 
   const filteredStats = useMemo(() => {
     return {
-      idr: orders.reduce((sum, order) => {
-        return sum + (order.currency === "IDR" ? Number(order.amount || 0) : 0);
-      }, 0),
-      inr: orders.reduce((sum, order) => {
-        if (order.currency === "INR") {
-          return sum + Number(order.amount || 0);
-        }
-
-        return sum;
-      }, 0)
+      idr: filteredSummary.totalIDR,
+      inr: filteredSummary.totalINR
     };
-  }, [orders]);
+  }, [filteredSummary]);
+
+  async function loadMoreOrders() {
+    if (loading || loadingMore || !hasMore) {
+      return;
+    }
+
+    setLoadingMore(true);
+    const params = new URLSearchParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== "all") {
+        params.set(key, value);
+      }
+    });
+
+    params.set("paginated", "true");
+    params.set("page", String(currentPage + 1));
+    params.set("pageSize", String(pageSize));
+
+    try {
+      const response = await fetch(`/api/history?${params.toString()}`);
+      const payload = await response.json();
+      setOrders((current) => [...current, ...(payload.items || [])]);
+      setHasMore(Boolean(payload.hasMore));
+      setTotalCount(Number(payload.totalCount || 0));
+      setCurrentPage(Number(payload.page || currentPage + 1));
+    } catch (error) {
+      console.error("Failed to load more admin orders", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  async function fetchAllMatchingOrders() {
+    const allOrders = [];
+    let nextPage = 1;
+    let more = true;
+
+    while (more) {
+      const params = new URLSearchParams();
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value && value !== "all") {
+          params.set(key, value);
+        }
+      });
+
+      params.set("paginated", "true");
+      params.set("page", String(nextPage));
+      params.set("pageSize", "250");
+
+      const response = await fetch(`/api/history?${params.toString()}`);
+      const payload = await response.json();
+      allOrders.push(...(payload.items || []));
+      more = Boolean(payload.hasMore);
+      nextPage += 1;
+    }
+
+    return allOrders;
+  }
 
   async function handleDelete(order) {
     setDeleteOrder(order);
     setShowDeleteModal(true);
     setDeleteError(null);
+  }
+
+  function removeOrderFromLocalState(order) {
+    setOrders((current) => current.filter((item) => !(item.type === order.type && item.id === order.id)));
+    setTotalCount((current) => Math.max(0, current - 1));
+    setFilteredSummary((current) => ({
+      ...current,
+      totalOrders: Math.max(0, current.totalOrders - 1),
+      bankOrders: Math.max(0, current.bankOrders - 1),
+      totalIDR: current.totalIDR - (order.currency === "IDR" ? Number(order.amount || 0) : 0),
+      totalINR: current.totalINR - (order.currency === "INR" ? Number(order.amount || 0) : 0),
+      totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0))
+    }));
   }
   
   async function confirmDelete() {
@@ -145,12 +235,7 @@ export default function AdminDashboard({ stores }) {
         return;
       }
   
-      setOrders((current) =>
-        current.filter(
-          (item) =>
-            !(item.type === deleteOrder.type && item.id === deleteOrder.id)
-        )
-      );
+      removeOrderFromLocalState(deleteOrder);
       setShowDeleteModal(false);
       setDeleteOrder(null);
       setDeleteLoading(false);
@@ -159,26 +244,27 @@ export default function AdminDashboard({ stores }) {
       setDeleteLoading(false);
     }
   }
-  function buildExportRows() {
-    return [
-      ["OrderNo", "Store", "Type", "Customer", "Details", "Amount", "Status", "Date"],
-      ...orders.map((order) => [
-        order.orderNo,
-        order.storeCode,
-        order.typeLabel,
-        order.customerName,
-        order.bankOrAddress,
-        formatCurrency(order.amount, order.currency),
-        order.status,
-        formatDate(order.date)
-      ])
-    ];
-  }
-
   async function handleExportXlsx() {
     try {
       setExportMessage("");
-      const result = await exportXlsx("ubi-orders.xlsx", buildExportRows(), "Orders");
+      const exportOrders = await fetchAllMatchingOrders();
+      const result = await exportXlsx(
+        "ubi-orders.xlsx",
+        [
+          ["OrderNo", "Store", "Type", "Customer", "Details", "Amount", "Status", "Date"],
+          ...exportOrders.map((order) => [
+            order.orderNo,
+            order.storeCode,
+            order.typeLabel,
+            order.customerName,
+            order.bankOrAddress,
+            formatCurrency(order.amount, order.currency),
+            order.status,
+            formatDate(order.date)
+          ])
+        ],
+        "Orders"
+      );
 
       if (result?.path) {
         setExportMessage(`XLSX saved to Documents/${result.path}`);
@@ -191,6 +277,13 @@ export default function AdminDashboard({ stores }) {
   }
 
   async function handlePrintAll() {
+    if (hasMore) {
+      const allOrders = await fetchAllMatchingOrders();
+      setOrders(allOrders);
+      setHasMore(false);
+      setTotalCount(allOrders.length);
+    }
+
     await printCurrentPage({ title: "Filtered Orders Report" });
   }
 
@@ -335,7 +428,21 @@ export default function AdminDashboard({ stores }) {
             Loading orders...
           </div>
         ) : (
-          <AdminTable orders={orders} onDelete={handleDelete} />
+          <div className="space-y-4">
+            <AdminTable orders={orders} onDelete={handleDelete} />
+            {orders.length ? (
+              <div className="glass-panel rounded-[28px] border border-white/5 p-4 text-center">
+                <p className="text-sm text-white/60">
+                  Showing {orders.length} of {totalCount} orders
+                </p>
+                {hasMore ? (
+                  <Button className="mt-3" variant="secondary" onClick={() => void loadMoreOrders()} loading={loadingMore}>
+                    Load More
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         )}
       </div>
 

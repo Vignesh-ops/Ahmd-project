@@ -26,6 +26,7 @@ export default function HistoryPage({
   initialStoreCode = "all",
   initialStoreName = ""
 }) {
+  const pageSize = 5;
   const [filters, setFilters] = useState({
     from: "",
     to: "",
@@ -33,7 +34,18 @@ export default function HistoryPage({
     storeCode: initialStoreCode
   });
   const [orders, setOrders] = useState([]);
+  const [summary, setSummary] = useState({
+    totalOrders: 0,
+    bankOrders: 0,
+    totalIDR: 0,
+    totalINR: 0,
+    totalPayableMYR: 0
+  });
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteOrder, setDeleteOrder] = useState(null);
@@ -53,13 +65,27 @@ export default function HistoryPage({
           params.set(key, value);
         }
       });
+      params.set("paginated", "true");
+      params.set("page", "1");
+      params.set("pageSize", String(pageSize));
 
       try {
         const response = await fetch(`/api/history?${params.toString()}`, {
           signal: controller.signal
         });
         const payload = await response.json();
-        setOrders(payload);
+        setOrders(payload.items || []);
+        setSummary(payload.summary || {
+          totalOrders: 0,
+          bankOrders: 0,
+          totalIDR: 0,
+          totalINR: 0,
+          totalPayableMYR: 0
+        });
+        setHasMore(Boolean(payload.hasMore));
+        setTotalCount(Number(payload.totalCount || 0));
+        setCurrentPage(Number(payload.page || 1));
+        setSelectedOrder(null);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Failed to load history orders", error);
@@ -80,17 +106,46 @@ export default function HistoryPage({
 
   const stats = useMemo(() => {
     return {
-      total: orders.length,
-      bank: orders.length,
-      idr: orders
-        .filter((order) => order.currency === "IDR")
-        .reduce((sum, order) => sum + Number(order.amount || 0), 0),
-      inr: orders
-        .filter((order) => order.currency === "INR")
-        .reduce((sum, order) => sum + Number(order.amount || 0), 0),
-      myrPayable: orders.reduce((sum, order) => sum + Number(order.totalPayableAmount || 0), 0)
+      total: summary.totalOrders,
+      bank: summary.bankOrders,
+      idr: summary.totalIDR,
+      inr: summary.totalINR,
+      myrPayable: summary.totalPayableMYR
     };
-  }, [orders]);
+  }, [summary]);
+
+  async function loadMoreOrders() {
+    if (loading || loadingMore || !hasMore) {
+      return;
+    }
+
+    setLoadingMore(true);
+    const params = new URLSearchParams();
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== "all") {
+        params.set(key, value);
+      }
+    });
+
+    params.set("paginated", "true");
+    params.set("page", String(currentPage + 1));
+    params.set("pageSize", String(pageSize));
+
+    try {
+      const response = await fetch(`/api/history?${params.toString()}`);
+      const payload = await response.json();
+
+      setOrders((current) => [...current, ...(payload.items || [])]);
+      setHasMore(Boolean(payload.hasMore));
+      setTotalCount(Number(payload.totalCount || 0));
+      setCurrentPage(Number(payload.page || currentPage + 1));
+    } catch (error) {
+      console.error("Failed to load more history orders", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   function getMessage(order) {
     return formatBankMessage(order);
@@ -103,6 +158,19 @@ export default function HistoryPage({
     setSelectedOrder((current) =>
       current && current.type === updatedOrder.type && current.id === updatedOrder.id ? updatedOrder : current
     );
+  }
+
+  function removeOrderFromLocalState(order) {
+    setOrders((current) => current.filter((item) => !(item.type === order.type && item.id === order.id)));
+    setTotalCount((current) => Math.max(0, current - 1));
+    setSummary((current) => ({
+      ...current,
+      totalOrders: Math.max(0, current.totalOrders - 1),
+      bankOrders: Math.max(0, current.bankOrders - 1),
+      totalIDR: current.totalIDR - (order.currency === "IDR" ? Number(order.amount || 0) : 0),
+      totalINR: current.totalINR - (order.currency === "INR" ? Number(order.amount || 0) : 0),
+      totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0))
+    }));
   }
 
   async function syncDoneStatus(order, actionLabel) {
@@ -150,12 +218,7 @@ export default function HistoryPage({
         return;
       }
 
-      setOrders((current) =>
-        current.filter(
-          (item) =>
-            !(item.type === deleteOrder.type && item.id === deleteOrder.id)
-        )
-      );
+      removeOrderFromLocalState(deleteOrder);
       setSelectedOrder(null);
       setShowDeleteModal(false);
       setDeleteOrder(null);
@@ -283,6 +346,19 @@ export default function HistoryPage({
           {!orders.length ? (
             <div className="glass-panel rounded-[32px] border border-white/5 p-8 text-center text-white/55">
               No orders match the current filters.
+            </div>
+          ) : null}
+
+          {orders.length ? (
+            <div className="glass-panel rounded-[28px] border border-white/5 p-4 text-center">
+              <p className="text-sm text-white/60">
+                Showing {orders.length} of {totalCount} orders
+              </p>
+              {hasMore ? (
+                <Button className="mt-3" variant="secondary" onClick={() => void loadMoreOrders()} loading={loadingMore}>
+                  Load More
+                </Button>
+              ) : null}
             </div>
           ) : null}
         </div>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCombinedOrders } from "@/lib/orders";
+import { getCombinedOrders, getCombinedOrdersPage } from "@/lib/orders";
 import { getApiSession, guardAdminStoreAccess, unauthorized } from "@/lib/api";
 
 export async function GET(request) {
@@ -21,10 +21,24 @@ export async function GET(request) {
     orderNo: searchParams.get("orderNo") || undefined,
     today: searchParams.get("today") === "true"
   };
+  const page = searchParams.get("page");
+  const pageSize = searchParams.get("pageSize");
+  const paginated = searchParams.get("paginated") === "true";
 
   const scopeError = guardAdminStoreAccess(session.user, filters);
   if (scopeError) {
     return scopeError;
+  }
+
+  if (paginated) {
+    const result = await getCombinedOrdersPage({
+      sessionUser: session.user,
+      filters,
+      page,
+      pageSize
+    });
+
+    return NextResponse.json(result);
   }
 
   const orders = await getCombinedOrders({
