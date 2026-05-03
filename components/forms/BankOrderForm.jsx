@@ -154,7 +154,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     });
   }
 
-  function updateCountry(country) {
+  async function updateCountry(country) {
     const defaults = getCountryDefaults(country, settings);
 
     setSavedOrder(null);
@@ -173,14 +173,25 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         totalPayableAmount: formatCalculatedTotalPayable(nextTotalPayableAmount)
       };
     });
+
+    if (!isEditing) {
+      const nextOrderNo = await fetchFreshOrderNo(country);
+      setForm((current) => ({
+        ...current,
+        orderNo: nextOrderNo
+      }));
+    }
   }
 
   function applyLookupSelection(selection, { preserveSenderName = true } = {}) {
+    let nextOrderNoCountry = null;
+
     setSavedOrder(null);
     setForm((current) => {
       const currentDefaults = getCountryDefaults(current.country, settings);
       const nextCountry = selection.data.country || current.country;
       const nextDefaults = getCountryDefaults(nextCountry, settings);
+      nextOrderNoCountry = !isEditing && nextCountry !== current.country ? nextCountry : null;
       const shouldSyncPricing =
         nextCountry !== current.country &&
         String(current.rate ?? "") === String(currentDefaults.rate ?? "") &&
@@ -208,6 +219,15 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           : current.totalPayableAmount
       };
     });
+
+    if (nextOrderNoCountry) {
+      fetchFreshOrderNo(nextOrderNoCountry).then((nextOrderNo) => {
+        setForm((current) => ({
+          ...current,
+          orderNo: nextOrderNo
+        }));
+      });
+    }
 
     setLookup({
       status: "success",
@@ -326,14 +346,14 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     };
   }, [form.senderMobile]);
 
-  async function fetchFreshOrderNo() {
-    const response = await fetch("/api/orders/bank?preview=true");
+  async function fetchFreshOrderNo(country = form.country) {
+    const response = await fetch(`/api/orders/bank?preview=true&country=${country}`);
     const payload = await response.json();
     return payload.orderNo;
   }
 
   async function startNewOrder() {
-    const nextOrderNo = await fetchFreshOrderNo();
+    const nextOrderNo = await fetchFreshOrderNo(1);
     setSavedOrder(null);
     setMessage("");
     setLookup({

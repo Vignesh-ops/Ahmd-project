@@ -52,3 +52,18 @@ app-update API route
 app-version.js
 provider wiring in providers.js
 folder public/apk
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

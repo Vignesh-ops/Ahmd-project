@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { ArrowUpRight, Home, Landmark, Phone } from "lucide-react";
+import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import StatusBadge from "./StatusBadge";
 
 export default function OrderCard({ order, href, showStore = false, children }) {
   const showLinkIndicator = Boolean(href);
+  const displayOrderNo = formatDisplayOrderNo(order.orderNo);
   const icon =
     order.type === "bank" ? (
       <Landmark className="h-4 w-4 text-gold-light" />
@@ -26,7 +28,7 @@ export default function OrderCard({ order, href, showStore = false, children }) 
             {order.typeLabel}
           </div>
           <div className="min-w-0">
-            <p className="break-all font-mono text-sm text-gold-light">{order.orderNo}</p>
+            <p className="break-all font-mono text-sm text-gold-light">{displayOrderNo}</p>
             <h3 className="mt-1 break-words text-lg font-semibold text-white">{order.customerName}</h3>
             <p className="break-words text-sm text-white/55">{order.bankOrAddress || "No extra details"}</p>
           </div>

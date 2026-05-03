@@ -8,6 +8,7 @@ import InfoDialog from "@/components/ui/InfoDialog";
 import { markOrderDone } from "@/lib/orderStatus";
 import { buildBankReceiptText, printReceipt } from "@/lib/print";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
+import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const Barcode = dynamic(() => import("react-barcode"), { ssr: false });
@@ -92,6 +93,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
 
   const amount = formatCurrency(order.depositAmount ?? order.amount, order.currency);
   const totalPayable = formatCurrency(order.totalPayableAmount, "MYR");
+  const displayOrderNo = formatDisplayOrderNo(order.orderNo);
 
   return (
     <div className="page-fade space-y-6">
@@ -144,7 +146,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
           <div className="thermal-divider" />
 
           <div className="space-y-2 text-sm">
-            <p>Order#: {order.orderNo}</p>
+            <p>Order#: {displayOrderNo}</p>
             <p>AccName: {order.accountName}</p>
             <p>AccNo: {order.accountNo}</p>
             <p>Bank: {order.bank}</p>
@@ -162,7 +164,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
             <p className="pt-1 text-xs uppercase tracking-[0.2em]">Total Payable (RM)</p>
             <p className="text-lg font-semibold">{totalPayable}</p>
             <div className="flex justify-center pt-2">
-              <Barcode value={order.orderNo} width={1.2} height={40} fontSize={10} background="#ffffff" />
+              <Barcode value={order.orderNo} text={displayOrderNo} width={1.2} height={40} fontSize={10} background="#ffffff" />
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { generateOrderNo } from "@/lib/orderNo";
-import { normalizeBankOrder } from "@/lib/orders";
+import { generateCurrencyOrderNo } from "@/lib/orderNo";
+import { bankCurrencyFromCountry, normalizeBankOrder } from "@/lib/orders";
 import {
   badRequest,
   cleanString,
@@ -23,6 +23,7 @@ export async function GET(request) {
   const preview = searchParams.get("preview");
   const storeId = searchParams.get("storeId");
   const storeCode = searchParams.get("storeCode");
+  const previewCountry = Number(searchParams.get("country") || 1);
 
   const scopeError = guardAdminStoreAccess(session.user, { storeId, storeCode });
   if (scopeError) {
@@ -30,7 +31,11 @@ export async function GET(request) {
   }
 
   if (preview === "true") {
-    const orderNo = await generateOrderNo("B", session.user.storeCode, prisma);
+    if (![1, 2].includes(previewCountry)) {
+      return badRequest("Invalid country selection.");
+    }
+
+    const orderNo = await generateCurrencyOrderNo("B", session.user.storeCode, prisma, bankCurrencyFromCountry(previewCountry));
     return NextResponse.json({ orderNo });
   }
 
@@ -98,6 +103,8 @@ export async function POST(request) {
     return badRequest("Invalid country selection.");
   }
 
+  const currency = bankCurrencyFromCountry(country);
+
   if (!isValidMobile(senderMobile)) {
     return badRequest("Sender mobile must be at least 10 digits.");
   }
@@ -121,7 +128,7 @@ export async function POST(request) {
   let order = null;
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    const orderNo = await generateOrderNo("B", session.user.storeCode, prisma);
+    const orderNo = await generateCurrencyOrderNo("B", session.user.storeCode, prisma, currency);
 
     try {
       order = await prisma.bankOrder.create({

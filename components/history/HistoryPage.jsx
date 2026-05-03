@@ -7,6 +7,7 @@ import Input from "@/components/ui/Input";
 import OrderCard from "@/components/ui/OrderCard";
 import StatCard from "@/components/ui/StatCard";
 import StoreFilter from "@/components/admin/StoreFilter";
+import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { markOrderDone } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { openInAppOrTab } from "@/lib/native";
@@ -440,7 +441,7 @@ export default function HistoryPage({
       {selectedOrder ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <div className="glass-panel w-full max-w-lg rounded-[32px] border border-white/10 p-6">
-            <p className="font-mono text-sm text-gold-light">{selectedOrder.orderNo}</p>
+            <p className="font-mono text-sm text-gold-light">{formatDisplayOrderNo(selectedOrder.orderNo)}</p>
             <h3 className="mt-2 text-2xl font-semibold text-white">{selectedOrder.customerName}</h3>
             <p className="mt-2 text-sm text-white/60">{selectedOrder.bankOrAddress}</p>
             <div className="mt-5 grid gap-3 text-sm text-white/75 sm:grid-cols-2">
