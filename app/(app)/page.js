@@ -3,7 +3,9 @@ import MonthFilter from "@/components/dashboard/MonthFilter";
 import AppLink from "@/components/navigation/AppLink";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
+import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import OrderCard from "@/components/ui/OrderCard";
+import ProfitSummary from "@/components/ui/ProfitSummary";
 import StatCard from "@/components/ui/StatCard";
 import { getAvailableOrderMonths, getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
@@ -110,16 +112,20 @@ export default async function DashboardPage({ searchParams }) {
           <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.18em] text-white/35">Orders</p>
-              <p className="mt-2 text-lg font-semibold text-white">{todaySummary.totalOrders}</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                <OrderCountSummary
+                  idr={todaySummary.orderCountIDR}
+                  inr={todaySummary.orderCountINR}
+                  compact
+                />
+              </p>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.18em] text-white/35">Profit</p>
               <p className="mt-2 text-lg font-semibold text-white">
-                <CurrencyPairSummary
+                <ProfitSummary
                   idr={todaySummary.profitIDR}
-                  idrMyr={todaySummary.profitIDRMYR}
                   inr={todaySummary.profitINR}
-                  inrMyr={todaySummary.profitINRMYR}
                   compact
                 />
               </p>
@@ -146,17 +152,13 @@ export default async function DashboardPage({ searchParams }) {
           <h2 className="mt-2 text-2xl font-semibold text-white">Month activity</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <StatCard label="Total Orders" value={monthSummary.totalOrders} />
+          <StatCard
+            label="Total Orders"
+            value={<OrderCountSummary idr={monthSummary.orderCountIDR} inr={monthSummary.orderCountINR} />}
+          />
           <StatCard
             label="Profit"
-            value={
-              <CurrencyPairSummary
-                idr={monthSummary.profitIDR}
-                idrMyr={monthSummary.profitIDRMYR}
-                inr={monthSummary.profitINR}
-                inrMyr={monthSummary.profitINRMYR}
-              />
-            }
+            value={<ProfitSummary idr={monthSummary.profitIDR} inr={monthSummary.profitINR} />}
             accent="teal"
           />
           <StatCard

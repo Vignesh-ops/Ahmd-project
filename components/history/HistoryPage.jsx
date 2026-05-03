@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
+import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import OrderCard from "@/components/ui/OrderCard";
+import ProfitSummary from "@/components/ui/ProfitSummary";
 import StatCard from "@/components/ui/StatCard";
 import StoreFilter from "@/components/admin/StoreFilter";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
@@ -39,6 +41,8 @@ export default function HistoryPage({
   const [summary, setSummary] = useState({
     totalOrders: 0,
     bankOrders: 0,
+    orderCountIDR: 0,
+    orderCountINR: 0,
     totalIDR: 0,
     totalINR: 0,
     totalPayableMYR: 0,
@@ -87,6 +91,8 @@ export default function HistoryPage({
         setSummary(payload.summary || {
           totalOrders: 0,
           bankOrders: 0,
+          orderCountIDR: 0,
+          orderCountINR: 0,
           totalIDR: 0,
           totalINR: 0,
           totalPayableMYR: 0,
@@ -124,6 +130,8 @@ export default function HistoryPage({
     return {
       total: summary.totalOrders,
       bank: summary.bankOrders,
+      orderCountIDR: summary.orderCountIDR,
+      orderCountINR: summary.orderCountINR,
       idr: summary.totalIDR,
       inr: summary.totalINR,
       myrPayable: summary.totalPayableMYR,
@@ -191,6 +199,10 @@ export default function HistoryPage({
       ...current,
       totalOrders: Math.max(0, current.totalOrders - 1),
       bankOrders: Math.max(0, current.bankOrders - 1),
+      orderCountIDR:
+        order.currency === "IDR" ? Math.max(0, Number(current.orderCountIDR || 0) - 1) : current.orderCountIDR,
+      orderCountINR:
+        order.currency === "INR" ? Math.max(0, Number(current.orderCountINR || 0) - 1) : current.orderCountINR,
       totalIDR: current.totalIDR - (order.currency === "IDR" ? Number(order.amount || 0) : 0),
       totalINR: current.totalINR - (order.currency === "INR" ? Number(order.amount || 0) : 0),
       totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0)),
@@ -278,17 +290,10 @@ export default function HistoryPage({
         onClose={() => setShareDialogOrderNo("")}
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Total Orders" value={stats.total} />
+        <StatCard label="Total Orders" value={<OrderCountSummary idr={stats.orderCountIDR} inr={stats.orderCountINR} />} />
         <StatCard
           label="Profit"
-          value={
-            <CurrencyPairSummary
-              idr={stats.profitIDR}
-              idrMyr={stats.profitIDRMYR}
-              inr={stats.profitINR}
-              inrMyr={stats.profitINRMYR}
-            />
-          }
+          value={<ProfitSummary idr={stats.profitIDR} inr={stats.profitINR} />}
           accent="teal"
         />
         <StatCard

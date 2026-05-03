@@ -51,6 +51,8 @@ export async function GET(request) {
     .map((store) => {
     const storeSummary = summary.byStore[String(store.id)] || {
       count: 0,
+      orderCountIDR: 0,
+      orderCountINR: 0,
       totalIDR: 0,
       totalINR: 0
     };
@@ -60,6 +62,8 @@ export async function GET(request) {
       storeName: store.storeName,
       role: store.role,
       count: storeSummary.count,
+      orderCountIDR: storeSummary.orderCountIDR,
+      orderCountINR: storeSummary.orderCountINR,
       totalIDR: storeSummary.totalIDR,
       totalINR: storeSummary.totalINR
     };
@@ -68,6 +72,8 @@ export async function GET(request) {
   return NextResponse.json({
     totalToday: summary.totalOrders,
     bankToday: summary.totalOrders,
+    orderCountIDR: summary.orderCountIDR,
+    orderCountINR: summary.orderCountINR,
     profitIDR: summary.profitIDR,
     profitINR: summary.profitINR,
     profitIDRMYR: summary.profitIDRMYR,

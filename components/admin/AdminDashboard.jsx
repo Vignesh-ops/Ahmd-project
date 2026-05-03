@@ -7,6 +7,8 @@ import StoreFilter from "@/components/admin/StoreFilter";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
+import OrderCountSummary from "@/components/ui/OrderCountSummary";
+import ProfitSummary from "@/components/ui/ProfitSummary";
 import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
 import { exportXlsx } from "@/lib/client-export";
@@ -29,6 +31,8 @@ export default function AdminDashboard({ stores }) {
   const [summary, setSummary] = useState({
     totalToday: 0,
     bankToday: 0,
+    orderCountIDR: 0,
+    orderCountINR: 0,
     profitIDR: 0,
     profitINR: 0,
     profitIDRMYR: 0,
@@ -40,6 +44,8 @@ export default function AdminDashboard({ stores }) {
   const [filteredSummary, setFilteredSummary] = useState({
     totalOrders: 0,
     bankOrders: 0,
+    orderCountIDR: 0,
+    orderCountINR: 0,
     totalIDR: 0,
     totalINR: 0,
     totalPayableMYR: 0,
@@ -123,6 +129,8 @@ export default function AdminDashboard({ stores }) {
         setFilteredSummary(payload.summary || {
           totalOrders: 0,
           bankOrders: 0,
+          orderCountIDR: 0,
+          orderCountINR: 0,
           totalIDR: 0,
           totalINR: 0,
           totalPayableMYR: 0,
@@ -159,6 +167,8 @@ export default function AdminDashboard({ stores }) {
     return {
       idr: filteredSummary.totalIDR,
       inr: filteredSummary.totalINR,
+      orderCountIDR: filteredSummary.orderCountIDR,
+      orderCountINR: filteredSummary.orderCountINR,
       idrMyr: filteredSummary.totalPayableIDRMYR,
       inrMyr: filteredSummary.totalPayableINRMYR
     };
@@ -239,6 +249,10 @@ export default function AdminDashboard({ stores }) {
       ...current,
       totalOrders: Math.max(0, current.totalOrders - 1),
       bankOrders: Math.max(0, current.bankOrders - 1),
+      orderCountIDR:
+        order.currency === "IDR" ? Math.max(0, Number(current.orderCountIDR || 0) - 1) : current.orderCountIDR,
+      orderCountINR:
+        order.currency === "INR" ? Math.max(0, Number(current.orderCountINR || 0) - 1) : current.orderCountINR,
       totalIDR: current.totalIDR - (order.currency === "IDR" ? Number(order.amount || 0) : 0),
       totalINR: current.totalINR - (order.currency === "INR" ? Number(order.amount || 0) : 0),
       totalPayableMYR: Math.max(0, current.totalPayableMYR - Number(order.totalPayableAmount || 0)),
@@ -342,17 +356,13 @@ export default function AdminDashboard({ stores }) {
     <>
       <div className="admin-screen-only space-y-6">
         <div className="grid gap-4 md:grid-cols-3">
-          <StatCard label="Total Orders Today" value={summary.totalToday} />
+          <StatCard
+            label="Total Orders Today"
+            value={<OrderCountSummary idr={summary.orderCountIDR} inr={summary.orderCountINR} />}
+          />
           <StatCard
             label="Profit Today"
-            value={
-              <CurrencyPairSummary
-                idr={summary.profitIDR}
-                idrMyr={summary.profitIDRMYR}
-                inr={summary.profitINR}
-                inrMyr={summary.profitINRMYR}
-              />
-            }
+            value={<ProfitSummary idr={summary.profitIDR} inr={summary.profitINR} />}
             accent="teal"
           />
           <StatCard
@@ -376,8 +386,8 @@ export default function AdminDashboard({ stores }) {
               </p>
               <p className="mt-2 text-lg font-semibold text-white">{store.storeName}</p>
               <p className="mt-4 text-sm text-white/65">{store.count} orders</p>
-              <p className="mt-1 text-sm text-white/55">IDR {formatCurrency(store.totalIDR, "IDR")}</p>
-              <p className="text-sm text-white/55">INR {formatCurrency(store.totalINR, "INR")}</p>
+              <p className="mt-1 text-sm text-white/55">IDR: {formatCurrency(store.totalIDR, "IDR")}</p>
+              <p className="text-sm text-white/55">RS: {formatCurrencyPlain(store.totalINR, "INR")}</p>
               <Button className="mt-4 w-full" variant="secondary" href={`/history?storeCode=${store.storeCode}`}>
                 View {store.role === "admin" ? "Admin" : "Store"} History
               </Button>
