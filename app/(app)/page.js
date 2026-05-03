@@ -6,7 +6,6 @@ import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import OrderCard from "@/components/ui/OrderCard";
 import ProfitSummary from "@/components/ui/ProfitSummary";
-import StatCard from "@/components/ui/StatCard";
 import { getAvailableOrderMonths, getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 
@@ -106,6 +105,49 @@ export default async function DashboardPage({ searchParams }) {
       <section className="glass-panel rounded-[32px] border border-white/5 p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
+            <h2 className="mt-2 text-xl font-semibold text-white">Month activity</h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
+            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Total Orders</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                <OrderCountSummary
+                  idr={monthSummary.orderCountIDR}
+                  inr={monthSummary.orderCountINR}
+                  compact
+                />
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Profit</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                <ProfitSummary
+                  idr={monthSummary.profitIDR}
+                  inr={monthSummary.profitINR}
+                  compact
+                />
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Total Amount</p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                <CurrencyPairSummary
+                  idr={monthSummary.totalIDR}
+                  idrMyr={monthSummary.totalPayableIDRMYR}
+                  inr={monthSummary.totalINR}
+                  inrMyr={monthSummary.totalPayableINRMYR}
+                  compact
+                />
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+              
+      <section className="glass-panel rounded-[32px] border border-white/5 p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
             <p className="text-xs uppercase tracking-[0.22em] text-white/35">Today</p>
             <h2 className="mt-2 text-xl font-semibold text-white">Today&apos;s activity</h2>
           </div>
@@ -143,35 +185,6 @@ export default async function DashboardPage({ searchParams }) {
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Month activity</h2>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <StatCard
-            label="Total Orders"
-            value={<OrderCountSummary idr={monthSummary.orderCountIDR} inr={monthSummary.orderCountINR} />}
-          />
-          <StatCard
-            label="Profit"
-            value={<ProfitSummary idr={monthSummary.profitIDR} inr={monthSummary.profitINR} />}
-            accent="teal"
-          />
-          <StatCard
-            label="Total Amount"
-            value={
-              <CurrencyPairSummary
-                idr={monthSummary.totalIDR}
-                idrMyr={monthSummary.totalPayableIDRMYR}
-                inr={monthSummary.totalINR}
-                inrMyr={monthSummary.totalPayableINRMYR}
-              />
-            }
-          />
         </div>
       </section>
 
