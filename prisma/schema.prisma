@@ -1,22 +1,23 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl"]
 }
+
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-   directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique
-  password   String
-  role       String   @default("store")
-  storeName  String?
-  storeCode  String?
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      String   @default("store")
+  storeName String?
+  storeCode String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
   bankOrders BankOrder[]
   homeOrders HomeOrder[]
@@ -26,29 +27,32 @@ model User {
 }
 
 model BankOrder {
-  id            Int      @id @default(autoincrement())
-  orderNo       String   @unique
-  userId        Int
-  user          User     @relation(fields: [userId], references: [id])
-  country       Int      @default(1)
-  date          DateTime @default(now())
-  senderName    String   @default("")
-  accountName   String
-  accountNo     String
-  bank          String
-  branch        String?
-  ifscCode      String?
-  depositAmount Float
-  rate          Float    @default(0)
-  serviceCharge Float    @default(0)
-  totalPayableAmount Float @default(0)
-  senderMobile  String
-  notes         String?
-  status        String   @default("pending")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  orderNo            String   @unique
+  userId             Int
+  user               User     @relation(fields: [userId], references: [id])
+  country            Int      @default(1)
+  date               DateTime @default(now())
+  senderName         String   @default("")
+  accountName        String
+  accountNo          String
+  bank               String
+  branch             String?
+  ifscCode           String?
+  depositAmount      Float
+  rate               Float    @default(0)
+  serviceCharge      Float    @default(0)
+  totalPayableAmount Float    @default(0)
+  senderMobile       String
+  notes              String?
+  status             String   @default("pending")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@index([userId, date])
+  @@index([date])
+  @@index([status, date])
+  @@index([userId, status, date])
   @@index([senderMobile, date])
   @@index([userId, senderMobile, date])
   @@index([status])
@@ -80,9 +84,9 @@ model HomeOrder {
 }
 
 model Settings {
-  id       Int    @id
-  rate1    Float  @default(195)
-  rate2    Float  @default(198)
-  service1 Float  @default(2)
-  service2 Float  @default(3)
+  id       Int   @id
+  rate1    Float @default(195)
+  rate2    Float @default(198)
+  service1 Float @default(2)
+  service2 Float @default(3)
 }
