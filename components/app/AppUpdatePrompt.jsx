@@ -100,7 +100,7 @@ export default function AppUpdatePrompt() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="dialog-surface w-full max-w-md rounded-xl border border-gold/20 p-6 shadow-2xl">
         <p className="text-xs uppercase tracking-[0.22em] text-gold-light/80">App Update</p>
-        <h3 className="mt-2 text-lg font-semibold text-white">Update Available</h3>
+        <h3 className="mt-2 text-2xl font-bold text-white">Update Available</h3>
         <p className="mt-3 text-sm text-white/80">
           New version v{updateInfo.latestVersion} is available. Current version is v{updateInfo.currentVersion}.
         </p>

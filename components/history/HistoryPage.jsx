@@ -291,11 +291,13 @@ export default function HistoryPage({
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total Orders" value={<OrderCountSummary idr={stats.orderCountIDR} inr={stats.orderCountINR} />} />
+        {isAdmin && (
         <StatCard
           label="Profit"
           value={<ProfitSummary idr={stats.profitIDR} inr={stats.profitINR} />}
           accent="teal"
         />
+        )}
         <StatCard
           label="Total Amount"
           value={<CurrencyPairSummary idr={stats.idr} idrMyr={stats.idrMyr} inr={stats.inr} inrMyr={stats.inrMyr} />}

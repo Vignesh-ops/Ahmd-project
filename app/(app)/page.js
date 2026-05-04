@@ -106,11 +106,13 @@ export default async function DashboardPage({ searchParams }) {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
-            <h2 className="mt-2 text-xl font-semibold text-white">Month activity</h2>
+            <h2 className="mt-2 text-2xl font-bold text-white underline decoration-gold-light decoration-2 underline-offset-4">Month activity</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Total Orders</p>
+              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
+                <p className="text-base font-bold text-gold-light underline decoration-gold-light decoration-2 underline-offset-2">Total Orders</p>
+              </div>
               <p className="mt-2 text-lg font-semibold text-white">
                 <OrderCountSummary
                   idr={monthSummary.orderCountIDR}
@@ -119,8 +121,11 @@ export default async function DashboardPage({ searchParams }) {
                 />
               </p>
             </div>
+            {session.user.role === "admin" && (
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Profit</p>
+              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
+                <p className="text-base font-bold text-gold-light underline decoration-gold-light decoration-2 underline-offset-2">Profit</p>
+              </div>
               <p className="mt-2 text-lg font-semibold text-white">
                 <ProfitSummary
                   idr={monthSummary.profitIDR}
@@ -129,8 +134,11 @@ export default async function DashboardPage({ searchParams }) {
                 />
               </p>
             </div>
+            )}
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Total Amount</p>
+              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
+                <p className="text-base font-bold text-gold-light underline decoration-gold-light decoration-2 underline-offset-2">Total Amount</p>
+              </div>
               <p className="mt-2 text-lg font-semibold text-white">
                 <CurrencyPairSummary
                   idr={monthSummary.totalIDR}
@@ -149,11 +157,13 @@ export default async function DashboardPage({ searchParams }) {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-white/35">Today</p>
-            <h2 className="mt-2 text-xl font-semibold text-white">Today&apos;s activity</h2>
+            <h2 className="mt-2 text-2xl font-bold text-white underline decoration-gold-light decoration-2 underline-offset-4">Today&apos;s activity</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Orders</p>
+              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
+                <p className="text-base font-bold text-gold-light underline decoration-gold-light decoration-2 underline-offset-2">Orders</p>
+              </div>
               <p className="mt-2 text-lg font-semibold text-white">
                 <OrderCountSummary
                   idr={todaySummary.orderCountIDR}
@@ -162,8 +172,11 @@ export default async function DashboardPage({ searchParams }) {
                 />
               </p>
             </div>
+            {session.user.role === "admin" && (
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Profit</p>
+              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
+                <p className="text-base font-bold text-gold-light underline decoration-gold-light decoration-2 underline-offset-2">Profit</p>
+              </div>
               <p className="mt-2 text-lg font-semibold text-white">
                 <ProfitSummary
                   idr={todaySummary.profitIDR}
@@ -172,8 +185,11 @@ export default async function DashboardPage({ searchParams }) {
                 />
               </p>
             </div>
+            )}
             <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/35">Amount</p>
+              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
+                <p className="text-base font-bold text-gold-light underline decoration-gold-light decoration-2 underline-offset-2">Amount</p>
+              </div>
               <p className="mt-2 text-lg font-semibold text-white">
                 <CurrencyPairSummary
                   idr={todaySummary.totalIDR}
