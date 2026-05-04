@@ -27,11 +27,7 @@ export default function Navbar({ user }) {
   return (
 
     <header
-      className="sticky top-0 z-30 border-b bg-dark-base/85 border-white/5 backdrop-blur-xl"
-      style={{
-        paddingTop: "env(safe-area-inset-top)",
-        backgroundColor: "#000"
-      }}
+      className="sticky top-0 z-30 border-b border-white/5 bg-dark-base/85 backdrop-blur-xl"
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <AppLink href="/" prefetch={false} className="flex min-w-0 items-center gap-3">
@@ -42,7 +38,6 @@ export default function Navbar({ user }) {
                 alt="Ahmad company logo"
                 fill
                 priority
-                quality={100}
                 unoptimized
                 className="object-contain"
                 sizes="44px"
