@@ -108,7 +108,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     }
 
     const truncatedAmount = Math.trunc(amount * 1000) / 1000;
-    console.log('truncatedAmoun',truncatedAmount)
+    console.log('truncatedAmoun', truncatedAmount)
     return truncatedAmount.toString();
   }
 
@@ -210,12 +210,12 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         serviceCharge: shouldSyncPricing ? String(nextDefaults.serviceCharge ?? "") : current.serviceCharge,
         totalPayableAmount: shouldSyncPricing
           ? formatCalculatedTotalPayable(
-              calculateTotalPayable({
-                depositAmount: current.depositAmount,
-                rate: nextDefaults.rate,
-                serviceCharge: nextDefaults.serviceCharge
-              })
-            )
+            calculateTotalPayable({
+              depositAmount: current.depositAmount,
+              rate: nextDefaults.rate,
+              serviceCharge: nextDefaults.serviceCharge
+            })
+          )
           : current.totalPayableAmount
       };
     });
@@ -462,6 +462,37 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       : String(calculatedTotalPayableAmount)
     : "-";
 
+
+  function handleClearForm() {
+    setSavedOrder(null);
+    setMessage("");
+    setLookup({
+      status: "idle",
+      message: ""
+    });
+    setLookupChoices([]);
+    setLookupModal({
+      open: false,
+      mobile: ""
+    });
+    setForm((current) => ({
+      orderNo: current.orderNo,
+      country: current.country,
+      rate: current.rate,
+      serviceCharge: current.serviceCharge,
+      totalPayableAmount: "",
+      senderName: "",
+      accountName: "",
+      accountNo: "",
+      bank: "",
+      branch: "",
+      ifscCode: "",
+      depositAmount: "",
+      senderMobile: "",
+      notes: ""
+    }));
+  }
+
   return (
     <div className="space-y-6">
       <div className="glass-panel rounded-[32px] border border-white/5 p-6">
@@ -513,6 +544,16 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       ) : null}
 
       <div className="glass-panel rounded-[32px] border border-white/5 p-6">
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            onClick={handleClearForm}
+            className="self-end p-2 hover:bg-white/10 rounded-full transition-colors"
+            title="Clear form fields (keeps Rate, Service Charge, and Order Number)"
+          >
+            <RotateCcw size={20} className="text-gold-light" />
+          </button>
+        </div>
         <div className="grid-form two-col">
           <Input label="Order No" value={form.orderNo} readOnly mono />
 
