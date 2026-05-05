@@ -353,14 +353,22 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   async function startNewOrder() {
-    const nextOrderNo = await fetchFreshOrderNo(1);
     setSavedOrder(null);
     setMessage("");
     setLookup({
       status: "idle",
       message: ""
     });
-    setForm(buildInitialForm(nextOrderNo, settings));
+    setLookupChoices([]);
+    setLookupModal({
+      open: false,
+      mobile: ""
+    });
+    setForm((current) => ({
+      ...buildInitialForm(current.orderNo, settings, current.country),
+      rate: current.rate,
+      serviceCharge: current.serviceCharge
+    }));
   }
 
   async function persistOrder() {
@@ -465,7 +473,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-white/55">
               {isEditing
-                ? "Pending orders can be updated before they are shared or printed."
+                ? "Update the order details and refresh its receipt."
                 : "Sender details, pricing, and receiver details are saved together, so repeated mobile numbers can prefill the form on the next order."}
             </p>
           </div>
@@ -669,7 +677,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           <p className="text-sm text-white/55">
             {message ||
               (isEditing
-                ? "Update the pending order to refresh its receipt."
+                ? "Update the order to refresh its receipt."
                 : "Save first to generate a permanent order and receipt.")}
           </p>
         </div>

@@ -17,7 +17,7 @@ import {
   startBluetoothDiscovery
 } from "@/lib/print";
 
-export default function SettingsForm({ settings, storeName, isAdmin }) {
+export default function SettingsForm({ settings, storeName }) {
   const router = useRouter();
   const [form, setForm] = useState({
     rate1: settings.rate1,
@@ -181,11 +181,6 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
   async function handleSave(event) {
     event.preventDefault();
 
-    if (!isAdmin) {
-      setMessage("Only admin users can update settings.");
-      return;
-    }
-
     setLoading(true);
     setMessage("");
 
@@ -304,56 +299,39 @@ export default function SettingsForm({ settings, storeName, isAdmin }) {
           type="number"
           step="0.00001"
           value={form.rate1}
-          readOnly={!isAdmin}
-          onChange={
-            isAdmin ? (event) => setForm((current) => ({ ...current, rate1: event.target.value })) : undefined
-          }
+          onChange={(event) => setForm((current) => ({ ...current, rate1: event.target.value }))}
         />
         <Input
           label="INDIA Exchange Rate"
           type="number"
           step="0.00001"
           value={form.rate2}
-          readOnly={!isAdmin}
-          onChange={
-            isAdmin ? (event) => setForm((current) => ({ ...current, rate2: event.target.value })) : undefined
-          }
+          onChange={(event) => setForm((current) => ({ ...current, rate2: event.target.value }))}
         />
         <Input
           label="INDONASIA Service Charge"
           type="number"
           step="0.00001"
           value={form.service1}
-          readOnly={!isAdmin}
-          onChange={
-            isAdmin ? (event) => setForm((current) => ({ ...current, service1: event.target.value })) : undefined
-          }
+          onChange={(event) => setForm((current) => ({ ...current, service1: event.target.value }))}
         />
         <Input
           label="INDIA Service Charge"
           type="number"
           step="0.00001"
           value={form.service2}
-          readOnly={!isAdmin}
-          onChange={
-            isAdmin ? (event) => setForm((current) => ({ ...current, service2: event.target.value })) : undefined
-          }
+          onChange={(event) => setForm((current) => ({ ...current, service2: event.target.value }))}
         />
         <Input label="Store Name" value={storeName} disabled className="md:col-span-2" />
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-red/55">
-          {message ||
-            (isAdmin
-              ? "Rates are used to prefill the order forms."
-              : "You can view these settings, but only admin users can edit and save changes.")}
+          {message || "Rates are used to prefill your order forms."}
         </p>
-        {isAdmin ? (
-          <Button type="submit" loading={loading}>
-            Save Settings
-          </Button>
-        ) : null}
+        <Button type="submit" loading={loading}>
+          Save Settings
+        </Button>
       </div>
 
       <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-4">

@@ -1,7 +1,7 @@
 import BankOrderForm from "@/components/forms/BankOrderForm";
 import { generateCurrencyOrderNo } from "@/lib/orderNo";
 import { normalizeBankOrder } from "@/lib/orders";
-import { getGlobalSettings } from "@/lib/settings";
+import { getUserSettings } from "@/lib/settings";
 import prisma from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
@@ -10,7 +10,7 @@ export default async function BankOrderPage({ searchParams }) {
   const resolvedSearchParams = await searchParams;
   const editId = Number(resolvedSearchParams?.edit || 0);
   const [settings, initialOrderNo] = await Promise.all([
-    getGlobalSettings(),
+    getUserSettings(session.user.id),
     generateCurrencyOrderNo("B", session.user.storeCode, prisma, "IDR")
   ]);
   let initialOrder = null;

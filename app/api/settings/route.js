@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { badRequest, forbidden, getApiSession, unauthorized } from "@/lib/api";
-import { getGlobalSettings, updateGlobalSettings } from "@/lib/settings";
+import { badRequest, getApiSession, unauthorized } from "@/lib/api";
+import { getUserSettings, updateUserSettings } from "@/lib/settings";
 
 export async function GET() {
   const session = await getApiSession();
@@ -10,7 +10,7 @@ export async function GET() {
     return unauthorized();
   }
 
-  const settings = await getGlobalSettings();
+  const settings = await getUserSettings(session.user.id);
 
   return NextResponse.json(settings);
 }
@@ -23,10 +23,6 @@ export async function PUT(request) {
       return unauthorized();
     }
 
-    if (session.user.role !== "admin") {
-      return forbidden("Only admin users can update settings.");
-    }
-
     const body = await request.json();
     const rate1 = Number(body.rate1);
     const rate2 = Number(body.rate2);
@@ -37,7 +33,7 @@ export async function PUT(request) {
       return badRequest("Rate and service charge values must be valid numbers.");
     }
 
-    const settings = await updateGlobalSettings({
+    const settings = await updateUserSettings(session.user.id, {
       rate1,
       rate2,
       service1,
@@ -49,7 +45,7 @@ export async function PUT(request) {
 
     return NextResponse.json(settings);
   } catch (error) {
-    console.error("Failed to update global settings:", error);
+    console.error("Failed to update user settings:", error);
     return NextResponse.json({ error: "Failed to save settings." }, { status: 500 });
   }
 }

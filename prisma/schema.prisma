@@ -21,6 +21,7 @@ model User {
 
   bankOrders BankOrder[]
   homeOrders HomeOrder[]
+  settings   Settings?
 
   @@index([role])
   @@index([storeCode])
@@ -85,6 +86,8 @@ model HomeOrder {
 
 model Settings {
   id       Int   @id
+  userId   Int   @unique
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   rate1    Float @default(195)
   rate2    Float @default(198)
   service1 Float @default(2)

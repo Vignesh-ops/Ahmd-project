@@ -389,7 +389,7 @@ export default function HistoryPage({
                 >
                   Print
                 </Button>
-                {order.status === "pending" ? (
+                {["pending", "done"].includes(order.status) ? (
                   <Button
                     variant="secondary"
                     href={`/bank-order?edit=${order.id}`}
@@ -514,7 +514,7 @@ export default function HistoryPage({
               <Button variant="secondary" onClick={() => handlePrint(selectedOrder)}>
                 Print
               </Button>
-              {selectedOrder.status === "pending" ? (
+              {["pending", "done"].includes(selectedOrder.status) ? (
                 <Button variant="secondary" href={`/bank-order?edit=${selectedOrder.id}`}>
                   Edit
                 </Button>

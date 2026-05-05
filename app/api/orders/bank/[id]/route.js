@@ -99,8 +99,8 @@ export async function PUT(request, { params }) {
   ];
   const hasEditableField = editableFields.some((field) => body[field] !== undefined);
 
-  if (hasEditableField && existing.status !== "pending") {
-    return badRequest("Only pending orders can be edited.");
+  if (hasEditableField && !["pending", "done"].includes(existing.status)) {
+    return badRequest("Only pending or completed orders can be edited.");
   }
 
   if (body.senderName !== undefined) {
