@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, Landmark, RotateCcw, Save, ShieldCheck } from "lucide-react";
+import { Calculator, Landmark, RotateCcw, Save, ShieldCheck, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
@@ -24,6 +24,20 @@ function getCountryDefaults(country, settings) {
 
 function normalizeAccountNo(value) {
   return String(value ?? "").replace(/\s+/g, "");
+}
+
+async function readJsonResponse(response) {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 }
 
 function buildInitialForm(orderNo, settings, country = 1) {
@@ -94,6 +108,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     open: false,
     mobile: ""
   });
+  const [deletingSuggestion, setDeletingSuggestion] = useState("");
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
   const calculatedTotalPayableAmount = useMemo(
@@ -255,6 +270,64 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     });
   }
 
+  async function deleteLookupChoice(choice) {
+    const signature = choice?.signature;
+    const mobile = lookupModal.mobile || form.senderMobile;
+
+    if (!signature || deletingSuggestion) {
+      return;
+    }
+
+    try {
+      setDeletingSuggestion(signature);
+      const response = await fetch("/api/customers/lookup", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          type: "bank",
+          mobile,
+          signature
+        })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Could not delete saved customer suggestion.");
+      }
+
+      setLookupChoices((current) => {
+        const remaining = current.filter((item) => item.signature !== signature);
+
+        if (!remaining.length) {
+          setLookupModal({
+            open: false,
+            mobile: ""
+          });
+          setLookup({
+            status: "empty",
+            message: "No saved customer found for this mobile yet."
+          });
+        } else {
+          setLookup({
+            status: "success",
+            message: `Found ${remaining.length} saved accounts for this mobile. Choose one to autofill or continue manually.`
+          });
+        }
+
+        return remaining;
+      });
+    } catch (error) {
+      setLookup({
+        status: "error",
+        message: error.message || "Could not delete saved customer suggestion."
+      });
+    } finally {
+      setDeletingSuggestion("");
+    }
+  }
+
   useEffect(() => {
     const mobile = form.senderMobile.trim();
     const normalizedMobile = mobile.replace(/\D/g, "");
@@ -285,7 +358,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           cache: "no-store",
           signal: controller.signal
         });
-        const payload = await response.json();
+        const payload = await readJsonResponse(response);
 
         if (!response.ok) {
           throw new Error(payload.error || "Could not fetch customer details.");
@@ -353,7 +426,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
   async function fetchFreshOrderNo(country = form.country) {
     const response = await fetch(`/api/orders/bank?preview=true&country=${country}`);
-    const payload = await response.json();
+      const payload = await readJsonResponse(response);
     return payload.orderNo;
   }
 
@@ -741,26 +814,40 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
             <div className="mt-5 space-y-3 h-[45vh] overflow-y-auto">
               {lookupChoices.map((choice) => (
-                <button
+                <div
                   key={`${choice.data.accountNo}-${choice.orderNo}`}
-                  type="button"
-                  className="w-full rounded-[24px] border border-white/10 bg-white/5 p-4 text-left transition hover:border-gold/30 hover:bg-white/10"
-                  onClick={() => applyLookupSelection(choice)}
+                  className="flex w-full items-stretch overflow-hidden rounded-[24px] border border-white/10 bg-white/5 transition hover:border-gold/30 hover:bg-white/10"
                 >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="font-semibold text-white">{choice.data.accountName || "Unnamed Account"}</p>
-                      <p className="mt-1 font-mono text-sm text-gold-light">{choice.data.accountNo}</p>
-                      <p className="mt-1 text-sm text-white/65">
-                        {[choice.data.bank, choice.data.branch, choice.data.ifscCode].filter(Boolean).join(" · ") || "Bank details saved"}
-                      </p>
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 p-4 text-left"
+                    onClick={() => applyLookupSelection(choice)}
+                  >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="font-semibold text-white">{choice.data.accountName || "Unnamed Account"}</p>
+                        <p className="mt-1 font-mono text-sm text-gold-light">{choice.data.accountNo}</p>
+                        <p className="mt-1 text-sm text-white/65">
+                          {[choice.data.bank, choice.data.branch, choice.data.ifscCode].filter(Boolean).join(" · ") || "Bank details saved"}
+                        </p>
+                      </div>
+                      <div className="text-left text-xs text-white/45 sm:text-right">
+                        <p>{choice.storeCode || "Store"}</p>
+                        <p>{choice.orderNo}</p>
+                      </div>
                     </div>
-                    <div className="text-left text-xs text-white/45 sm:text-right">
-                      <p>{choice.storeCode || "Store"}</p>
-                      <p>{choice.orderNo}</p>
-                    </div>
-                  </div>
-                </button>
+                  </button>
+                  <button
+                    type="button"
+                    className="flex w-12 shrink-0 items-center justify-center border-l border-white/10 text-white/55 transition hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    aria-label={`Delete saved account ${choice.data.accountName || choice.data.accountNo || ""}`.trim()}
+                    title="Delete saved suggestion"
+                    disabled={deletingSuggestion === choice.signature}
+                    onClick={() => deleteLookupChoice(choice)}
+                  >
+                    <X className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </div>
               ))}
             </div>
 

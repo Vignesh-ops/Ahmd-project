@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHash } from "crypto";
 import prisma from "@/lib/prisma";
 import {
   badRequest,
@@ -29,6 +30,19 @@ const bankOrderLookupSelect = {
     select: userSelect
   }
 };
+
+function buildBankSuggestionSignature(data) {
+  const parts = [
+    Number(data?.country || 1),
+    cleanString(data?.accountName).toLowerCase(),
+    cleanString(data?.accountNo),
+    cleanString(data?.bank).toLowerCase(),
+    cleanString(data?.branch).toLowerCase(),
+    cleanString(data?.ifscCode).toLowerCase()
+  ];
+
+  return createHash("sha256").update(parts.join("|")).digest("hex");
+}
 
 export async function GET(request) {
   const session = await getApiSession();
@@ -61,7 +75,7 @@ export async function GET(request) {
     orderBy: {
       date: "desc"
     },
-    take: 20
+    take: 100
   });
 
   if (!recentOrders.length) {
@@ -70,18 +84,22 @@ export async function GET(request) {
 
   const matches = [];
   const seenAccounts = new Set();
+  const deletedSuggestions = await prisma.customerAutofillExclusion.findMany({
+    where: {
+      userId: Number(session.user.id),
+      type,
+      mobile: mobileDigits
+    },
+    select: {
+      signature: true
+    }
+  });
+  const deletedSignatures = new Set(deletedSuggestions.map((item) => item.signature));
 
   recentOrders.forEach((order) => {
-    const signature = [
-      order.country,
-      cleanString(order.accountName).toLowerCase(),
-      cleanString(order.accountNo),
-      cleanString(order.bank).toLowerCase(),
-      cleanString(order.branch).toLowerCase(),
-      cleanString(order.ifscCode).toLowerCase()
-    ].join("|");
+    const signature = buildBankSuggestionSignature(order);
 
-    if (seenAccounts.has(signature)) {
+    if (seenAccounts.has(signature) || deletedSignatures.has(signature)) {
       return;
     }
 
@@ -91,6 +109,7 @@ export async function GET(request) {
       date: order.date,
       storeName: order.user?.storeName || "",
       storeCode: order.user?.storeCode || "",
+      signature,
       data: {
         country: order.country,
         senderName: order.senderName || "",
@@ -105,6 +124,10 @@ export async function GET(request) {
 
   const latestMatch = matches[0];
 
+  if (!latestMatch) {
+    return NextResponse.json({ found: false, mobile });
+  }
+
   return NextResponse.json({
     found: true,
     type,
@@ -115,4 +138,57 @@ export async function GET(request) {
     data: latestMatch.data,
     matches
   });
+}
+
+export async function DELETE(request) {
+  const session = await getApiSession();
+
+  if (!session?.user) {
+    return unauthorized();
+  }
+
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+
+  const type = cleanString(body.type).toLowerCase() || "bank";
+  const mobileDigits = digitsOnly(cleanString(body.mobile));
+
+  if (type !== "bank") {
+    return badRequest("Only bank customer lookup is available.");
+  }
+
+  if (!isValidMobile(mobileDigits)) {
+    return badRequest("A valid customer mobile number is required.");
+  }
+
+  const submittedSignature = cleanString(body.signature);
+  const signature = submittedSignature || (body.data ? buildBankSuggestionSignature(body.data) : "");
+
+  if (!signature) {
+    return badRequest("A saved customer suggestion is required.");
+  }
+
+  await prisma.customerAutofillExclusion.upsert({
+    where: {
+      userId_type_mobile_signature: {
+        userId: Number(session.user.id),
+        type,
+        mobile: mobileDigits,
+        signature
+      }
+    },
+    create: {
+      userId: Number(session.user.id),
+      type,
+      mobile: mobileDigits,
+      signature
+    },
+    update: {}
+  });
+
+  return NextResponse.json({ ok: true, mobile: mobileDigits, signature });
 }
