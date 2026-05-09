@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight, Home, Landmark, Phone } from "lucide-react";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import LocalDateTime from "./LocalDateTime";
 import StatusBadge from "./StatusBadge";
 
 export default function OrderCard({ order, href, showStore = false, children }) {
@@ -53,7 +54,7 @@ export default function OrderCard({ order, href, showStore = false, children }) 
         </div>
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-white/35">Date</p>
-          <p className="mt-1 text-white">{formatDateTime(order.date)}</p>
+          <LocalDateTime value={order.date} className="mt-1 block text-white" />
         </div>
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-white/35">Contact</p>

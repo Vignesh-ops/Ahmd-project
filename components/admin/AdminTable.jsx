@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
+import LocalDateTime from "@/components/ui/LocalDateTime";
 import StatusBadge from "@/components/ui/StatusBadge";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 export default function AdminTable({ orders = [], onDelete, printMode = false }) {
   const wrapperClassName = printMode
@@ -48,7 +49,10 @@ export default function AdminTable({ orders = [], onDelete, printMode = false })
                       Payable {formatCurrency(order.totalPayableAmount, "MYR")}
                     </div>
                   ) : null}
-                  <div className={printMode ? "text-xs text-black/70" : "text-xs text-white/35"}>{formatDate(order.date)}</div>
+                  <LocalDateTime
+                    value={order.date}
+                    className={printMode ? "block text-xs text-black/70" : "block text-xs text-white/35"}
+                  />
                 </td>
                 <td className="px-4 py-4">{printMode ? order.status : <StatusBadge status={order.status} />}</td>
                 {!printMode ? (
