@@ -40,7 +40,8 @@ function ensureSelectedMonthOption(months, selectedMonth) {
   const { from } = buildMonthRange(selectedMonth);
   const label = new Intl.DateTimeFormat("en-US", {
     month: "long",
-    year: "numeric"
+    year: "numeric",
+    timeZone: "UTC"
   }).format(from);
 
   return [{ value: selectedMonth, label }, ...months];
