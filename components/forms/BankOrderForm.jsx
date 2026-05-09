@@ -22,6 +22,10 @@ function getCountryDefaults(country, settings) {
     : { rate: settings.rate2, serviceCharge: settings.service2, label: "India" };
 }
 
+function normalizeAccountNo(value) {
+  return String(value ?? "").replace(/\s+/g, "");
+}
+
 function buildInitialForm(orderNo, settings, country = 1) {
   const defaults = getCountryDefaults(country, settings);
   const initialTotalPayableAmount = calculateTotalPayable({
@@ -58,7 +62,7 @@ function buildFormFromOrder(order, settings) {
     country: Number(order.country || 1),
     senderName: order.senderName || "",
     accountName: order.accountName || "",
-    accountNo: order.accountNo || "",
+    accountNo: normalizeAccountNo(order.accountNo),
     bank: order.bank || "",
     branch: order.branch || "",
     ifscCode: order.ifscCode || "",
@@ -113,10 +117,11 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   function updateField(name, value) {
+    const nextValue = name === "accountNo" ? normalizeAccountNo(value) : value;
     setSavedOrder(null);
     setForm((current) => ({
       ...current,
-      [name]: value
+      [name]: nextValue
     }));
   }
 
@@ -202,7 +207,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         country: nextCountry,
         senderName: preserveSenderName ? current.senderName || selection.data.senderName || "" : selection.data.senderName || "",
         accountName: selection.data.accountName || "",
-        accountNo: selection.data.accountNo || "",
+        accountNo: normalizeAccountNo(selection.data.accountNo),
         bank: selection.data.bank || "",
         branch: selection.data.branch || "",
         ifscCode: selection.data.ifscCode || "",
@@ -231,7 +236,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
     setLookup({
       status: "success",
-      message: `Loaded saved account ${selection.data.accountNo}${selection.storeCode ? ` · ${selection.storeCode}` : ""}.`
+      message: `Loaded saved account ${normalizeAccountNo(selection.data.accountNo)}${selection.storeCode ? ` · ${selection.storeCode}` : ""}.`
     });
     setLookupModal({
       open: false,
@@ -379,6 +384,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       },
       body: JSON.stringify({
         ...form,
+        accountNo: normalizeAccountNo(form.accountNo),
         totalPayableAmount: Number(form.totalPayableAmount || 0)
       })
     });
