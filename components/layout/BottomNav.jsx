@@ -18,6 +18,7 @@ const nonKeyboardInputTypes = new Set([
   "reset",
   "submit"
 ]);
+const keyboardHeightThreshold = 120;
 
 function opensSoftKeyboard(element) {
   if (!(element instanceof HTMLElement)) {
@@ -49,9 +50,27 @@ export default function BottomNav({ role }) {
 
   useEffect(() => {
     let blurTimer;
+    const getViewportHeight = () => window.visualViewport?.height || window.innerHeight;
+    const baselineHeight = {
+      current: Math.max(window.innerHeight, getViewportHeight())
+    };
 
     function updateVisibility(target = document.activeElement) {
-      setHideForKeyboard(opensSoftKeyboard(target));
+      const hasKeyboardFieldFocus = opensSoftKeyboard(target);
+      const currentViewportHeight = getViewportHeight();
+      const visualViewportKeyboardGap = window.visualViewport
+        ? window.innerHeight - window.visualViewport.height
+        : 0;
+      const viewportKeyboardGap = baselineHeight.current - currentViewportHeight;
+      const keyboardIsOpen =
+        hasKeyboardFieldFocus &&
+        Math.max(visualViewportKeyboardGap, viewportKeyboardGap) > keyboardHeightThreshold;
+
+      if (!keyboardIsOpen) {
+        baselineHeight.current = Math.max(baselineHeight.current, window.innerHeight, currentViewportHeight);
+      }
+
+      setHideForKeyboard(keyboardIsOpen);
     }
 
     function handleFocusIn(event) {
@@ -64,14 +83,22 @@ export default function BottomNav({ role }) {
       blurTimer = window.setTimeout(() => updateVisibility(), 80);
     }
 
+    function handleViewportResize() {
+      updateVisibility();
+    }
+
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
+    window.addEventListener("resize", handleViewportResize);
+    window.visualViewport?.addEventListener("resize", handleViewportResize);
     updateVisibility();
 
     return () => {
       window.clearTimeout(blurTimer);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
+      window.removeEventListener("resize", handleViewportResize);
+      window.visualViewport?.removeEventListener("resize", handleViewportResize);
     };
   }, []);
 
