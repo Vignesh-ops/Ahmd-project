@@ -1,12 +1,79 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Home, History, Landmark, Settings, Shield } from "lucide-react";
 import AppLink from "@/components/navigation/AppLink";
 import { cn } from "@/lib/utils";
 
+const nonKeyboardInputTypes = new Set([
+  "button",
+  "checkbox",
+  "color",
+  "file",
+  "hidden",
+  "image",
+  "radio",
+  "range",
+  "reset",
+  "submit"
+]);
+
+function opensSoftKeyboard(element) {
+  if (!(element instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (element.isContentEditable) {
+    return true;
+  }
+
+  if (element instanceof HTMLTextAreaElement) {
+    return !element.disabled && !element.readOnly;
+  }
+
+  if (element instanceof HTMLSelectElement) {
+    return !element.disabled;
+  }
+
+  if (element instanceof HTMLInputElement) {
+    return !element.disabled && !element.readOnly && !nonKeyboardInputTypes.has(element.type);
+  }
+
+  return false;
+}
+
 export default function BottomNav({ role }) {
   const pathname = usePathname();
+  const [hideForKeyboard, setHideForKeyboard] = useState(false);
+
+  useEffect(() => {
+    let blurTimer;
+
+    function updateVisibility(target = document.activeElement) {
+      setHideForKeyboard(opensSoftKeyboard(target));
+    }
+
+    function handleFocusIn(event) {
+      window.clearTimeout(blurTimer);
+      updateVisibility(event.target);
+    }
+
+    function handleFocusOut() {
+      window.clearTimeout(blurTimer);
+      blurTimer = window.setTimeout(() => updateVisibility(), 80);
+    }
+
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
+    updateVisibility();
+
+    return () => {
+      window.clearTimeout(blurTimer);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
+    };
+  }, []);
 
   const items = [
     { href: "/", label: "Home", icon: Home },
@@ -20,7 +87,12 @@ export default function BottomNav({ role }) {
   }
 
   return (
-    <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-white/5 bg-dark-surface/95 backdrop-blur-xl md:hidden">
+    <nav
+      className={cn(
+        "bottom-nav fixed bottom-0 left-0 right-0 z-30 border-t border-white/5 bg-dark-surface/95 backdrop-blur-xl md:hidden",
+        hideForKeyboard && "hidden"
+      )}
+    >
       <div className={cn("grid h-16", role === "admin" ? "grid-cols-5" : "grid-cols-4")}>
         {items.map((item) => {
           const active =
