@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, Landmark, RotateCcw, Save, ShieldCheck, X } from "lucide-react";
+import { Calculator, Landmark, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
@@ -109,6 +109,9 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     mobile: ""
   });
   const [deletingSuggestion, setDeletingSuggestion] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmChoice, setDeleteConfirmChoice] = useState(null);
+  const [deleteConfirmError, setDeleteConfirmError] = useState(null);
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
   const calculatedTotalPayableAmount = useMemo(
@@ -271,10 +274,19 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   async function deleteLookupChoice(choice) {
+    setDeleteConfirmChoice(choice);
+    setShowDeleteConfirm(true);
+    setDeleteConfirmError(null);
+  }
+
+  async function confirmDeleteLookupChoice() {
+    if (!deleteConfirmChoice) return;
+
+    const choice = deleteConfirmChoice;
     const signature = choice?.signature;
     const mobile = lookupModal.mobile || form.senderMobile;
 
-    if (!signature || deletingSuggestion) {
+    if (!signature) {
       return;
     }
 
@@ -318,11 +330,11 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
         return remaining;
       });
+      
+      setShowDeleteConfirm(false);
+      setDeleteConfirmChoice(null);
     } catch (error) {
-      setLookup({
-        status: "error",
-        message: error.message || "Could not delete saved customer suggestion."
-      });
+      setDeleteConfirmError(error.message || "Could not delete saved customer suggestion.");
     } finally {
       setDeletingSuggestion("");
     }
@@ -820,7 +832,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
                 >
                   <button
                     type="button"
-                    className="min-w-0 flex-1 p-4 text-left"
+                    className="min-w-0 flex-1 p-5 text-left transition hover:bg-white/5"
                     onClick={() => applyLookupSelection(choice)}
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -837,16 +849,18 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
                       </div>
                     </div>
                   </button>
-                  <button
-                    type="button"
-                    className="flex w-12 shrink-0 items-center justify-center border-l border-white/10 text-white/55 transition hover:bg-red-500/15 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label={`Delete saved account ${choice.data.accountName || choice.data.accountNo || ""}`.trim()}
-                    title="Delete saved suggestion"
-                    disabled={deletingSuggestion === choice.signature}
-                    onClick={() => deleteLookupChoice(choice)}
-                  >
-                    <X className="h-5 w-5" aria-hidden="true" />
-                  </button>
+                  <div className="flex flex-col items-center justify-center border-l border-white/10 px-3 py-2">
+                    <button
+                      type="button"
+                      className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 transition hover:bg-red-500/20 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label={`Delete saved account ${choice.data.accountName || choice.data.accountNo || ""}`.trim()}
+                      title="Delete saved suggestion"
+                      disabled={deletingSuggestion === choice.signature}
+                      onClick={() => deleteLookupChoice(choice)}
+                    >
+                      <Trash2 className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -858,6 +872,62 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               <Button type="button" variant="ghost" onClick={() => setLookupModal({ open: false, mobile: "" })}>
                 Close
               </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showDeleteConfirm && deleteConfirmChoice ? (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-panel w-full max-w-sm rounded-[28px] border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white">Delete Saved Account?</h3>
+            </div>
+
+            <p className="text-white/60 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-red-300">{deleteConfirmChoice.data.accountName || deleteConfirmChoice.data.accountNo}</span>? This action cannot be undone.
+            </p>
+
+            {deleteConfirmError && (
+              <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                {deleteConfirmError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteConfirmChoice(null);
+                  setDeleteConfirmError(null);
+                }}
+                disabled={deletingSuggestion === deleteConfirmChoice.signature}
+                className="dialog-secondary-button flex-1 rounded-[20px] bg-white/10 px-4 py-2 text-white transition-colors disabled:opacity-50 hover:bg-white/15"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteLookupChoice}
+                disabled={deletingSuggestion === deleteConfirmChoice.signature}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 rounded-[20px] transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                {deletingSuggestion === deleteConfirmChoice.signature ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span className="text-white">Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 text-red-100" />
+                    <span className="text-white">Delete</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
