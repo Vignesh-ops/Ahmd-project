@@ -14,7 +14,8 @@
   },
   "plugins": {
     "StatusBar": {
-      "overlay": false
+      "overlay": false,
+      "backgroundcolor": "#000000"
     }
   }
 }
