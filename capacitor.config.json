@@ -11,5 +11,10 @@
   },
   "android": {
     "allowMixedContent": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlay": false
+    }
   }
 }

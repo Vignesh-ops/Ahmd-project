@@ -28,6 +28,7 @@
     "@capacitor/filesystem": "^8.1.2",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@posx/capacitor-usb-printer": "^0.0.8",
     "@prisma/client": "^5.18.0",
     "bcryptjs": "^2.4.3",
