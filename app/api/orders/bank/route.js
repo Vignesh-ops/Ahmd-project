@@ -66,6 +66,42 @@ export async function GET(request) {
   return NextResponse.json(orders.map(normalizeBankOrder));
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isScopedBankOrderNo(orderNo, storeCode, currency) {
+  const safeStoreCode = storeCode || "S0";
+  const safeCurrency = String(currency).toUpperCase() === "INR" ? "INR" : "IDR";
+  const pattern = new RegExp(`^B-${escapeRegExp(safeStoreCode)}-\\d{8}-${safeCurrency}-\\d{4}$`);
+
+  return pattern.test(orderNo);
+}
+
+function isUniqueOrderNoError(error) {
+  return error?.code === "P2002" && String(error?.meta?.target || "").includes("orderNo");
+}
+
+function isSameBankOrder(order, expected) {
+  return (
+    order &&
+    Number(order.userId) === Number(expected.userId) &&
+    Number(order.country) === Number(expected.country) &&
+    order.senderName === expected.senderName &&
+    order.accountName === expected.accountName &&
+    order.accountNo === expected.accountNo &&
+    order.bank === expected.bank &&
+    (order.branch || null) === (expected.branch || null) &&
+    (order.ifscCode || null) === (expected.ifscCode || null) &&
+    Number(order.depositAmount) === Number(expected.depositAmount) &&
+    Number(order.rate) === Number(expected.rate) &&
+    Number(order.serviceCharge) === Number(expected.serviceCharge) &&
+    Number(order.totalPayableAmount) === Number(expected.totalPayableAmount) &&
+    order.senderMobile === expected.senderMobile &&
+    (order.notes || null) === (expected.notes || null)
+  );
+}
+
 export async function POST(request) {
   const session = await getApiSession();
 
@@ -104,6 +140,10 @@ export async function POST(request) {
   }
 
   const currency = bankCurrencyFromCountry(country);
+  const submittedOrderNo = cleanString(body.orderNo);
+  const clientOrderNo = isScopedBankOrderNo(submittedOrderNo, session.user.storeCode, currency)
+    ? submittedOrderNo
+    : null;
 
   if (!isValidMobile(senderMobile)) {
     return badRequest("Sender mobile must be at least 10 digits.");
@@ -125,48 +165,79 @@ export async function POST(request) {
     return badRequest("Total payable amount must be zero or greater.");
   }
 
-  let order = null;
+  const orderData = {
+    userId: Number(session.user.id),
+    country,
+    senderName,
+    accountName,
+    accountNo,
+    bank,
+    branch,
+    ifscCode,
+    depositAmount,
+    rate,
+    serviceCharge,
+    totalPayableAmount,
+    senderMobile,
+    notes,
+    status: "pending"
+  };
+  const includeUser = {
+    user: {
+      select: {
+        id: true,
+        username: true,
+        storeName: true,
+        storeCode: true
+      }
+    }
+  };
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const orderNo = await generateCurrencyOrderNo("B", session.user.storeCode, prisma, currency);
+  let order = null;
+  const attemptedOrderNos = new Set();
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const orderNo =
+      attempt === 0 && clientOrderNo
+        ? clientOrderNo
+        : await generateCurrencyOrderNo("B", session.user.storeCode, prisma, currency);
+
+    if (attemptedOrderNos.has(orderNo)) {
+      continue;
+    }
+
+    attemptedOrderNos.add(orderNo);
 
     try {
       order = await prisma.bankOrder.create({
         data: {
           orderNo,
-          userId: Number(session.user.id),
-          country,
-          senderName,
-          accountName,
-          accountNo,
-          bank,
-          branch,
-          ifscCode,
-          depositAmount,
-          rate,
-          serviceCharge,
-          totalPayableAmount,
-          senderMobile,
-          notes,
-          status: "pending"
+          ...orderData
         },
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              storeName: true,
-              storeCode: true
-            }
-          }
-        }
+        include: includeUser
       });
       break;
     } catch (error) {
-      if (error?.code !== "P2002" || !String(error?.meta?.target || "").includes("orderNo") || attempt === 2) {
+      if (!isUniqueOrderNoError(error) || attempt === 3) {
         throw error;
       }
+
+      const existingOrder = await prisma.bankOrder.findUnique({
+        where: {
+          orderNo
+        },
+        include: includeUser
+      });
+
+      if (isSameBankOrder(existingOrder, orderData)) {
+        order = existingOrder;
+        break;
+      }
     }
+  }
+
+  if (!order) {
+    throw new Error("Could not save bank order.");
   }
 
   return NextResponse.json(normalizeBankOrder(order), { status: 201 });

@@ -21,6 +21,7 @@ export default function Button({
   icon: Icon,
   fullWidth = false,
   href,
+  disabled,
   ...props
 }) {
   const classes = cn(
@@ -42,6 +43,7 @@ export default function Button({
   return (
     <button
       className={classes}
+      disabled={disabled || loading}
       {...props}
     >
       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : Icon ? <Icon className="h-4 w-4" /> : null}

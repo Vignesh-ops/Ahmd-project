@@ -29,6 +29,7 @@ Production build commands:
 npm run build
 npm run android:sync
 cd android
+./gradlew clean
 ./gradlew assembleRelease (APK)
 ./gradlew bundleRelease (Play Store AAB)
 Also important for production updates:

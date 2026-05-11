@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calculator, Landmark, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -112,6 +112,8 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmChoice, setDeleteConfirmChoice] = useState(null);
   const [deleteConfirmError, setDeleteConfirmError] = useState(null);
+  const actionInFlightRef = useRef(false);
+  const savedOrderRef = useRef(initialOrder);
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
   const calculatedTotalPayableAmount = useMemo(
@@ -136,6 +138,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
   function updateField(name, value) {
     const nextValue = name === "accountNo" ? normalizeAccountNo(value) : value;
+    savedOrderRef.current = null;
     setSavedOrder(null);
     setForm((current) => ({
       ...current,
@@ -157,6 +160,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       return;
     }
 
+    savedOrderRef.current = null;
     setSavedOrder(null);
     setForm((current) => {
       const nextForm = {
@@ -180,6 +184,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   async function updateCountry(country) {
     const defaults = getCountryDefaults(country, settings);
 
+    savedOrderRef.current = null;
     setSavedOrder(null);
     setForm((current) => {
       const nextTotalPayableAmount = calculateTotalPayable({
@@ -209,6 +214,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   function applyLookupSelection(selection, { preserveSenderName = true } = {}) {
     let nextOrderNoCountry = null;
 
+    savedOrderRef.current = null;
     setSavedOrder(null);
     setForm((current) => {
       const currentDefaults = getCountryDefaults(current.country, settings);
@@ -443,6 +449,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   async function startNewOrder() {
+    savedOrderRef.current = null;
     setSavedOrder(null);
     setMessage("");
     setLookup({
@@ -454,8 +461,9 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       open: false,
       mobile: ""
     });
+    const nextOrderNo = await fetchFreshOrderNo(form.country);
     setForm((current) => ({
-      ...buildInitialForm(current.orderNo, settings, current.country),
+      ...buildInitialForm(nextOrderNo, settings, current.country),
       rate: current.rate,
       serviceCharge: current.serviceCharge
     }));
@@ -480,6 +488,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       throw new Error(payload.error || "Could not save bank order.");
     }
 
+    savedOrderRef.current = payload;
     setSavedOrder(payload);
     setForm((current) => ({
       ...current,
@@ -492,10 +501,12 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   async function syncDoneStatus(order, actionLabel) {
     try {
       const updatedOrder = await markOrderDone(order);
+      savedOrderRef.current = updatedOrder;
       setSavedOrder(updatedOrder);
       setMessage(`Order ${updatedOrder.orderNo} ${actionLabel} and marked done.`);
       return updatedOrder;
     } catch (error) {
+      savedOrderRef.current = order;
       setSavedOrder(order);
       setMessage(`Order ${order.orderNo} ${actionLabel}, but status update failed: ${error.message}`);
       return order;
@@ -503,13 +514,18 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   async function handleAction(intent) {
+    if (actionInFlightRef.current) {
+      return;
+    }
+
     try {
+      actionInFlightRef.current = true;
       setLoading(intent);
       setMessage("");
       if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
-      const order = savedOrder || (await persistOrder());
+      const order = savedOrderRef.current || (await persistOrder());
 
       if (intent === "save") {
         router.push(`/receipt/${order.orderNo}`);
@@ -528,6 +544,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     } catch (error) {
       setMessage(error.message);
     } finally {
+      actionInFlightRef.current = false;
       setLoading("");
     }
   }
@@ -555,6 +572,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
 
   function handleClearForm() {
+    savedOrderRef.current = null;
     setSavedOrder(null);
     setMessage("");
     setLookup({
@@ -780,6 +798,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               type="button"
               icon={isEditing ? Save : Landmark}
               loading={loading === "save"}
+              disabled={Boolean(loading)}
               onClick={() => handleAction("save")}
               fullWidth
             >
