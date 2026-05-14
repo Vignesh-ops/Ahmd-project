@@ -54,7 +54,9 @@ export async function GET(request) {
       orderCountIDR: 0,
       orderCountINR: 0,
       totalIDR: 0,
-      totalINR: 0
+      totalINR: 0,
+      totalPayableIDRMYR: 0,
+      totalPayableINRMYR: 0
     };
 
     return {
@@ -65,7 +67,9 @@ export async function GET(request) {
       orderCountIDR: storeSummary.orderCountIDR,
       orderCountINR: storeSummary.orderCountINR,
       totalIDR: storeSummary.totalIDR,
-      totalINR: storeSummary.totalINR
+      totalINR: storeSummary.totalINR,
+      totalPayableIDRMYR: storeSummary.totalPayableIDRMYR,
+      totalPayableINRMYR: storeSummary.totalPayableINRMYR
     };
   });
 

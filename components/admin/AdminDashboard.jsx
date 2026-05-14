@@ -386,8 +386,12 @@ export default function AdminDashboard({ stores }) {
               </p>
               <p className="mt-2 text-lg font-semibold text-white">{store.storeName}</p>
               <p className="mt-4 text-sm text-white/65">{store.count} orders</p>
-              <p className="mt-1 text-sm text-white/55">IDR: {formatCurrency(store.totalIDR, "IDR")}</p>
-              <p className="text-sm text-white/55">RS: {formatCurrencyPlain(store.totalINR, "INR")}</p>
+              <p className="mt-1 text-sm text-white/55">
+                IDR: {formatCurrency(store.totalIDR, "IDR")}/{formatCurrencyPlain(store.totalPayableIDRMYR, "MYR")}
+              </p>
+              <p className="text-sm text-white/55">
+                RS: {formatCurrencyPlain(store.totalINR, "INR")}/{formatCurrencyPlain(store.totalPayableINRMYR, "MYR")}
+              </p>
               <Button className="mt-4 w-full" variant="secondary" href={`/history?storeCode=${store.storeCode}`}>
                 View {store.role === "admin" ? "Admin" : "Store"} History
               </Button>
