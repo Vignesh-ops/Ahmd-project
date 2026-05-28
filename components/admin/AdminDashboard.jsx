@@ -304,12 +304,12 @@ export default function AdminDashboard({ stores }) {
       const result = await exportXlsx(
         "ubi-orders.xlsx",
         [
-          ["OrderNo", "Store", "Type", "Customer", "Details", "Amount", "Status", "Date"],
+          ["OrderNo", "Store", "Customer", "Account No", "Details", "Amount", "Status", "Date"],
           ...exportOrders.map((order) => [
             order.orderNo,
             order.storeCode,
-            order.typeLabel,
             order.customerName,
+            order.accountNo || "",
             order.bankOrAddress,
             formatCurrency(order.amount, order.currency),
             order.status,

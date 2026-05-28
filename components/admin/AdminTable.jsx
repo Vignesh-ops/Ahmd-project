@@ -23,8 +23,8 @@ export default function AdminTable({ orders = [], onDelete, printMode = false })
             <tr>
               <th className="px-4 py-4">Order No</th>
               <th className="px-4 py-4">Store</th>
-              <th className="px-4 py-4">Type</th>
               <th className="px-4 py-4">Customer</th>
+              <th className="px-4 py-4">Account No</th>
               <th className="px-4 py-4">Bank / Address</th>
               <th className="px-4 py-4">Amount</th>
               <th className="px-4 py-4">Status</th>
@@ -39,8 +39,8 @@ export default function AdminTable({ orders = [], onDelete, printMode = false })
                   {order.storeName}
                   <div className={printMode ? "text-xs text-black/70" : "text-xs text-white/35"}>{order.storeCode}</div>
                 </td>
-                <td className={printMode ? "px-4 py-4" : "px-4 py-4 text-white"}>{order.typeLabel}</td>
                 <td className={printMode ? "px-4 py-4" : "px-4 py-4 text-white"}>{order.customerName}</td>
+                <td className={printMode ? "px-4 py-4 font-mono" : "px-4 py-4 font-mono text-white/80"}>{order.accountNo || "-"}</td>
                 <td className={printMode ? "px-4 py-4" : "px-4 py-4 text-white/65"}>{order.bankOrAddress}</td>
                 <td className={printMode ? "px-4 py-4" : "px-4 py-4 text-white"}>
                   {formatCurrency(order.amount, order.currency)}
