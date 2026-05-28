@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,11 @@ export default function NetworkStatusIndicator() {
   const router = useRouter();
   const isOnline = useNetworkStatus();
   const wasOffline = useRef(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOnline) {
@@ -23,6 +28,22 @@ export default function NetworkStatusIndicator() {
       router.refresh();
     }
   }, [isOnline, router]);
+
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={cn(
+          "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold transition",
+          "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
+        )}
+      >
+        <Wifi className="h-4 w-4" />
+        <span className="hidden sm:inline">Online</span>
+      </button>
+    );
+  }
 
   const Icon = isOnline ? Wifi : WifiOff;
 

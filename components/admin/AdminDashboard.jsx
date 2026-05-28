@@ -319,10 +319,12 @@ export default function AdminDashboard({ stores }) {
         "Orders"
       );
 
-      if (result?.path) {
-        setExportMessage(`XLSX saved to Documents/${result.path}`);
+      if (result?.message) {
+        setExportMessage(result.message);
+      } else if (result?.downloaded) {
+        setExportMessage(`Download starting: ${result.filename}`);
       } else {
-        setExportMessage("XLSX downloaded successfully.");
+        setExportMessage("Download complete.");
       }
     } catch (error) {
       setExportMessage(error?.message || "Failed to export XLSX.");
@@ -418,12 +420,14 @@ export default function AdminDashboard({ stores }) {
             <Input
               label="From"
               type="date"
+              placeholder="Select start date"
               value={filters.from}
               onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))}
             />
             <Input
               label="To"
               type="date"
+              placeholder="Select end date"
               value={filters.to}
               onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))}
             />
