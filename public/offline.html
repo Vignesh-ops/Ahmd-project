@@ -37,12 +37,30 @@
         line-height: 1.6;
         color: rgba(255, 255, 255, 0.72);
       }
+
+      button {
+        min-height: 44px;
+        margin-top: 22px;
+        border: 0;
+        border-radius: 16px;
+        padding: 10px 16px;
+        background: #d4a843;
+        color: #0a0c10;
+        font: inherit;
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
     <div class="card">
       <h1>You're offline</h1>
       <p>AHMAD is still installed on your device. Reconnect to continue loading live orders, history, and settings.</p>
+      <button type="button" onclick="window.location.reload()">Reload</button>
     </div>
+    <script>
+      window.addEventListener("online", function () {
+        window.location.reload();
+      });
+    </script>
   </body>
 </html>

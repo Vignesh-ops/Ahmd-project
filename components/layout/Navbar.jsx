@@ -7,6 +7,7 @@ import AppLink from "@/components/navigation/AppLink";
 import { signOut } from "next-auth/react";
 import Button from "@/components/ui/Button";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import NetworkStatusIndicator from "@/components/network/NetworkStatusIndicator";
 import { cn } from "@/lib/utils";
 
 export default function Navbar({ user }) {
@@ -81,6 +82,7 @@ export default function Navbar({ user }) {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
+          <NetworkStatusIndicator />
           <ThemeToggle showLabel={false} className="px-3" />
           <span className="hidden max-w-[170px] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 sm:inline-flex">
             {isAdmin ? <Shield className="h-4 w-4 text-gold-light" /> : <Store className="h-4 w-4 text-teal" />}
