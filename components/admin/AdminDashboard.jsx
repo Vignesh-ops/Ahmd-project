@@ -11,7 +11,7 @@ import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import ProfitSummary from "@/components/ui/ProfitSummary";
 import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
-import { exportXlsx } from "@/lib/client-export";
+import { exportXlsx, pickXlsxSaveTarget } from "@/lib/client-export";
 import { printCurrentPage } from "@/lib/print";
 import { calculateProfitMYR, formatCurrency, formatCurrencyPlain, formatDate } from "@/lib/utils";
 
@@ -25,6 +25,32 @@ const statusOptions = [
   { label: "Done", value: "done" },
   { label: "Failed", value: "failed" }
 ];
+
+function toFilenamePart(value, fallback) {
+  const cleaned = String(value || fallback)
+    .normalize("NFKD")
+    .replace(/[^A-Za-z0-9 _-]+/g, " ")
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  return (cleaned || fallback).slice(0, 72);
+}
+
+function buildExportFilename(filters, scopeLabel) {
+  const scope = toFilenamePart(scopeLabel, "All_Accounts");
+  const dateRange =
+    filters.from && filters.to
+      ? `${filters.from}_${filters.to}`
+      : filters.from
+        ? `${filters.from}_Onward`
+        : filters.to
+          ? `Until_${filters.to}`
+          : "All_Dates";
+
+  return `Data_${scope}_${toFilenamePart(dateRange, "All_Dates")}.xlsx`;
+}
 
 export default function AdminDashboard({ stores }) {
   const pageSize = 5;
@@ -300,9 +326,17 @@ export default function AdminDashboard({ stores }) {
   async function handleExportXlsx() {
     try {
       setExportMessage("");
+      const saveTarget = await pickXlsxSaveTarget(buildExportFilename(filters, reportScopeLabel));
+
+      if (saveTarget?.canceled || saveTarget?.unsupported) {
+        setExportMessage(saveTarget.message);
+        return;
+      }
+
+      setExportMessage("Preparing XLSX...");
       const exportOrders = await fetchAllMatchingOrders();
       const result = await exportXlsx(
-        "ubi-orders.xlsx",
+        saveTarget,
         [
           ["OrderNo", "Store", "Customer", "Account No", "Details", "Amount", "Status", "Date"],
           ...exportOrders.map((order) => [
@@ -321,10 +355,10 @@ export default function AdminDashboard({ stores }) {
 
       if (result?.message) {
         setExportMessage(result.message);
-      } else if (result?.downloaded) {
-        setExportMessage(`Download starting: ${result.filename}`);
+      } else if (result?.saved) {
+        setExportMessage(`Saved: ${result.filename}`);
       } else {
-        setExportMessage("Download complete.");
+        setExportMessage("XLSX export complete.");
       }
     } catch (error) {
       setExportMessage(error?.message || "Failed to export XLSX.");

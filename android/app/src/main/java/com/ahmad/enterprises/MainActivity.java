@@ -20,6 +20,7 @@ import androidx.core.splashscreen.SplashScreen;
 
 import com.ahmad.enterprises.plugins.AppInfoPlugin;
 import com.ahmad.enterprises.plugins.BluetoothPrinterPlugin;
+import com.ahmad.enterprises.plugins.DocumentSaverPlugin;
 import com.ahmad.enterprises.plugins.WebPrintPlugin;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.WebViewListener;
@@ -56,6 +57,7 @@ public class MainActivity extends BridgeActivity {
         );
         registerPlugin(AppInfoPlugin.class);
         registerPlugin(BluetoothPrinterPlugin.class);
+        registerPlugin(DocumentSaverPlugin.class);
         registerPlugin(WebPrintPlugin.class);
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawableResource(R.drawable.launch_background);

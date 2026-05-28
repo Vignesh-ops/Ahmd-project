@@ -108,6 +108,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     open: false,
     mobile: ""
   });
+  const [lookupSearch, setLookupSearch] = useState("");
   const [deletingSuggestion, setDeletingSuggestion] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmChoice, setDeleteConfirmChoice] = useState(null);
@@ -125,6 +126,45 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       }),
     [form.depositAmount, form.rate, form.serviceCharge]
   );
+  const visibleLookupChoices = useMemo(() => {
+    const query = lookupSearch.trim().toLowerCase();
+
+    return [...lookupChoices]
+      .sort((left, right) => {
+        const leftName = left?.data?.accountName || left?.data?.accountNo || "";
+        const rightName = right?.data?.accountName || right?.data?.accountNo || "";
+        const nameCompare = leftName.localeCompare(rightName, undefined, { sensitivity: "base", numeric: true });
+
+        if (nameCompare !== 0) {
+          return nameCompare;
+        }
+
+        return String(left?.data?.accountNo || "").localeCompare(String(right?.data?.accountNo || ""), undefined, {
+          sensitivity: "base",
+          numeric: true
+        });
+      })
+      .filter((choice) => {
+        if (!query) {
+          return true;
+        }
+
+        const searchable = [
+          choice?.data?.accountName,
+          choice?.data?.accountNo,
+          choice?.data?.bank,
+          choice?.data?.branch,
+          choice?.data?.ifscCode,
+          choice?.storeCode,
+          choice?.orderNo
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchable.includes(query);
+      });
+  }, [lookupChoices, lookupSearch]);
 
   function formatCalculatedTotalPayable(amount) {
     if (!(amount > 0)) {
@@ -266,6 +306,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       open: false,
       mobile: ""
     });
+    setLookupSearch("");
   }
 
   function closeLookupModalForManualEntry() {
@@ -273,6 +314,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       open: false,
       mobile: ""
     });
+    setLookupSearch("");
     setLookup({
       status: "idle",
       message: "Enter receiver details manually for this sender mobile."
@@ -323,6 +365,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             open: false,
             mobile: ""
           });
+          setLookupSearch("");
           setLookup({
             status: "empty",
             message: "No saved customer found for this mobile yet."
@@ -356,6 +399,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         open: false,
         mobile: ""
       });
+      setLookupSearch("");
       setLookup({
         status: "idle",
         message: ""
@@ -389,6 +433,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               open: false,
               mobile: ""
             });
+            setLookupSearch("");
             setLookup({
               status: "empty",
               message: "No saved customer found for this mobile yet."
@@ -413,6 +458,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           open: true,
           mobile
         });
+        setLookupSearch("");
         setLookup({
           status: "success",
           message: `Found ${matches.length} saved accounts for this mobile. Choose one to autofill or continue manually.`
@@ -427,6 +473,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             open: false,
             mobile: ""
           });
+          setLookupSearch("");
           setLookup({
             status: "error",
             message: error.message || "Could not fetch customer details."
@@ -461,6 +508,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       open: false,
       mobile: ""
     });
+    setLookupSearch("");
     const nextOrderNo = await fetchFreshOrderNo(form.country);
     setForm((current) => ({
       ...buildInitialForm(nextOrderNo, settings, current.country),
@@ -584,6 +632,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       open: false,
       mobile: ""
     });
+    setLookupSearch("");
     setForm((current) => ({
       orderNo: current.orderNo,
       country: current.country,
@@ -699,7 +748,15 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               {lookup.message || "Enter an existing sender mobile number to auto-fill saved sender and receiver details."}
             </p>
             {lookupChoices.length > 1 ? (
-              <Button type="button" variant="ghost" className="min-h-0 self-start px-0 py-0 text-xs text-gold-light" onClick={() => setLookupModal({ open: true, mobile: form.senderMobile.trim() })}>
+              <Button
+                type="button"
+                variant="ghost"
+                className="min-h-0 self-start px-0 py-0 text-xs text-gold-light"
+                onClick={() => {
+                  setLookupSearch("");
+                  setLookupModal({ open: true, mobile: form.senderMobile.trim() });
+                }}
+              >
                 View saved accounts
               </Button>
             ) : null}
@@ -843,8 +900,17 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               Multiple receiver accounts were found for {lookupModal.mobile || form.senderMobile}. Select one to autofill the form, or continue with manual entry.
             </p>
 
-            <div className="mt-5 space-y-3 h-[45vh] overflow-y-auto">
-              {lookupChoices.map((choice) => (
+            <Input
+              label="Search"
+              type="search"
+              placeholder="Name, account no, bank, IFSC, store..."
+              value={lookupSearch}
+              onChange={(event) => setLookupSearch(event.target.value)}
+              className="mt-5"
+            />
+
+            <div className="mt-4 h-[45vh] space-y-3 overflow-y-auto">
+              {visibleLookupChoices.map((choice) => (
                 <div
                   key={`${choice.data.accountNo}-${choice.orderNo}`}
                   className="flex w-full items-stretch overflow-hidden rounded-[24px] border border-white/10 bg-white/5 transition hover:border-gold/30 hover:bg-white/10"
@@ -882,13 +948,25 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
                   </div>
                 </div>
               ))}
+              {!visibleLookupChoices.length ? (
+                <div className="rounded-[24px] border border-white/10 bg-white/5 p-5 text-sm text-white/55">
+                  No saved account matches your search.
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <Button type="button" variant="secondary" onClick={closeLookupModalForManualEntry}>
                 Fill Manually
               </Button>
-              <Button type="button" variant="ghost" onClick={() => setLookupModal({ open: false, mobile: "" })}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setLookupModal({ open: false, mobile: "" });
+                  setLookupSearch("");
+                }}
+              >
                 Close
               </Button>
             </div>
