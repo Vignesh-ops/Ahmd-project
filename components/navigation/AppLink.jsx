@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { forwardRef, useMemo } from "react";
 import { useRouteFeedback } from "@/components/navigation/RouteFeedbackProvider";
+import { showNetworkRetryToast } from "@/components/network/NetworkRetryToast";
 
 const AppLink = forwardRef(function AppLink(
   { href, onClick, onMouseEnter, onTouchStart, prefetch = true, ...props },
@@ -53,6 +54,12 @@ const AppLink = forwardRef(function AppLink(
           !event.shiftKey &&
           !event.altKey
         ) {
+          if (!navigator.onLine) {
+            event.preventDefault();
+            showNetworkRetryToast();
+            return;
+          }
+
           startNavigation();
           warmRoute();
         }

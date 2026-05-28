@@ -5,6 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import useNetworkStatus from "./useNetworkStatus";
+import { showNetworkRetryToast } from "./NetworkRetryToast";
 
 const pullThreshold = 82;
 const maxPullDistance = 118;
@@ -95,6 +96,8 @@ export default function PullToRefresh() {
 
         if (isOnlineRef.current) {
           router.refresh();
+        } else {
+          showNetworkRetryToast();
         }
 
         finishRefresh();

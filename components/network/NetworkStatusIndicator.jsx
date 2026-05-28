@@ -5,6 +5,7 @@ import { RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import useNetworkStatus from "./useNetworkStatus";
+import { showNetworkRetryToast } from "./NetworkRetryToast";
 
 export default function NetworkStatusIndicator() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function NetworkStatusIndicator() {
   return (
     <button
       type="button"
-      onClick={() => (isOnline ? router.refresh() : undefined)}
+      onClick={() => (isOnline ? router.refresh() : showNetworkRetryToast())}
       title={isOnline ? "Online. Refresh data" : "Offline. Waiting for network"}
       className={cn(
         "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold transition",

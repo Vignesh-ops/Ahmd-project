@@ -6,6 +6,7 @@ import ThemeProvider from "@/components/theme/ThemeProvider";
 import AppUpdatePrompt from "@/components/app/AppUpdatePrompt";
 import PwaInstallPrompt from "@/components/pwa/PwaInstallPrompt";
 import PwaRegistrar from "@/components/pwa/PwaRegistrar";
+import NetworkRetryToast from "@/components/network/NetworkRetryToast";
 
 export default function Providers({ children }) {
   return (
@@ -14,6 +15,7 @@ export default function Providers({ children }) {
         <RouteFeedbackProvider>
           <PwaRegistrar />
           <AppUpdatePrompt />
+          <NetworkRetryToast />
           {children}
           <PwaInstallPrompt />
         </RouteFeedbackProvider>

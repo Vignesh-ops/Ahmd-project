@@ -1,4 +1,4 @@
-const CACHE_NAME = "ahmad-pwa-v1";
+const CACHE_NAME = "ahmad-pwa-v2";
 const OFFLINE_ASSETS = ["/offline.html", "/manifest.webmanifest", "/Ahmad_logo.png"];
 
 self.addEventListener("install", (event) => {
@@ -25,7 +25,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match("/offline.html")));
+    event.respondWith(fetch(request).catch(() => caches.match(request).then((cached) => cached || caches.match("/offline.html"))));
     return;
   }
 
