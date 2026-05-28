@@ -1,0 +1,2 @@
+Image with src "/Ahmad_logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities

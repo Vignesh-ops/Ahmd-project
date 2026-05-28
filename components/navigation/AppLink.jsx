@@ -31,12 +31,6 @@ const AppLink = forwardRef(function AppLink(
     }
   }
 
-  function refreshRouteAfterNavigation() {
-    window.setTimeout(() => {
-      router.refresh();
-    }, 0);
-  }
-
   return (
     <Link
       ref={ref}
@@ -67,11 +61,6 @@ const AppLink = forwardRef(function AppLink(
           }
 
           startNavigation();
-          warmRoute();
-
-          if (hrefString === "/") {
-            refreshRouteAfterNavigation();
-          }
         }
 
         onClick?.(event);

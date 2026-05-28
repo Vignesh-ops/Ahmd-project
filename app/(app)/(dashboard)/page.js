@@ -6,7 +6,7 @@ import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import OrderCard from "@/components/ui/OrderCard";
 import ProfitSummary from "@/components/ui/ProfitSummary";
-import { getAvailableOrderMonths, getCombinedOrders, getOrderSummary } from "@/lib/orders";
+import { getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -32,18 +32,12 @@ function buildMonthRange(monthValue) {
   };
 }
 
-function ensureSelectedMonthOption(months, selectedMonth) {
-  if (months.some((month) => month.value === selectedMonth)) {
-    return months;
-  }
-
+function formatMonthLabel(selectedMonth) {
   const { from } = buildMonthRange(selectedMonth);
-  const label = new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
     month: "long",
     year: "numeric"
   }).format(from);
-
-  return [{ value: selectedMonth, label }, ...months];
 }
 
 export default async function DashboardPage({ searchParams }) {
@@ -55,16 +49,19 @@ export default async function DashboardPage({ searchParams }) {
     from: monthRange.from,
     to: monthRange.to
   };
-  const [monthSummary, todaySummary, recentOrders, availableMonths] = await Promise.all([
+  const includeProfit = session.user.role === "admin";
+  const [monthSummary, todaySummary, recentOrders] = await Promise.all([
     getOrderSummary({
       sessionUser: session.user,
-      filters: monthFilters
+      filters: monthFilters,
+      includeProfit
     }),
     getOrderSummary({
       sessionUser: session.user,
       filters: {
         today: true
-      }
+      },
+      includeProfit
     }),
     getCombinedOrders({
       sessionUser: session.user,
@@ -72,13 +69,9 @@ export default async function DashboardPage({ searchParams }) {
         ...monthFilters,
         limit: 5
       }
-    }),
-    getAvailableOrderMonths({
-      sessionUser: session.user
     })
   ]);
-  const monthOptions = ensureSelectedMonthOption(availableMonths, selectedMonth);
-  const selectedMonthLabel = monthOptions.find((month) => month.value === selectedMonth)?.label || "Selected Month";
+  const selectedMonthLabel = formatMonthLabel(selectedMonth);
 
   return (
     <div className="page-fade space-y-6">
@@ -94,7 +87,7 @@ export default async function DashboardPage({ searchParams }) {
             </p> */}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <MonthFilter months={monthOptions} value={selectedMonth} />
+            <MonthFilter value={selectedMonth} />
             <Button href="/bank-order" icon={Landmark}>
               New Bank Order
             </Button>
