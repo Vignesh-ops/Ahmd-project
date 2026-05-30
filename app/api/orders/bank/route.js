@@ -182,15 +182,11 @@ export async function POST(request) {
     notes,
     status: "pending"
   };
-  const includeUser = {
-    user: {
-      select: {
-        id: true,
-        username: true,
-        storeName: true,
-        storeCode: true
-      }
-    }
+  const responseUser = {
+    id: session.user.id,
+    username: session.user.username,
+    storeName: session.user.storeName,
+    storeCode: session.user.storeCode
   };
 
   let order = null;
@@ -213,8 +209,7 @@ export async function POST(request) {
         data: {
           orderNo,
           ...orderData
-        },
-        include: includeUser
+        }
       });
       break;
     } catch (error) {
@@ -225,8 +220,7 @@ export async function POST(request) {
       const existingOrder = await prisma.bankOrder.findUnique({
         where: {
           orderNo
-        },
-        include: includeUser
+        }
       });
 
       if (isSameBankOrder(existingOrder, orderData)) {
@@ -240,5 +234,5 @@ export async function POST(request) {
     throw new Error("Could not save bank order.");
   }
 
-  return NextResponse.json(normalizeBankOrder(order), { status: 201 });
+  return NextResponse.json(normalizeBankOrder({ ...order, user: responseUser }), { status: 201 });
 }
