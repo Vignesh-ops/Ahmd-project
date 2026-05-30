@@ -133,6 +133,8 @@ export default function BottomNav({ role }) {
             <AppLink
               key={item.href}
               href={item.href}
+              prefetch={item.href === "/" ? false : undefined}
+              refreshOnNavigate={item.href === "/"}
               className="flex flex-col items-center justify-center gap-1 px-1 py-2"
             >
               <Icon className={cn("h-4 w-4", active ? "text-gold-light" : "text-white/45")} />

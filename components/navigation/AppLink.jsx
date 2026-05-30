@@ -7,7 +7,7 @@ import { useRouteFeedback } from "@/components/navigation/RouteFeedbackProvider"
 import { showNetworkRetryToast } from "@/components/network/NetworkRetryToast";
 
 const AppLink = forwardRef(function AppLink(
-  { href, onClick, onMouseEnter, onTouchStart, prefetch = true, ...props },
+  { href, onClick, onMouseEnter, onTouchStart, prefetch = true, refreshOnNavigate = false, ...props },
   ref
 ) {
   const router = useRouter();
@@ -62,6 +62,10 @@ const AppLink = forwardRef(function AppLink(
 
           startNavigation();
           warmRoute();
+
+          if (refreshOnNavigate && hrefString) {
+            window.sessionStorage.setItem("refresh-after-navigation", hrefString);
+          }
         }
 
         onClick?.(event);
