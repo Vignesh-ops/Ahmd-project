@@ -2,7 +2,27 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, Landmark, RotateCcw, Save, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  BadgeDollarSign,
+  Banknote,
+  Building2,
+  Calculator,
+  CreditCard,
+  FileText,
+  Globe2,
+  Hash,
+  Landmark,
+  MapPin,
+  ReceiptText,
+  Search,
+  Settings2,
+  Smartphone,
+  User,
+  RotateCcw,
+  Save,
+  ShieldCheck,
+  Trash2
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
@@ -723,17 +743,21 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           <button
             type="button"
             onClick={handleClearForm}
-            className="self-end p-2 hover:bg-white/10 rounded-full transition-colors"
+            className="self-end px-4 py-2 bg-gold/20 border border-gold/40 hover:bg-gold/30 rounded-[20px] transition-colors flex items-center gap-2"
             title="Clear form fields (keeps Rate, Service Charge, and Order Number)"
           >
             <RotateCcw size={20} className="text-gold-light" />
+            <span className="text-sm text-gold-light">Reset</span>
           </button>
         </div>
         <div className="grid-form two-col">
-          <Input label="Order No" value={form.orderNo} readOnly mono />
+          <Input label="Order No" icon={Hash} value={form.orderNo} readOnly mono />
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-white/80">Country</span>
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-white/80">
+              <Globe2 className="h-4 w-4 text-gold-light" />
+              Country
+            </span>
             <div className="flex flex-wrap gap-2">
               {countryOptions.map((option) => (
                 <RadioPill
@@ -749,6 +773,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
           <Input
             label="Sender Name"
+            icon={User}
             placeholder="Customer full name"
             value={form.senderName}
             pattern="[\p{L} ]*"
@@ -757,6 +782,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           <div className="space-y-2">
             <Input
               label="Sender Mobile"
+              icon={Smartphone}
               type="tel"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -784,12 +810,14 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
           <Input
             label="Account Name"
+            icon={User}
             placeholder="Receiver account name"
             value={form.accountName}
             onChange={(event) => updateField("accountName", event.target.value)}
           />
           <Input
             label="Account No"
+            icon={CreditCard}
             type="tel"
             inputMode="numeric"
             pattern="[0-9]*"
@@ -800,15 +828,16 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           />
           <Input
             label="Bank Name"
+            icon={Landmark}
             placeholder="BCA / SBI"
             value={form.bank}
             onChange={(event) => updateField("bank", event.target.value)}
           />
           <Input
             label="Deposit Amount"
+            icon={Banknote}
             type="text"
             inputMode="decimal"
-            prefix={form.country === 1 ? "Rp" : "₹"}
             placeholder="0"
             value={form.depositAmount}
             onChange={(event) => updatePricingField("depositAmount", event.target.value)}
@@ -818,12 +847,14 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             <>
               <Input
                 label="Branch"
+                icon={Building2}
                 placeholder="Chennai Main"
                 value={form.branch}
                 onChange={(event) => updateField("branch", event.target.value)}
               />
               <Input
                 label="IFSC Code"
+                icon={MapPin}
                 placeholder="SBIN0001234"
                 value={form.ifscCode}
                 onChange={(event) => updateField("ifscCode", event.target.value)}
@@ -835,6 +866,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           <Input
             label="Rate"
             hint="From store settings by default"
+            icon={BadgeDollarSign}
             type="text"
             inputMode="decimal"
             placeholder="0"
@@ -843,6 +875,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           />
           <Input
             label="Service Charge"
+            icon={Settings2}
             type="text"
             inputMode="decimal"
             placeholder="0"
@@ -852,6 +885,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           <Input
             label="Total Payable Amount (RM)"
             hint="Calculated as deposit amount * rate + service charge"
+            icon={ReceiptText}
             type="text"
             inputMode="decimal"
             placeholder="0"
@@ -863,6 +897,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
           <Input
             label="Notes"
+            icon={FileText}
             placeholder="Optional notes"
             value={form.notes}
             onChange={(event) => updateField("notes", event.target.value)}
@@ -925,6 +960,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
             <Input
               label="Search"
+              icon={Search}
               type="search"
               placeholder="Name, account no, bank, IFSC, store..."
               value={lookupSearch}
