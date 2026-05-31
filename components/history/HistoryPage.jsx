@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, ListFilter } from "lucide-react";
+import { CalendarDays, Filter, ListFilter, RotateCcw, Search } from "lucide-react";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
@@ -33,12 +33,18 @@ export default function HistoryPage({
 }) {
   const router = useRouter();
   const pageSize = 5;
-  const [filters, setFilters] = useState({
+  const initialFilters = {
     from: "",
     to: "",
     status: "all",
     storeCode: initialStoreCode
-  });
+  };
+  const resetFilters = {
+    ...initialFilters,
+    storeCode: isAdmin ? "all" : initialStoreCode
+  };
+  const [draftFilters, setDraftFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState(initialFilters);
   const [orders, setOrders] = useState([]);
   const [summary, setSummary] = useState({
     totalOrders: 0,
@@ -306,6 +312,16 @@ export default function HistoryPage({
     }
   }
 
+  function handleApplyFilters(event) {
+    event.preventDefault();
+    setFilters(draftFilters);
+  }
+
+  function handleResetFilters() {
+    setDraftFilters(resetFilters);
+    setFilters(resetFilters);
+  }
+
   return (
     <div className="space-y-6">
       <InfoDialog
@@ -335,16 +351,30 @@ export default function HistoryPage({
           accounts or view all.
         </div>
       ) : null}
+      <form onSubmit={handleApplyFilters} className="filters-panel glass-panel rounded-[32px] border border-white/5 p-6">
 
-      <div className="filters-panel glass-panel rounded-[32px] border border-white/5 p-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+              <Filter className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Data Scope</h2>
+              <p className="mt-1 text-sm text-white/50">Filter your transaction history</p>
+            </div>
+          </div>
+          <Button type="button" variant="secondary" icon={RotateCcw} onClick={handleResetFilters}>
+            Reset
+          </Button>
+        </div>
         <div className="grid-form two-col">
           {isAdmin ? (
             <StoreFilter
               stores={stores}
               label="Data Scope"
               allLabel="All Accounts"
-              value={filters.storeCode}
-              onChange={(event) => setFilters((current) => ({ ...current, storeCode: event.target.value }))}
+              value={draftFilters.storeCode}
+              onChange={(event) => setDraftFilters((current) => ({ ...current, storeCode: event.target.value }))}
             />
           ) : null}
           <Input
@@ -352,26 +382,29 @@ export default function HistoryPage({
             placeholder="DD/MM/YYYY"
             type="date"
             icon={CalendarDays}
-            value={filters.from}
-            onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))}
+            value={draftFilters.from}
+            onChange={(event) => setDraftFilters((current) => ({ ...current, from: event.target.value }))}
           />
           <Input
             label="To"
             placeholder="DD/MM/YYYY"
             type="date"
             icon={CalendarDays}
-            value={filters.to}
-            onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))}
+            value={draftFilters.to}
+            onChange={(event) => setDraftFilters((current) => ({ ...current, to: event.target.value }))}
           />
           <Select
             label="Status"
             options={statusOptions}
             icon={ListFilter}
-            value={filters.status}
-            onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+            value={draftFilters.status}
+            onChange={(event) => setDraftFilters((current) => ({ ...current, status: event.target.value }))}
           />
         </div>
-      </div>
+        <Button className="mt-6 w-full" type="submit" icon={Search}>
+          Apply Filter
+        </Button>
+      </form>
 
       {actionError ? (
         <div className="rounded-[28px] border border-red-500/30 bg-red-500/10 p-4 text-sm text-white/80">

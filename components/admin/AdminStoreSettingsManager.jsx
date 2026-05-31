@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRightLeft, BadgeDollarSign, IndianRupee, Pencil, Save, Settings2 } from "lucide-react";
+import { ArrowRightLeft, BadgeDollarSign, Pencil, Save, Settings2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,7 @@ const pricingItems = [
     label: "India Service",
     description: "Default service charge",
     accent: "blue",
-    icon: IndianRupee,
+    icon: Settings2,
     flag: "india"
   }
 ];

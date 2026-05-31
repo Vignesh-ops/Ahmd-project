@@ -10,6 +10,8 @@ import {
   ListFilter,
   Loader2,
   Printer,
+  RotateCcw,
+  Search,
   Shield,
   Store
 } from "lucide-react";
@@ -32,6 +34,13 @@ const statusOptions = [
   { label: "Done", value: "done" },
   { label: "Failed", value: "failed" }
 ];
+
+const defaultFilters = {
+  storeCode: "all",
+  from: "",
+  to: "",
+  status: "all"
+};
 
 function toFilenamePart(value, fallback) {
   const cleaned = String(value || fallback)
@@ -95,13 +104,8 @@ export default function AdminDashboard({ stores }) {
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState({
-    storeCode: "all",
-    from: "",
-    to: "",
-    type: "bank",
-    status: "all"
-  });
+  const [draftFilters, setDraftFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState(defaultFilters);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -336,6 +340,17 @@ export default function AdminDashboard({ stores }) {
       setDeleteLoading(false);
     }
   }
+
+  function handleApplyFilters(event) {
+    event.preventDefault();
+    setFilters(draftFilters);
+  }
+
+  function handleResetFilters() {
+    setDraftFilters(defaultFilters);
+    setFilters(defaultFilters);
+  }
+
   async function handleExportXlsx() {
     try {
       setExportMessage("");
@@ -443,10 +458,10 @@ export default function AdminDashboard({ stores }) {
               </div>
               <p className="mt-4 text-sm text-white/65">{store.count} orders</p>
               <p className="mt-1 text-sm text-white/55">
-                IDR: {formatCurrency(store.totalIDR, "IDR")}/{formatCurrencyPlain(store.totalPayableIDRMYR, "MYR")}
+                IDR: {formatCurrency(store.totalIDR, "IDR")} / {formatCurrencyPlain(store.totalPayableIDRMYR, "MYR")}
               </p>
               <p className="text-sm text-white/55">
-                RS: {formatCurrencyPlain(store.totalINR, "INR")}/{formatCurrencyPlain(store.totalPayableINRMYR, "MYR")}
+                INR: {formatCurrencyPlain(store.totalINR, "INR")} / {formatCurrencyPlain(store.totalPayableINRMYR, "MYR")}
               </p>
               <Button className="mt-4 w-full" variant="secondary" icon={History} href={`/history?storeCode=${store.storeCode}`}>
                 View {store.role === "admin" ? "Admin" : "Store"} History
@@ -455,59 +470,67 @@ export default function AdminDashboard({ stores }) {
           ))}
         </div>
 
-        <div className="filters-panel glass-panel rounded-[32px] border border-white/5 p-6">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
-              <Filter className="h-5 w-5" />
+        <form onSubmit={handleApplyFilters} className="filters-panel glass-panel rounded-[32px] border border-white/5 p-6">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+                <Filter className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">Data Scope</h2>
+                <p className="mt-1 text-sm text-white/50">Filter your transaction history</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/35">Filters</p>
-              <h2 className="text-lg font-semibold text-white">Report controls</h2>
-            </div>
+            <Button type="button" variant="secondary" icon={RotateCcw} onClick={handleResetFilters}>
+              Reset
+            </Button>
           </div>
           <div className="grid-form two-col">
             <StoreFilter
               stores={stores}
               label="Data Scope"
               allLabel="All Accounts"
-              value={filters.storeCode}
-              onChange={(event) => setFilters((current) => ({ ...current, storeCode: event.target.value }))}
+              value={draftFilters.storeCode}
+              onChange={(event) => setDraftFilters((current) => ({ ...current, storeCode: event.target.value }))}
             />
             <Input
               label="From"
               type="date"
               placeholder="Select start date"
               icon={CalendarDays}
-              value={filters.from}
-              onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))}
+              value={draftFilters.from}
+              onChange={(event) => setDraftFilters((current) => ({ ...current, from: event.target.value }))}
             />
             <Input
               label="To"
               type="date"
               placeholder="Select end date"
               icon={CalendarDays}
-              value={filters.to}
-              onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))}
+              value={draftFilters.to}
+              onChange={(event) => setDraftFilters((current) => ({ ...current, to: event.target.value }))}
             />
             <Select
               label="Status"
               options={statusOptions}
               icon={ListFilter}
-              value={filters.status}
-              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+              value={draftFilters.status}
+              onChange={(event) => setDraftFilters((current) => ({ ...current, status: event.target.value }))}
             />
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" icon={Download} onClick={() => void handleExportXlsx()}>
-              Export XLSX
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <Button className="sm:col-span-3" type="submit" icon={Search}>
+              Apply Filter
             </Button>
-            <Button variant="secondary" icon={Printer} onClick={() => void handlePrintAll()}>
+            <Button type="button" variant="secondary" icon={Download} onClick={() => void handleExportXlsx()}>
+              Export Report
+            </Button>
+            <Button type="button" variant="secondary" icon={Printer} onClick={() => void handlePrintAll()}>
               Print All
             </Button>
           </div>
           {exportMessage ? <p className="mt-3 text-sm text-white/65">{exportMessage}</p> : null}
-        </div>
+        </form>
 {/* Fancy Delete Confirmation Modal */}
 {showDeleteModal && (
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
