@@ -103,10 +103,10 @@ export default async function DashboardPage({ searchParams }) {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="glass-panel rounded-[36px] border border-white/5 p-6 space-y-4 shadow-xl">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
-          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Month activity</h2>
+          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Monthly Activity</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <StatCard
@@ -134,11 +134,11 @@ export default async function DashboardPage({ searchParams }) {
           />
         </div>
       </section>
-              
-      <section className="space-y-4">
+
+      <section className="glass-panel rounded-[36px] border border-white/5 p-6 space-y-4 shadow-xl">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-white/35">Today</p>
-          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Today&apos;s activity</h2>
+          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Today&apos;s Activity</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <StatCard
