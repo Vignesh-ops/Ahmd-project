@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, KeyRound, Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { Copy, KeyRound, Pencil, Plus, Save, SlidersHorizontal, Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -516,6 +516,9 @@ export default function UsersManager() {
                   <div className="flex flex-wrap gap-2">
                     <Button variant="secondary" href={`/history?storeCode=${user.storeCode}`}>
                       View History
+                    </Button>
+                    <Button variant="secondary" icon={SlidersHorizontal} href="/admin/settings">
+                      Rates
                     </Button>
                     <Button
                       variant="secondary"

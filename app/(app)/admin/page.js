@@ -38,9 +38,14 @@ export default async function AdminPage() {
             Review store activity, export filtered order data, and manage receipts across all operators.
           </p>
         </div>
-        <Button href="/admin/users" variant="secondary">
-          Manage Users
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button href="/admin/settings" variant="secondary">
+            Manage Rates
+          </Button>
+          <Button href="/admin/users" variant="secondary">
+            Manage Users
+          </Button>
+        </div>
       </div>
       <AdminDashboard stores={stores} />
     </div>

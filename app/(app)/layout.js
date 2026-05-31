@@ -9,7 +9,7 @@ export default async function AppLayout({ children }) {
   const session = await requireSession();
   const warmRoutes =
     session.user.role === "admin"
-      ? ["/bank-order", "/history", "/settings", "/admin"]
+      ? ["/bank-order", "/history", "/settings", "/admin", "/admin/users", "/admin/settings"]
       : ["/bank-order", "/history", "/settings"];
 
   return (
