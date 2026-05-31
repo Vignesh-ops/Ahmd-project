@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Download, Landmark, ListFilter, Printer } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarDays,
+  Download,
+  Filter,
+  History,
+  ListFilter,
+  Loader2,
+  Printer,
+  Shield,
+  Store
+} from "lucide-react";
 import AdminTable from "@/components/admin/AdminTable";
 import StoreFilter from "@/components/admin/StoreFilter";
 import Button from "@/components/ui/Button";
@@ -14,10 +25,6 @@ import StatCard from "@/components/ui/StatCard";
 import { exportXlsx, pickXlsxSaveTarget } from "@/lib/client-export";
 import { printCurrentPage } from "@/lib/print";
 import { calculateProfitMYR, formatCurrency, formatCurrencyPlain, formatDate } from "@/lib/utils";
-
-const typeOptions = [
-  { label: "Bank Transfer", value: "bank" }
-];
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -423,10 +430,17 @@ export default function AdminDashboard({ stores }) {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {summary.byStore.map((store) => (
             <div key={store.storeCode} className="glass-panel rounded-[28px] border border-white/5 p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/35">
-                {store.role === "admin" ? "Admin Scope" : store.storeCode}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-white">{store.storeName}</p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+                  {store.role === "admin" ? <Shield className="h-5 w-5" /> : <Store className="h-5 w-5" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.24em] text-white/35">
+                    {store.role === "admin" ? "Admin Scope" : store.storeCode}
+                  </p>
+                  <p className="mt-2 truncate text-lg font-semibold text-white">{store.storeName}</p>
+                </div>
+              </div>
               <p className="mt-4 text-sm text-white/65">{store.count} orders</p>
               <p className="mt-1 text-sm text-white/55">
                 IDR: {formatCurrency(store.totalIDR, "IDR")}/{formatCurrencyPlain(store.totalPayableIDRMYR, "MYR")}
@@ -434,7 +448,7 @@ export default function AdminDashboard({ stores }) {
               <p className="text-sm text-white/55">
                 RS: {formatCurrencyPlain(store.totalINR, "INR")}/{formatCurrencyPlain(store.totalPayableINRMYR, "MYR")}
               </p>
-              <Button className="mt-4 w-full" variant="secondary" href={`/history?storeCode=${store.storeCode}`}>
+              <Button className="mt-4 w-full" variant="secondary" icon={History} href={`/history?storeCode=${store.storeCode}`}>
                 View {store.role === "admin" ? "Admin" : "Store"} History
               </Button>
             </div>
@@ -442,6 +456,15 @@ export default function AdminDashboard({ stores }) {
         </div>
 
         <div className="filters-panel glass-panel rounded-[32px] border border-white/5 p-6">
+          <div className="mb-5 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+              <Filter className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/35">Filters</p>
+              <h2 className="text-lg font-semibold text-white">Report controls</h2>
+            </div>
+          </div>
           <div className="grid-form two-col">
             <StoreFilter
               stores={stores}
@@ -449,14 +472,6 @@ export default function AdminDashboard({ stores }) {
               allLabel="All Accounts"
               value={filters.storeCode}
               onChange={(event) => setFilters((current) => ({ ...current, storeCode: event.target.value }))}
-            />
-            <Select
-              label="Order Type"
-              options={typeOptions}
-              icon={Landmark}
-              value={filters.type}
-              onChange={(event) => setFilters((current) => ({ ...current, type: event.target.value }))}
-              disabled
             />
             <Input
               label="From"
@@ -499,9 +514,7 @@ export default function AdminDashboard({ stores }) {
     <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-red-500/20 rounded-lg">
-          <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
-          </svg>
+          <AlertTriangle className="h-6 w-6 text-red-400" />
         </div>
         <h3 className="text-lg font-semibold text-white">Delete Order?</h3>
       </div>
@@ -531,7 +544,7 @@ export default function AdminDashboard({ stores }) {
         >
           {deleteLoading ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <Loader2 className="h-4 w-4 animate-spin" />
               Deleting...
             </>
           ) : (

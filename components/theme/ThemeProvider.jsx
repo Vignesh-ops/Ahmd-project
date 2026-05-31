@@ -3,7 +3,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "ahmad-theme";
+const TRANSITION_CLASS = "theme-transition";
 const ThemeContext = createContext(null);
+let transitionTimer;
 
 function resolveTheme() {
   if (typeof window === "undefined") {
@@ -26,6 +28,18 @@ function applyTheme(theme) {
 
   document.documentElement.dataset.theme = theme;
   document.body?.setAttribute("data-theme", theme);
+}
+
+function beginThemeTransition() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  window.clearTimeout(transitionTimer);
+  document.documentElement.classList.add(TRANSITION_CLASS);
+  transitionTimer = window.setTimeout(() => {
+    document.documentElement.classList.remove(TRANSITION_CLASS);
+  }, 520);
 }
 
 export default function ThemeProvider({ children }) {
@@ -54,6 +68,7 @@ export default function ThemeProvider({ children }) {
       ready,
       setTheme,
       toggleTheme() {
+        beginThemeTransition();
         setTheme((current) => (current === "light" ? "dark" : "light"));
       }
     }),

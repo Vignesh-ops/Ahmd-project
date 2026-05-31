@@ -2,7 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bluetooth, Check, Plus, RefreshCw, Usb, Wifi } from "lucide-react";
+import {
+  BadgeDollarSign,
+  Bluetooth,
+  Check,
+  IndianRupee,
+  Plus,
+  Printer,
+  RefreshCw,
+  Settings2,
+  Store,
+  Usb,
+  Wifi
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import {
@@ -288,41 +300,50 @@ export default function SettingsForm({ settings, storeName }) {
 
   return (
     <form onSubmit={handleSave} className="glass-panel rounded-[32px] border border-white/5 p-6">
-      <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.24em] text-white/35">Store Settings</p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">{storeName}</h2>
+      <div className="mb-6 flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+          <Store className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-[0.24em] text-white/35">Store Settings</p>
+          <h2 className="mt-2 text-2xl font-semibold text-white">{storeName}</h2>
+        </div>
       </div>
 
       <div className="grid-form two-col">
         <Input
-          label="INDONASIA Exchange Rate"
+          label="Indonesia Exchange Rate"
+          icon={BadgeDollarSign}
           type="number"
           step="0.00001"
           value={form.rate1}
           onChange={(event) => setForm((current) => ({ ...current, rate1: event.target.value }))}
         />
         <Input
-          label="INDIA Exchange Rate"
+          label="India Exchange Rate"
+          icon={IndianRupee}
           type="number"
           step="0.00001"
           value={form.rate2}
           onChange={(event) => setForm((current) => ({ ...current, rate2: event.target.value }))}
         />
         <Input
-          label="INDONASIA Service Charge"
+          label="Indonesia Service Charge"
+          icon={Settings2}
           type="number"
           step="0.00001"
           value={form.service1}
           onChange={(event) => setForm((current) => ({ ...current, service1: event.target.value }))}
         />
         <Input
-          label="INDIA Service Charge"
+          label="India Service Charge"
+          icon={Settings2}
           type="number"
           step="0.00001"
           value={form.service2}
           onChange={(event) => setForm((current) => ({ ...current, service2: event.target.value }))}
         />
-        <Input label="Store Name" value={storeName} disabled className="md:col-span-2" />
+        <Input label="Store Name" icon={Store} value={storeName} disabled className="md:col-span-2" />
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -336,16 +357,22 @@ export default function SettingsForm({ settings, storeName }) {
 
       <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Printer Setup</p>
-            <h3 className="mt-1 text-lg font-semibold text-white">Preferred Printer</h3>
-            <p className="text-sm text-white/50">{preferredLabel}</p>
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+              <Printer className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/35">Printer Setup</p>
+              <h3 className="mt-1 text-lg font-semibold text-white">Preferred Printer</h3>
+              <p className="text-sm text-white/50">{preferredLabel}</p>
+            </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             {/* "Choose Printer" — triggers permission + load on click */}
             <Button
               type="button"
               variant={printerTab === "choose" ? "secondary" : "ghost"}
+              icon={Printer}
               onClick={() => {
                 setPrinterTab("choose");
                 void refreshPrinters();
@@ -373,6 +400,7 @@ export default function SettingsForm({ settings, storeName }) {
             <Button
               type="button"
               variant={printerTab === "add" ? "secondary" : "ghost"}
+              icon={Plus}
               onClick={handleAddPrinterClick}
             >
               Add New Printer
@@ -556,6 +584,7 @@ export default function SettingsForm({ settings, storeName }) {
             type="button"
             variant="secondary"
             className="mt-2"
+            icon={Bluetooth}
             onClick={async () => {
               try {
                 await openBluetoothPermissionSettings();

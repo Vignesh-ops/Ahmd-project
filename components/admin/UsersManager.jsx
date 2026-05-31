@@ -1,7 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Copy, KeyRound, Pencil, Plus, Save, SlidersHorizontal, Trash2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Badge,
+  Building2,
+  Copy,
+  History,
+  KeyRound,
+  LockKeyhole,
+  Pencil,
+  Plus,
+  Save,
+  ShieldCheck,
+  SlidersHorizontal,
+  Store,
+  Trash2,
+  User,
+  UserCog
+} from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -283,20 +300,27 @@ export default function UsersManager() {
   return (
     <div className="space-y-6">
       <form onSubmit={handleAdminAccountUpdate} className="glass-panel rounded-[32px] border border-white/5 p-6">
-        <div className="mb-6">
-          <p className="text-xs uppercase tracking-[0.24em] text-white/35">Admin Account</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Protect and manage the admin login</h2>
+        <div className="mb-6 flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Admin Account</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Protect and manage the admin login</h2>
+          </div>
         </div>
 
         <div className="grid-form two-col">
           <Input
             label="Admin Username"
+            icon={UserCog}
             value={adminForm.username}
             onChange={(event) => setAdminForm((current) => ({ ...current, username: event.target.value }))}
           />
-          <Input label="Account" value={adminAccount?.storeName || "AHMAD Enterprises Admin"} disabled />
+          <Input label="Account" icon={Building2} value={adminAccount?.storeName || "AHMAD Enterprises Admin"} disabled />
           <Input
             label="Current Password"
+            icon={LockKeyhole}
             type="password"
             allowPasswordToggle
             autoComplete="current-password"
@@ -305,6 +329,7 @@ export default function UsersManager() {
           />
           <Input
             label="New Secure Password"
+            icon={KeyRound}
             type="password"
             hint="Optional. Min 8 chars with Aa1!"
             allowPasswordToggle
@@ -322,6 +347,7 @@ export default function UsersManager() {
             <Button
               type="button"
               variant="secondary"
+              icon={History}
               href={`/history?storeCode=${adminAccount?.storeCode || "ADM"}`}
             >
               View Admin History
@@ -343,19 +369,26 @@ export default function UsersManager() {
       </form>
 
       <form onSubmit={handleCreate} className="glass-panel rounded-[32px] border border-white/5 p-6">
-        <div className="mb-6">
-          <p className="text-xs uppercase tracking-[0.24em] text-white/35">Add Store User</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Create as many operators as you need</h2>
+        <div className="mb-6 flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+            <Plus className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.24em] text-white/35">Add Store User</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Create as many operators as you need</h2>
+          </div>
         </div>
 
         <div className="grid-form two-col">
           <Input
             label="Username"
+            icon={User}
             value={newUser.username}
             onChange={(event) => setNewUser((current) => ({ ...current, username: event.target.value }))}
           />
           <Input
             label="Password"
+            icon={KeyRound}
             type="password"
             hint="Min 8 chars with Aa1!"
             allowPasswordToggle
@@ -365,11 +398,13 @@ export default function UsersManager() {
           />
           <Input
             label="Store Name"
+            icon={Store}
             value={newUser.storeName}
             onChange={(event) => setNewUser((current) => ({ ...current, storeName: event.target.value }))}
           />
           <Input
             label="Store Code"
+            icon={Badge}
             value={newUser.storeCode}
             onChange={(event) => setNewUser((current) => ({ ...current, storeCode: event.target.value.toUpperCase() }))}
           />
@@ -391,9 +426,7 @@ export default function UsersManager() {
       <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-red-500/20 rounded-lg">
-            <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
-            </svg>
+            <AlertTriangle className="h-6 w-6 text-red-400" />
           </div>
           <h3 className="text-lg font-semibold text-white">Delete Store User?</h3>
         </div>
@@ -464,11 +497,13 @@ export default function UsersManager() {
                 <div className="grid-form two-col">
                   <Input
                     label="Username"
+                    icon={User}
                     value={editForm.username}
                     onChange={(event) => setEditForm((current) => ({ ...current, username: event.target.value }))}
                   />
                   <Input
                     label="New Password"
+                    icon={KeyRound}
                     type="password"
                     hint="Min 8 chars with Aa1!"
                     allowPasswordToggle
@@ -479,11 +514,13 @@ export default function UsersManager() {
                   />
                   <Input
                     label="Store Name"
+                    icon={Store}
                     value={editForm.storeName}
                     onChange={(event) => setEditForm((current) => ({ ...current, storeName: event.target.value }))}
                   />
                   <Input
                     label="Store Code"
+                    icon={Badge}
                     value={editForm.storeCode}
                     onChange={(event) => setEditForm((current) => ({ ...current, storeCode: event.target.value.toUpperCase() }))}
                   />
@@ -506,15 +543,20 @@ export default function UsersManager() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/35">{user.storeCode}</p>
-                    <h3 className="mt-2 text-xl font-semibold text-white">{user.storeName}</h3>
-                    <p className="mt-1 text-sm text-white/55">
-                      {user.username} · {user.isActive ? "Active" : "Inactive"}
-                    </p>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
+                      <Store className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-white/35">{user.storeCode}</p>
+                      <h3 className="mt-2 text-xl font-semibold text-white">{user.storeName}</h3>
+                      <p className="mt-1 text-sm text-white/55">
+                        {user.username} · {user.isActive ? "Active" : "Inactive"}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="secondary" href={`/history?storeCode=${user.storeCode}`}>
+                    <Button variant="secondary" icon={History} href={`/history?storeCode=${user.storeCode}`}>
                       View History
                     </Button>
                     <Button variant="secondary" icon={SlidersHorizontal} href="/admin/settings">

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Save } from "lucide-react";
+import { ArrowRightLeft, BadgeDollarSign, IndianRupee, Pencil, Save, Settings2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 
 function toForm(settings) {
   return {
@@ -12,6 +13,61 @@ function toForm(settings) {
     service1: String(settings?.service1 ?? ""),
     service2: String(settings?.service2 ?? "")
   };
+}
+
+const pricingItems = [
+  {
+    field: "rate1",
+    label: "Indonesia Rate",
+    description: "Default exchange rate",
+    accent: "teal",
+    icon: ArrowRightLeft,
+    flag: "indonesia"
+  },
+  {
+    field: "rate2",
+    label: "India Rate",
+    description: "Default exchange rate",
+    accent: "blue",
+    icon: ArrowRightLeft,
+    flag: "india"
+  },
+  {
+    field: "service1",
+    label: "Indonesia Service",
+    description: "Default service charge",
+    accent: "teal",
+    icon: Settings2,
+    flag: "indonesia"
+  },
+  {
+    field: "service2",
+    label: "India Service",
+    description: "Default service charge",
+    accent: "blue",
+    icon: IndianRupee,
+    flag: "india"
+  }
+];
+
+function PricingValueCard({ item, value }) {
+  const Icon = item.icon;
+
+  return (
+    <div className={cn("admin-rate-card", `admin-rate-card--${item.accent}`)}>
+      <div className={cn("admin-rate-icon", `admin-rate-icon--${item.accent}`)}>
+        <span className={cn("admin-rate-flag", `admin-rate-flag--${item.flag}`)} aria-hidden="true" />
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={cn("admin-rate-label", `admin-rate-label--${item.accent}`)}>
+          {item.label}
+        </p>
+        <p className="mt-1 text-sm text-white/55">{item.description}</p>
+      </div>
+      <p className="shrink-0 text-right font-mono text-xl font-semibold text-white">{value || "0"}</p>
+    </div>
+  );
 }
 
 export default function AdminStoreSettingsManager({ stores = [] }) {
@@ -111,58 +167,49 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
           <div key={store.id} className="glass-panel rounded-[28px] border border-white/5 p-5">
             <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-white/35">{store.storeCode || "STORE"}</p>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">{store.storeCode || "STORE"}</p>
                 <h2 className="mt-2 text-xl font-semibold text-white">{store.storeName || store.username}</h2>
-                <p className="mt-1 text-sm text-white/50">{store.username}</p>
+                <p className="mt-1 text-sm text-white/60">{store.username}</p>
               </div>
-              <p className="text-sm text-white/50">{messages[store.id] || "Default pricing for new orders."}</p>
+              <p className="text-sm text-white/60">{messages[store.id] || "Default pricing for new orders."}</p>
             </div>
 
             {isEditing ? (
               <div className="grid-form two-col">
                 <Input
-                  label="INDONASIA Exchange Rate"
+                  label="Indonesia Exchange Rate"
+                  icon={BadgeDollarSign}
                   inputMode="decimal"
                   value={form.rate1}
                   onChange={(event) => updateField(store.id, "rate1", event.target.value)}
                 />
                 <Input
-                  label="INDIA Exchange Rate"
+                  label="India Exchange Rate"
+                  icon={BadgeDollarSign}
                   inputMode="decimal"
                   value={form.rate2}
                   onChange={(event) => updateField(store.id, "rate2", event.target.value)}
                 />
                 <Input
-                  label="INDONASIA Service Charge"
+                  label="Indonesia Service Charge"
+                  icon={Settings2}
                   inputMode="decimal"
                   value={form.service1}
                   onChange={(event) => updateField(store.id, "service1", event.target.value)}
                 />
                 <Input
-                  label="INDIA Service Charge"
+                  label="India Service Charge"
+                  icon={Settings2}
                   inputMode="decimal"
                   value={form.service2}
                   onChange={(event) => updateField(store.id, "service2", event.target.value)}
                 />
               </div>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/35">INDONASIA Rate</p>
-                  <p className="mt-2 font-mono text-lg font-semibold text-white">{form.rate1}</p>
-                </div>
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/35">INDIA Rate</p>
-                  <p className="mt-2 font-mono text-lg font-semibold text-white">{form.rate2}</p>
-                </div>
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/35">INDONASIA Service</p>
-                  <p className="mt-2 font-mono text-lg font-semibold text-white">{form.service1}</p>
-                </div>
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/35">INDIA Service</p>
-                  <p className="mt-2 font-mono text-lg font-semibold text-white">{form.service2}</p>
-                </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {pricingItems.map((item) => (
+                  <PricingValueCard key={item.field} item={item} value={form[item.field]} />
+                ))}
               </div>
             )}
 
