@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CalendarDays, ListFilter } from "lucide-react";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
@@ -350,6 +351,7 @@ export default function HistoryPage({
             label="From"
             placeholder="DD/MM/YYYY"
             type="date"
+            icon={CalendarDays}
             value={filters.from}
             onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))}
           />
@@ -357,12 +359,14 @@ export default function HistoryPage({
             label="To"
             placeholder="DD/MM/YYYY"
             type="date"
+            icon={CalendarDays}
             value={filters.to}
             onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))}
           />
           <Select
             label="Status"
             options={statusOptions}
+            icon={ListFilter}
             value={filters.status}
             onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
           />

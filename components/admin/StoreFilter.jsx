@@ -1,3 +1,4 @@
+import { Store } from "lucide-react";
 import Select from "@/components/ui/Select";
 
 export default function StoreFilter({
@@ -18,5 +19,5 @@ export default function StoreFilter({
     }))
   ];
 
-  return <Select label={label} value={value} onChange={onChange} options={options} />;
+  return <Select label={label} value={value} onChange={onChange} options={options} icon={Store} />;
 }

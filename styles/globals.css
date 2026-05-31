@@ -49,7 +49,7 @@ input[type="date"]::-webkit-datetime-edit {
 }
 
 input[type="date"][data-empty="true"]::-webkit-datetime-edit {
-  color: rgba(255, 255, 255, 0.38);
+  color: transparent;
 }
 
 input[type="date"]::-webkit-date-and-time-value,
@@ -66,7 +66,7 @@ input[type="date"][data-empty="true"]::-webkit-datetime-edit-year-field,
 input[type="date"][data-empty="true"]::-webkit-datetime-edit-month-field,
 input[type="date"][data-empty="true"]::-webkit-datetime-edit-day-field,
 input[type="date"][data-empty="true"]::-webkit-datetime-edit-text {
-  color: rgba(255, 255, 255, 0.38);
+  color: transparent;
   opacity: 1;
 }
 
@@ -182,12 +182,40 @@ html[data-theme="light"] .bg-white\/5 {
   background-color: rgba(148, 163, 184, 0.08) !important;
 }
 
+html[data-theme="light"] .from-gold\/15 {
+  --tw-gradient-from: rgba(212, 168, 67, 0.16) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(212, 168, 67, 0) var(--tw-gradient-to-position) !important;
+}
+
+html[data-theme="light"] .from-gold\/25 {
+  --tw-gradient-from: rgba(212, 168, 67, 0.2) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(212, 168, 67, 0) var(--tw-gradient-to-position) !important;
+}
+
 html[data-theme="light"] .bg-white\/10 {
   background-color: rgba(148, 163, 184, 0.12) !important;
 }
 
 html[data-theme="light"] .bg-white\/20 {
   background-color: rgba(148, 163, 184, 0.18) !important;
+}
+
+html[data-theme="light"] .status-pending {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  color: rgb(146, 64, 14) !important;
+  --tw-ring-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+html[data-theme="light"] .status-done {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+  color: rgb(4, 120, 87) !important;
+  --tw-ring-color: rgba(5, 150, 105, 0.28) !important;
+}
+
+html[data-theme="light"] .status-failed {
+  background-color: rgba(244, 63, 94, 0.13) !important;
+  color: rgb(190, 18, 60) !important;
+  --tw-ring-color: rgba(225, 29, 72, 0.28) !important;
 }
 
 html[data-theme="light"] .text-white {
@@ -236,7 +264,7 @@ html[data-theme="light"] input[type="date"]::-webkit-datetime-edit {
 }
 
 html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit {
-  color: rgba(100, 116, 139, 0.9);
+  color: transparent;
 }
 
 html[data-theme="light"] input[type="date"]::-webkit-date-and-time-value,
@@ -253,7 +281,7 @@ html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime
 html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-month-field,
 html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-day-field,
 html[data-theme="light"] input[type="date"][data-empty="true"]::-webkit-datetime-edit-text {
-  color: rgba(100, 116, 139, 0.9);
+  color: transparent;
   opacity: 1;
 }
 

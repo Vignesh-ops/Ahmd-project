@@ -9,6 +9,7 @@ export default function Input({
   hint,
   error,
   prefix,
+  icon: Icon,
   className,
   inputClassName,
   mono = false,
@@ -22,11 +23,12 @@ export default function Input({
   const sharedClassName = cn(
     "w-full rounded-2xl border border-white/10 bg-dark-input px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
     mono && "font-mono",
-    prefix && "pl-10",
+    (prefix || Icon) && "pl-10",
     canTogglePassword && "pr-12",
     props.readOnly && "bg-white/5",
     inputClassName
   );
+  const showDatePlaceholder = !textarea && resolvedType === "date" && !props.value && props.placeholder;
 
   return (
     <label className={cn("flex w-full flex-col gap-2", className)}>
@@ -37,7 +39,9 @@ export default function Input({
         </span>
       ) : null}
       <span className="relative">
-        {prefix ? (
+        {Icon ? (
+          <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gold-light" />
+        ) : prefix ? (
           <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-white/45">
             {prefix}
           </span>
@@ -52,6 +56,11 @@ export default function Input({
             type={resolvedType}
           />
         )}
+        {showDatePlaceholder ? (
+          <span className="pointer-events-none absolute left-10 top-1/2 -translate-y-1/2 text-sm text-white/40">
+            {props.placeholder}
+          </span>
+        ) : null}
         {canTogglePassword ? (
           <button
             type="button"

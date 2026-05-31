@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function Select({ label, options = [], className, ...props }) {
+export default function Select({ label, options = [], className, icon: Icon, ...props }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(props.value || "");
+  const disabled = Boolean(props.disabled);
 
   useEffect(() => {
     setSelected(props.value || "");
@@ -42,14 +43,25 @@ export default function Select({ label, options = [], className, ...props }) {
 
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-dark-input px-4 py-3 pr-10 text-left text-sm text-white outline-none transition hover:border-gold/50 focus:border-gold/70 focus:ring-2 focus:ring-gold/20"
+          onClick={() => {
+            if (!disabled) {
+              setIsOpen(!isOpen);
+            }
+          }}
+          disabled={disabled}
+          className={cn(
+            "flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-dark-input px-4 py-3 pr-10 text-left text-sm text-white outline-none transition hover:border-gold/50 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
+            disabled && "hover:border-white/10"
+          )}
           aria-expanded={isOpen}
         >
-          <span>{selectedLabel}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            {Icon ? <Icon className="h-4 w-4 shrink-0 text-gold-light" /> : null}
+            <span className="truncate">{selectedLabel}</span>
+          </span>
           <ChevronDown
             className={cn(
-              "h-4 w-4 text-white/40 transition-transform",
+              "h-4 w-4 shrink-0 text-white/40 transition-transform",
               isOpen && "rotate-180"
             )}
           />
@@ -70,12 +82,14 @@ export default function Select({ label, options = [], className, ...props }) {
                       : "text-white/80 hover:bg-white/5 hover:text-white"
                   )}
                 >
-                  {selected === option.value && (
-                    <svg className="h-4 w-4 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                  {selected === option.value ? (
+                    <svg className="h-4 w-4 shrink-0 text-gold" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                  )}
-                  {option.label}
+                  ) : Icon ? (
+                    <Icon className="h-4 w-4 shrink-0 text-white/35" />
+                  ) : null}
+                  <span className="min-w-0 truncate">{option.label}</span>
                 </button>
               ))}
             </div>

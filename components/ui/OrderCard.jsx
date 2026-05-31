@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Home, Landmark, Phone } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Home, Landmark, Phone, WalletCards } from "lucide-react";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { formatCurrency } from "@/lib/utils";
 import LocalDateTime from "./LocalDateTime";
@@ -24,7 +24,7 @@ export default function OrderCard({ order, href, showStore = false, children }) 
     <div className="glass-panel w-full relative overflow-hidden rounded-[28px] border border-white/5 p-5 transition hover:border-gold/25">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
+          <div className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold/15 to-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/65">
             {icon}
             {order.typeLabel}
           </div>
@@ -44,24 +44,36 @@ export default function OrderCard({ order, href, showStore = false, children }) 
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 text-sm text-white/65 sm:grid-cols-2 md:grid-cols-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-white/35">Amount</p>
-          <p className="mt-1 break-words font-semibold text-white">{amount}</p>
-          {order.totalPayableAmount ? (
-            <p className="mt-1 text-xs text-white/45">Payable {formatCurrency(order.totalPayableAmount, "MYR")}</p>
-          ) : null}
+      <div className="mt-5 grid gap-3 border-t border-white/5 pt-4 text-sm text-white/65 sm:grid-cols-2 md:grid-cols-3">
+        <div className="flex gap-3">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-gold-light ring-1 ring-white/5">
+            <WalletCards className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/35">Amount</p>
+            <p className="mt-1 break-words font-semibold text-white">{amount}</p>
+            {order.totalPayableAmount ? (
+              <p className="mt-1 text-xs text-white/45">Payable {formatCurrency(order.totalPayableAmount, "MYR")}</p>
+            ) : null}
+          </div>
         </div>
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-white/35">Date</p>
-          <LocalDateTime value={order.date} className="mt-1 block text-white" />
+        <div className="flex gap-3">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-teal ring-1 ring-white/5">
+            <CalendarDays className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/35">Date</p>
+            <LocalDateTime value={order.date} className="mt-1 block text-white" />
+          </div>
         </div>
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-white/35">Contact</p>
-          <p className="mt-1 inline-flex items-center gap-2 text-white">
-            <Phone className="h-4 w-4 text-white/40" />
-            {order.senderMobile || order.benMobile || "-"}
-          </p>
+        <div className="flex gap-3">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-white/55 ring-1 ring-white/5">
+            <Phone className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/35">Contact</p>
+            <p className="mt-1 break-words text-white">{order.senderMobile || order.benMobile || "-"}</p>
+          </div>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, Printer } from "lucide-react";
+import { CalendarDays, Download, Landmark, ListFilter, Printer } from "lucide-react";
 import AdminTable from "@/components/admin/AdminTable";
 import StoreFilter from "@/components/admin/StoreFilter";
 import Button from "@/components/ui/Button";
@@ -453,6 +453,7 @@ export default function AdminDashboard({ stores }) {
             <Select
               label="Order Type"
               options={typeOptions}
+              icon={Landmark}
               value={filters.type}
               onChange={(event) => setFilters((current) => ({ ...current, type: event.target.value }))}
               disabled
@@ -461,6 +462,7 @@ export default function AdminDashboard({ stores }) {
               label="From"
               type="date"
               placeholder="Select start date"
+              icon={CalendarDays}
               value={filters.from}
               onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))}
             />
@@ -468,12 +470,14 @@ export default function AdminDashboard({ stores }) {
               label="To"
               type="date"
               placeholder="Select end date"
+              icon={CalendarDays}
               value={filters.to}
               onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))}
             />
             <Select
               label="Status"
               options={statusOptions}
+              icon={ListFilter}
               value={filters.status}
               onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
             />

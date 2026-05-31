@@ -6,6 +6,7 @@ import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import OrderCard from "@/components/ui/OrderCard";
 import ProfitSummary from "@/components/ui/ProfitSummary";
+import StatCard from "@/components/ui/StatCard";
 import { getAvailableOrderMonths, getCombinedOrders, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 
@@ -102,105 +103,67 @@ export default async function DashboardPage({ searchParams }) {
         </div>
       </section>
 
-      <section className="glass-panel rounded-[32px] border border-white/5 p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
-            <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Month activity</h2>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
-            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
-                <p className="text-base font-bold text-gold-light decoration-gold-light decoration-2 underline-offset-2">Total Orders</p>
-              </div>
-              <p className="mt-2 text-lg font-semibold text-white">
-                <OrderCountSummary
-                  idr={monthSummary.orderCountIDR}
-                  inr={monthSummary.orderCountINR}
-                  compact
-                />
-              </p>
-            </div>
-            {session.user.role === "admin" && (
-            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
-                <p className="text-base font-bold text-gold-light decoration-gold-light decoration-2 underline-offset-2">Profit</p>
-              </div>
-              <p className="mt-2 text-lg font-semibold text-white">
-                <ProfitSummary
-                  idr={monthSummary.profitIDR}
-                  inr={monthSummary.profitINR}
-                  compact
-                />
-              </p>
-            </div>
-            )}
-            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
-                <p className="text-base font-bold text-gold-light decoration-gold-light decoration-2 underline-offset-2">Total Amount</p>
-              </div>
-              <p className="mt-2 text-lg font-semibold text-white">
-                <CurrencyPairSummary
-                  idr={monthSummary.totalIDR}
-                  idrMyr={monthSummary.totalPayableIDRMYR}
-                  inr={monthSummary.totalINR}
-                  inrMyr={monthSummary.totalPayableINRMYR}
-                  compact
-                />
-              </p>
-            </div>
-          </div>
+      <section className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
+          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Month activity</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard
+            label="Total Orders"
+            value={<OrderCountSummary idr={monthSummary.orderCountIDR} inr={monthSummary.orderCountINR} compact />}
+          />
+          {session.user.role === "admin" && (
+            <StatCard
+              label="Profit"
+              value={<ProfitSummary idr={monthSummary.profitIDR} inr={monthSummary.profitINR} compact />}
+              accent="teal"
+            />
+          )}
+          <StatCard
+            label="Total Amount"
+            value={
+              <CurrencyPairSummary
+                idr={monthSummary.totalIDR}
+                idrMyr={monthSummary.totalPayableIDRMYR}
+                inr={monthSummary.totalINR}
+                inrMyr={monthSummary.totalPayableINRMYR}
+                compact
+              />
+            }
+          />
         </div>
       </section>
               
-      <section className="glass-panel rounded-[32px] border border-white/5 p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/35">Today</p>
-            <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Today&apos;s activity</h2>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
-            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
-                <p className="text-base font-bold text-gold-light decoration-gold-light decoration-2 underline-offset-2">Orders</p>
-              </div>
-              <p className="mt-2 text-lg font-semibold text-white">
-                <OrderCountSummary
-                  idr={todaySummary.orderCountIDR}
-                  inr={todaySummary.orderCountINR}
-                  compact
-                />
-              </p>
-            </div>
-            {session.user.role === "admin" && (
-            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
-                <p className="text-base font-bold text-gold-light decoration-gold-light decoration-2 underline-offset-2">Profit</p>
-              </div>
-              <p className="mt-2 text-lg font-semibold text-white">
-                <ProfitSummary
-                  idr={todaySummary.profitIDR}
-                  inr={todaySummary.profitINR}
-                  compact
-                />
-              </p>
-            </div>
-            )}
-            <div className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
-              <div className="inline-block rounded-lg bg-gradient-to-r from-gold/30 to-gold/10 px-3 py-1.5">
-                <p className="text-base font-bold text-gold-light decoration-gold-light decoration-2 underline-offset-2">Amount</p>
-              </div>
-              <p className="mt-2 text-lg font-semibold text-white">
-                <CurrencyPairSummary
-                  idr={todaySummary.totalIDR}
-                  idrMyr={todaySummary.totalPayableIDRMYR}
-                  inr={todaySummary.totalINR}
-                  inrMyr={todaySummary.totalPayableINRMYR}
-                  compact
-                />
-              </p>
-            </div>
-          </div>
+      <section className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-white/35">Today</p>
+          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Today&apos;s activity</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard
+            label="Orders"
+            value={<OrderCountSummary idr={todaySummary.orderCountIDR} inr={todaySummary.orderCountINR} compact />}
+          />
+          {session.user.role === "admin" && (
+            <StatCard
+              label="Profit"
+              value={<ProfitSummary idr={todaySummary.profitIDR} inr={todaySummary.profitINR} compact />}
+              accent="teal"
+            />
+          )}
+          <StatCard
+            label="Amount"
+            value={
+              <CurrencyPairSummary
+                idr={todaySummary.totalIDR}
+                idrMyr={todaySummary.totalPayableIDRMYR}
+                inr={todaySummary.totalINR}
+                inrMyr={todaySummary.totalPayableINRMYR}
+                compact
+              />
+            }
+          />
         </div>
       </section>
 
