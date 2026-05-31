@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
@@ -12,7 +13,6 @@ import StoreFilter from "@/components/admin/StoreFilter";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { markOrderDone } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
-import { openInAppOrTab } from "@/lib/native";
 import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import InfoDialog from "@/components/ui/InfoDialog";
@@ -30,6 +30,7 @@ export default function HistoryPage({
   initialStoreCode = "all",
   initialStoreName = ""
 }) {
+  const router = useRouter();
   const pageSize = 5;
   const [filters, setFilters] = useState({
     from: "",
@@ -66,6 +67,7 @@ export default function HistoryPage({
   const [deleteError, setDeleteError] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [shareDialogOrderNo, setShareDialogOrderNo] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
 
@@ -84,10 +86,12 @@ export default function HistoryPage({
 
       try {
         const response = await fetch(`/api/history?${params.toString()}`, {
+          cache: "no-store",
           signal: controller.signal
         });
         const payload = await response.json();
-        setOrders(payload.items || []);
+        const nextOrders = payload.items || [];
+        setOrders(nextOrders);
         setSummary(payload.summary || {
           totalOrders: 0,
           bankOrders: 0,
@@ -107,7 +111,11 @@ export default function HistoryPage({
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
         setCurrentPage(Number(payload.page || 1));
-        setSelectedOrder(null);
+        setSelectedOrder((current) =>
+          current
+            ? nextOrders.find((item) => item.type === current.type && item.id === current.id) || null
+            : null
+        );
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Failed to load history orders", error);
@@ -124,7 +132,21 @@ export default function HistoryPage({
     return () => {
       controller.abort();
     };
-  }, [filters]);
+  }, [filters, refreshKey]);
+
+  useEffect(() => {
+    const refreshOrders = () => {
+      setRefreshKey((current) => current + 1);
+    };
+
+    window.addEventListener("pageshow", refreshOrders);
+    window.addEventListener("focus", refreshOrders);
+
+    return () => {
+      window.removeEventListener("pageshow", refreshOrders);
+      window.removeEventListener("focus", refreshOrders);
+    };
+  }, []);
 
   const stats = useMemo(() => {
     return {
@@ -163,7 +185,9 @@ export default function HistoryPage({
     params.set("pageSize", String(pageSize));
 
     try {
-      const response = await fetch(`/api/history?${params.toString()}`);
+      const response = await fetch(`/api/history?${params.toString()}`, {
+        cache: "no-store"
+      });
       const payload = await response.json();
 
       setOrders((current) => [...current, ...(payload.items || [])]);
@@ -246,7 +270,7 @@ export default function HistoryPage({
   }
 
   async function handlePrint(order) {
-    openInAppOrTab(`/receipt/${order.orderNo}?autoprint=true`);
+    router.push(`/receipt/${order.orderNo}?autoprint=true`);
     await syncDoneStatus(order, "sent to print");
   }
 
@@ -505,7 +529,7 @@ export default function HistoryPage({
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button variant="secondary" onClick={() => openInAppOrTab(`/receipt/${selectedOrder.orderNo}`)}>
+              <Button variant="secondary" onClick={() => router.push(`/receipt/${selectedOrder.orderNo}`)}>
                 Open Receipt
               </Button>
               <Button variant="secondary" onClick={() => handleShare(selectedOrder)}>

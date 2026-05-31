@@ -112,6 +112,7 @@ export default function AdminDashboard({ stores }) {
 
       try {
         const response = await fetch(`/api/admin/summary?${params.toString()}`, {
+          cache: "no-store",
           signal: controller.signal
         });
         const payload = await response.json();
@@ -148,6 +149,7 @@ export default function AdminDashboard({ stores }) {
 
       try {
         const response = await fetch(`/api/history?${params.toString()}`, {
+          cache: "no-store",
           signal: controller.signal
         });
         const payload = await response.json();
@@ -219,7 +221,9 @@ export default function AdminDashboard({ stores }) {
     params.set("pageSize", String(pageSize));
 
     try {
-      const response = await fetch(`/api/history?${params.toString()}`);
+      const response = await fetch(`/api/history?${params.toString()}`, {
+        cache: "no-store"
+      });
       const payload = await response.json();
       setOrders((current) => [...current, ...(payload.items || [])]);
       setHasMore(Boolean(payload.hasMore));
@@ -250,7 +254,9 @@ export default function AdminDashboard({ stores }) {
       params.set("page", String(nextPage));
       params.set("pageSize", "250");
 
-      const response = await fetch(`/api/history?${params.toString()}`);
+      const response = await fetch(`/api/history?${params.toString()}`, {
+        cache: "no-store"
+      });
       const payload = await response.json();
       allOrders.push(...(payload.items || []));
       more = Boolean(payload.hasMore);

@@ -7,9 +7,9 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
 import { markOrderDone } from "@/lib/orderStatus";
+import { cacheReceiptOrder } from "@/lib/receipt-cache";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
-import { openInAppOrTab } from "@/lib/native";
-import { calculateTotalPayable, formatCurrency, formatNumber } from "@/lib/utils";
+import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber } from "@/lib/utils";
 
 const countryOptions = [
   { label: "IDR", value: 1 },
@@ -23,7 +23,7 @@ function getCountryDefaults(country, settings) {
 }
 
 function normalizeAccountNo(value) {
-  return String(value ?? "").replace(/\s+/g, "");
+  return digitsOnly(value);
 }
 
 async function readJsonResponse(response) {
@@ -176,7 +176,12 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   function updateField(name, value) {
-    const nextValue = name === "accountNo" ? normalizeAccountNo(value) : value;
+    const nextValue =
+      name === "accountNo"
+        ? normalizeAccountNo(value)
+        : name === "senderMobile"
+          ? digitsOnly(value)
+          : value;
     savedOrderRef.current = null;
     setSavedOrder(null);
     setForm((current) => ({
@@ -537,10 +542,8 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
     savedOrderRef.current = payload;
     setSavedOrder(payload);
-    setForm((current) => ({
-      ...current,
-      orderNo: payload.orderNo
-    }));
+    setForm(buildFormFromOrder(payload, settings));
+    cacheReceiptOrder(payload);
 
     return payload;
   }
@@ -573,6 +576,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         document.activeElement.blur();
       }
       const order = savedOrderRef.current || (await persistOrder());
+      cacheReceiptOrder(order);
 
       if (intent === "save") {
         router.push(`/receipt/${order.orderNo}`);
@@ -586,7 +590,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         return;
       }
 
-      openInAppOrTab(`/receipt/${order.orderNo}?autoprint=true`);
+      router.push(`/receipt/${order.orderNo}?autoprint=true`);
       await syncDoneStatus(order, "sent to print");
     } catch (error) {
       setMessage(error.message);
@@ -606,6 +610,16 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const nextForm = initialOrder
+      ? buildFormFromOrder(initialOrder, settings)
+      : buildInitialForm(initialOrderNo, settings);
+
+    savedOrderRef.current = initialOrder;
+    setSavedOrder(initialOrder);
+    setForm(nextForm);
+  }, [initialOrder, initialOrderNo, settings]);
 
   const displayDefaultRate = mounted ? formatNumber(selectedCountrySettings.rate, 5) : String(selectedCountrySettings.rate ?? "");
   const displayDefaultServiceCharge = mounted
@@ -739,6 +753,8 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             <Input
               label="Sender Mobile"
               type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="10+ digits"
               value={form.senderMobile}
               onChange={(event) => updateField("senderMobile", event.target.value)}
@@ -769,7 +785,10 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           />
           <Input
             label="Account No"
-            placeholder="1234 5678 9012 3456"
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="1234567890123456"
             value={form.accountNo}
             onChange={(event) => updateField("accountNo", event.target.value)}
             mono

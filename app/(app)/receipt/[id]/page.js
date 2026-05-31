@@ -1,22 +1,19 @@
-import { notFound } from "next/navigation";
-import BankReceipt from "@/components/receipt/BankReceipt";
-import { getOrderByOrderNo } from "@/lib/orders";
+import ReceiptPageClient from "@/components/receipt/ReceiptPageClient";
 import { requireSession } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ReceiptPage({ params, searchParams }) {
-  const session = await requireSession();
+  await requireSession();
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  const order = await getOrderByOrderNo(decodeURIComponent(resolvedParams.id), session.user);
-
-  if (!order) {
-    notFound();
-  }
+  const orderNo = decodeURIComponent(resolvedParams.id);
 
   return (
     <div className="page-fade flex justify-center py-6">
       <div className="w-full max-w-2xl">
-        <BankReceipt order={order} autoPrint={resolvedSearchParams.autoprint === "true"} />
+        <ReceiptPageClient orderNo={orderNo} autoPrint={resolvedSearchParams.autoprint === "true"} />
       </div>
     </div>
   );

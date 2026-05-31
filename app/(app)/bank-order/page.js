@@ -5,6 +5,9 @@ import { getUserSettings } from "@/lib/settings";
 import prisma from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function BankOrderPage({ searchParams }) {
   const session = await requireSession();
   const resolvedSearchParams = await searchParams;

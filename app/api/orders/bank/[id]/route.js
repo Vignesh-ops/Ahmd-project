@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { normalizeBankOrder } from "@/lib/orders";
 import {
@@ -12,6 +13,9 @@ import {
   unauthorized
 } from "@/lib/api";
 import { calculateTotalPayable, digitsOnly } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function getScopedBankOrder(id, sessionUser) {
   const where =
@@ -57,7 +61,11 @@ export async function GET(request, { params }) {
     return forbidden("Bank order not found.");
   }
 
-  return NextResponse.json(normalizeBankOrder(order));
+  return NextResponse.json(normalizeBankOrder(order), {
+    headers: {
+      "Cache-Control": "no-store"
+    }
+  });
 }
 
 export async function PUT(request, { params }) {
@@ -232,8 +240,16 @@ export async function PUT(request, { params }) {
       }
     }
   });
+  revalidatePath("/history");
+  revalidatePath("/admin");
+  revalidatePath(`/receipt/${order.orderNo}`);
+  revalidatePath("/bank-order");
 
-  return NextResponse.json(normalizeBankOrder(order));
+  return NextResponse.json(normalizeBankOrder(order), {
+    headers: {
+      "Cache-Control": "no-store"
+    }
+  });
 }
 
 export async function DELETE(request, { params }) {

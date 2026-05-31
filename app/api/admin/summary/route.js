@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { getStoreOrderSummary } from "@/lib/orders";
 import { forbidden, getApiSession, unauthorized } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(request) {
   const session = await getApiSession();
 
@@ -73,16 +76,23 @@ export async function GET(request) {
     };
   });
 
-  return NextResponse.json({
-    totalToday: summary.totalOrders,
-    bankToday: summary.totalOrders,
-    orderCountIDR: summary.orderCountIDR,
-    orderCountINR: summary.orderCountINR,
-    profitIDR: summary.profitIDR,
-    profitINR: summary.profitINR,
-    profitIDRMYR: summary.profitIDRMYR,
-    profitINRMYR: summary.profitINRMYR,
-    totalProfitMYR: summary.totalProfitMYR,
-    byStore
-  });
+  return NextResponse.json(
+    {
+      totalToday: summary.totalOrders,
+      bankToday: summary.totalOrders,
+      orderCountIDR: summary.orderCountIDR,
+      orderCountINR: summary.orderCountINR,
+      profitIDR: summary.profitIDR,
+      profitINR: summary.profitINR,
+      profitIDRMYR: summary.profitIDRMYR,
+      profitINRMYR: summary.profitINRMYR,
+      totalProfitMYR: summary.totalProfitMYR,
+      byStore
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    }
+  );
 }

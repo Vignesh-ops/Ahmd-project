@@ -8,6 +8,15 @@ export default function PwaRegistrar() {
       return undefined;
     }
 
+    if (process.env.NODE_ENV !== "production") {
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+        .catch((error) => {
+          console.error("Service worker cleanup failed", error);
+        });
+      return undefined;
+    }
+
     const registerWorker = async () => {
       try {
         await navigator.serviceWorker.register("/sw.js");

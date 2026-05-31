@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getCombinedOrders, getCombinedOrdersPage } from "@/lib/orders";
 import { getApiSession, guardAdminStoreAccess, unauthorized } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(request) {
   const session = await getApiSession();
 
@@ -38,7 +41,11 @@ export async function GET(request) {
       pageSize
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: {
+        "Cache-Control": "no-store"
+      }
+    });
   }
 
   const orders = await getCombinedOrders({
@@ -46,5 +53,9 @@ export async function GET(request) {
     filters
   });
 
-  return NextResponse.json(orders);
+  return NextResponse.json(orders, {
+    headers: {
+      "Cache-Control": "no-store"
+    }
+  });
 }

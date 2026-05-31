@@ -1,4 +1,4 @@
-const CACHE_NAME = "ahmad-pwa-v2";
+const CACHE_NAME = "ahmad-pwa-v3";
 const OFFLINE_ASSETS = ["/offline.html", "/manifest.webmanifest", "/Ahmad_logo.png"];
 
 self.addEventListener("install", (event) => {
@@ -33,10 +33,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (
-    url.pathname.startsWith("/_next/static/") ||
-    /\.(?:js|css|png|jpg|jpeg|svg|webp|ico)$/.test(url.pathname)
-  ) {
+  if (url.pathname.startsWith("/_next/")) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  if (/\.(?:png|jpg|jpeg|svg|webp|ico)$/.test(url.pathname)) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) {
