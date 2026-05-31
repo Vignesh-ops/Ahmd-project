@@ -10,7 +10,7 @@ import {
   isValidMobile,
   unauthorized
 } from "@/lib/api";
-import { calculateTotalPayable, digitsOnly } from "@/lib/utils";
+import { calculateTotalPayable, digitsOnly, isLettersAndSpacesOnly } from "@/lib/utils";
 
 export async function GET(request) {
   const session = await getApiSession();
@@ -133,6 +133,10 @@ export async function POST(request) {
 
   if (!senderName || !accountName || !accountNo || !bank || !senderMobile) {
     return badRequest("Please fill all required bank order fields.");
+  }
+
+  if (!isLettersAndSpacesOnly(senderName)) {
+    return badRequest("Sender name must contain only letters and spaces.");
   }
 
   if (![1, 2].includes(country)) {

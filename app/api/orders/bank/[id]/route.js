@@ -12,7 +12,7 @@ import {
   parseRouteId,
   unauthorized
 } from "@/lib/api";
-import { calculateTotalPayable, digitsOnly } from "@/lib/utils";
+import { calculateTotalPayable, digitsOnly, isLettersAndSpacesOnly } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -116,6 +116,10 @@ export async function PUT(request, { params }) {
 
     if (!senderName) {
       return badRequest("Sender name is required.");
+    }
+
+    if (!isLettersAndSpacesOnly(senderName)) {
+      return badRequest("Sender name must contain only letters and spaces.");
     }
 
     updates.senderName = senderName;

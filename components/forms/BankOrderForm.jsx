@@ -9,7 +9,7 @@ import RadioPill from "@/components/ui/RadioPill";
 import { markOrderDone } from "@/lib/orderStatus";
 import { cacheReceiptOrder } from "@/lib/receipt-cache";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
-import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber } from "@/lib/utils";
+import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber, lettersAndSpacesOnly } from "@/lib/utils";
 
 const countryOptions = [
   { label: "IDR", value: 1 },
@@ -74,7 +74,7 @@ function buildFormFromOrder(order, settings) {
   return {
     orderNo: order.orderNo,
     country: Number(order.country || 1),
-    senderName: order.senderName || "",
+    senderName: lettersAndSpacesOnly(order.senderName || ""),
     accountName: order.accountName || "",
     accountNo: normalizeAccountNo(order.accountNo),
     bank: order.bank || "",
@@ -181,6 +181,8 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         ? normalizeAccountNo(value)
         : name === "senderMobile"
           ? digitsOnly(value)
+          : name === "senderName"
+            ? lettersAndSpacesOnly(value)
           : value;
     savedOrderRef.current = null;
     setSavedOrder(null);
@@ -273,7 +275,9 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       return {
         ...current,
         country: nextCountry,
-        senderName: preserveSenderName ? current.senderName || selection.data.senderName || "" : selection.data.senderName || "",
+        senderName: lettersAndSpacesOnly(
+          preserveSenderName ? current.senderName || selection.data.senderName || "" : selection.data.senderName || ""
+        ),
         accountName: selection.data.accountName || "",
         accountNo: normalizeAccountNo(selection.data.accountNo),
         bank: selection.data.bank || "",
@@ -747,6 +751,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             label="Sender Name"
             placeholder="Customer full name"
             value={form.senderName}
+            pattern="[\p{L} ]*"
             onChange={(event) => updateField("senderName", event.target.value)}
           />
           <div className="space-y-2">
