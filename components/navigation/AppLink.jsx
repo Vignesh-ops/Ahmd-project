@@ -7,7 +7,7 @@ import { useRouteFeedback } from "@/components/navigation/RouteFeedbackProvider"
 import { showNetworkRetryToast } from "@/components/network/NetworkRetryToast";
 
 const AppLink = forwardRef(function AppLink(
-  { href, onClick, onMouseEnter, onTouchStart, prefetch = true, refreshOnNavigate = false, ...props },
+  { href, onClick, onMouseEnter, onTouchStart, prefetch = true, refreshOnNavigate = false, target, className, ...rest },
   ref
 ) {
   const router = useRouter();
@@ -36,6 +36,7 @@ const AppLink = forwardRef(function AppLink(
       ref={ref}
       href={href}
       prefetch={prefetch}
+      target={target}
       onMouseEnter={(event) => {
         warmRoute();
         onMouseEnter?.(event);
@@ -48,7 +49,7 @@ const AppLink = forwardRef(function AppLink(
         if (
           !event.defaultPrevented &&
           event.button === 0 &&
-          !props.target &&
+          !target &&
           !event.metaKey &&
           !event.ctrlKey &&
           !event.shiftKey &&
@@ -70,7 +71,8 @@ const AppLink = forwardRef(function AppLink(
 
         onClick?.(event);
       }}
-      {...props}
+      className={className}
+      {...rest}
     />
   );
 });
