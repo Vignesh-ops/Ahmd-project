@@ -1,5 +1,6 @@
 import { ArrowRight, Landmark } from "lucide-react";
 import MonthFilter from "@/components/dashboard/MonthFilter";
+import TimeGreeting from "@/components/dashboard/TimeGreeting";
 import AppLink from "@/components/navigation/AppLink";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
@@ -88,7 +89,7 @@ export default async function DashboardPage({ searchParams }) {
         <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-semibold text-white">
-              Hello, {session.user.role === "admin" ? "Admin" : session.user.storeName}
+              <TimeGreeting name={session.user.role === "admin" ? "Admin" : session.user.storeName} />
             </h1>
             {/* <p className="mt-2 max-w-2xl text-sm text-white/55">
               Full activity snapshot across your remittance workflow, with quick access to new bank transfer orders.
@@ -171,7 +172,7 @@ export default async function DashboardPage({ searchParams }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-white/35">Recent Orders</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Latest activity</h2>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Latest Activity</h2>
           </div>
           <AppLink href="/history" className="inline-flex items-center gap-2 text-sm text-gold-light">
             View all
