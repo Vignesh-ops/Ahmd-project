@@ -12,7 +12,7 @@ import ProfitSummary from "@/components/ui/ProfitSummary";
 import StatCard from "@/components/ui/StatCard";
 import StoreFilter from "@/components/admin/StoreFilter";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
-import { markOrderDone } from "@/lib/orderStatus";
+import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
@@ -267,6 +267,49 @@ export default function HistoryPage({
     }
   }
 
+  function syncDoneStatusAsync(order, actionLabel) {
+    // Optimistically update order status immediately
+    const optimisticOrder = { ...order, status: "done" };
+    applyOrderUpdate(optimisticOrder);
+    setActionError(null);
+
+    // Update in background with proper error handling and verification
+    (async () => {
+      try {
+        const updatedOrder = await markOrderDone(order);
+        
+        // Verify the update was successful
+        const verified = await verifyOrderStatus(order.id);
+        if (verified && verified.status === "done") {
+          applyOrderUpdate(verified);
+        } else {
+          // Verification failed, try again in 2 seconds
+          setTimeout(() => verifyAndUpdate(), 2000);
+        }
+      } catch (error) {
+        setActionError(`Order ${order.orderNo} ${actionLabel}, but status update failed. Retrying...`);
+        // Retry verification in 2 seconds
+        setTimeout(() => verifyAndUpdate(), 2000);
+      }
+    })();
+
+    async function verifyAndUpdate() {
+      try {
+        const verified = await verifyOrderStatus(order.id);
+        if (verified) {
+          applyOrderUpdate(verified);
+          if (verified.status === "done") {
+            setActionError(null);
+          } else {
+            setActionError(`Order status is ${verified.status}. Please try again.`);
+          }
+        }
+      } catch (error) {
+        setActionError(`Could not verify order status. Please refresh the page.`);
+      }
+    }
+  }
+
   async function handleShare(order) {
     const result = await shareViaWhatsApp(getMessage(order));
     if (order.status === "done") {
@@ -344,7 +387,7 @@ export default function HistoryPage({
           const orderToUpdate = shareConfirmOrder;
           setShareConfirmOrder(null);
           if (orderToUpdate) {
-            void syncDoneStatus(orderToUpdate, "shared");
+            syncDoneStatusAsync(orderToUpdate, "shared");
           }
         }}
       />
@@ -378,7 +421,6 @@ export default function HistoryPage({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Data Scope</h2>
-              <p className="mt-1 text-sm text-white/50">Filter your transaction history</p>
             </div>
           </div>
           <Button type="button" variant="secondary" icon={RotateCcw} onClick={handleResetFilters}>

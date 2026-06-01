@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Printer, Send } from "lucide-react";
 import Button from "@/components/ui/Button";
 import InfoDialog from "@/components/ui/InfoDialog";
-import { markOrderDone } from "@/lib/orderStatus";
+import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
 import { buildBankReceiptText, printReceipt } from "@/lib/print";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
@@ -31,6 +31,56 @@ export default function BankReceipt({ order, autoPrint = false }) {
     } catch (error) {
       if (!silent) {
         setMessage(`Order ${order.orderNo} ${actionLabel}, but status update failed: ${error.message}`);
+      }
+    }
+  }
+
+  function syncDoneStatusAsync(actionLabel, silent = false) {
+    // Optimistically update order status immediately
+    const optimisticOrder = { ...currentOrder, status: "done" };
+    setCurrentOrder(optimisticOrder);
+    
+    if (!silent) {
+      setMessage(`Order ${currentOrder.orderNo} ${actionLabel} and marked done.`);
+    }
+
+    // Update in background with proper error handling and verification
+    (async () => {
+      try {
+        const updatedOrder = await markOrderDone(currentOrder);
+        
+        // Verify the update was successful
+        const verified = await verifyOrderStatus(currentOrder.id);
+        if (verified && verified.status === "done") {
+          setCurrentOrder(verified);
+        } else {
+          // Verification failed, keep optimistic for now but try again in 2 seconds
+          setTimeout(() => verifyAndUpdate(), 2000);
+        }
+      } catch (error) {
+        if (!silent) {
+          setMessage(`Order ${currentOrder.orderNo} ${actionLabel}, but status update failed. Retrying...`);
+        }
+        // Retry verification in 2 seconds
+        setTimeout(() => verifyAndUpdate(), 2000);
+      }
+    })();
+
+    async function verifyAndUpdate() {
+      try {
+        const verified = await verifyOrderStatus(currentOrder.id);
+        if (verified) {
+          setCurrentOrder(verified);
+          if (verified.status === "done" && !silent) {
+            setMessage(`Order ${currentOrder.orderNo} ${actionLabel} and marked done.`);
+          } else if (verified.status !== "done" && !silent) {
+            setMessage(`Order status is ${verified.status}. Please try again.`);
+          }
+        }
+      } catch (error) {
+        if (!silent) {
+          setMessage(`Could not verify order status. Please refresh the page.`);
+        }
       }
     }
   }
@@ -126,7 +176,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
         }}
         onClose={() => {
           setShowShareDialog(false);
-          void syncDoneStatus("shared");
+          syncDoneStatusAsync("shared");
         }}
       />
       <div className="print-hide flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">

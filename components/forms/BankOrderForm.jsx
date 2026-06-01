@@ -26,7 +26,7 @@ import {
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
-import { markOrderDone } from "@/lib/orderStatus";
+import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
 import { cacheReceiptOrder } from "@/lib/receipt-cache";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber, lettersAndSpacesOnly } from "@/lib/utils";
@@ -247,7 +247,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     });
   }
 
-  async function updateCountry(country) {
+  function updateCountry(country) {
     const defaults = getCountryDefaults(country, settings);
 
     savedOrderRef.current = null;
@@ -268,12 +268,19 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       };
     });
 
+    // Fetch new OrderNo in background without blocking
     if (!isEditing) {
-      const nextOrderNo = await fetchFreshOrderNo(country);
-      setForm((current) => ({
-        ...current,
-        orderNo: nextOrderNo
-      }));
+      void (async () => {
+        try {
+          const nextOrderNo = await fetchFreshOrderNo(country);
+          setForm((current) => ({
+            ...current,
+            orderNo: nextOrderNo
+          }));
+        } catch (error) {
+          console.error("Failed to fetch order number:", error);
+        }
+      })();
     }
   }
 
@@ -587,6 +594,52 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     }
   }
 
+  function syncDoneStatusAsync(order, actionLabel) {
+    // Optimistically update order status immediately
+    const optimisticOrder = { ...order, status: "done" };
+    savedOrderRef.current = optimisticOrder;
+    setSavedOrder(optimisticOrder);
+    setMessage(`Order ${order.orderNo} ${actionLabel} and marked done.`);
+
+    // Update in background with proper error handling and verification
+    (async () => {
+      try {
+        const updatedOrder = await markOrderDone(order);
+        
+        // Verify the update was successful
+        const verified = await verifyOrderStatus(order.id);
+        if (verified && verified.status === "done") {
+          savedOrderRef.current = verified;
+          setSavedOrder(verified);
+        } else {
+          // Verification failed, try again in 2 seconds
+          setTimeout(() => verifyAndUpdate(), 2000);
+        }
+      } catch (error) {
+        setMessage(`Order ${order.orderNo} ${actionLabel}, but status update failed. Retrying...`);
+        // Retry verification in 2 seconds
+        setTimeout(() => verifyAndUpdate(), 2000);
+      }
+    })();
+
+    async function verifyAndUpdate() {
+      try {
+        const verified = await verifyOrderStatus(order.id);
+        if (verified) {
+          savedOrderRef.current = verified;
+          setSavedOrder(verified);
+          if (verified.status === "done") {
+            setMessage(`Order ${order.orderNo} ${actionLabel} and marked done.`);
+          } else {
+            setMessage(`Order status is ${verified.status}. Please try again.`);
+          }
+        }
+      } catch (error) {
+        setMessage(`Could not verify order status. Please refresh the page.`);
+      }
+    }
+  }
+
   async function handleAction(intent) {
     if (actionInFlightRef.current) {
       return;
@@ -612,7 +665,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         if (order.status === "done") {
           setMessage(`Order ${order.orderNo} shared.`);
         } else if (result.returned && window.confirm("Have you successfully shared the order?")) {
-          await syncDoneStatus(order, "shared");
+          syncDoneStatusAsync(order, "shared");
         } else {
           setMessage("Share not confirmed. Order status remains pending.");
         }
@@ -709,7 +762,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             </p>
           </div>
           <div className="w-full rounded-[28px] border border-gold/20 bg-gold/10 px-5 py-4 md:max-w-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-gold-light/75">Rate Setup</p>
+            <p className="text-sm font-medium text-gold-light/75 uppercase tracking-[0.22em]">Rate Setup</p>
             <p className="mt-2 text-sm font-semibold text-white">
               {selectedCountrySettings.label} default rate {displayDefaultRate}
             </p>

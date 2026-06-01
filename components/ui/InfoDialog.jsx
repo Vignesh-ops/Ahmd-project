@@ -24,11 +24,11 @@ export default function InfoDialog({
         <p className="mt-3 text-sm text-white/65">{description}</p>
         <div className="mt-6 flex justify-end gap-3">
           {cancelLabel ? (
-            <Button type="button" variant="ghost" onClick={onCancel || onClose}>
+            <Button type="button" variant="secondary" onClick={onCancel || onClose} className="flex-1">
               {cancelLabel}
             </Button>
           ) : null}
-          <Button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose} className="flex-1">
             {confirmLabel}
           </Button>
         </div>

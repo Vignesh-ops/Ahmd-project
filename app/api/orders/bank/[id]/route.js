@@ -244,10 +244,16 @@ export async function PUT(request, { params }) {
       }
     }
   });
-  revalidatePath("/history");
-  revalidatePath("/admin");
+  
+  // Revalidate critical paths immediately
   revalidatePath(`/receipt/${order.orderNo}`);
-  revalidatePath("/bank-order");
+  revalidatePath("/history");
+  
+  // Revalidate other paths asynchronously in background
+  setTimeout(() => {
+    revalidatePath("/admin");
+    revalidatePath("/bank-order");
+  }, 0);
 
   return NextResponse.json(normalizeBankOrder(order), {
     headers: {

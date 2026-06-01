@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { memo } from "react";
 import { ArrowUpRight, CalendarDays, Home, Landmark, Phone, WalletCards } from "lucide-react";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { formatCurrency } from "@/lib/utils";
 import LocalDateTime from "./LocalDateTime";
 import StatusBadge from "./StatusBadge";
 
-export default function OrderCard({ order, href, showStore = false, children }) {
+export default memo(function OrderCard({ order, href, showStore = false, children }) {
   const showLinkIndicator = Boolean(href);
   const displayOrderNo = formatDisplayOrderNo(order.orderNo);
   const icon =
@@ -96,4 +97,4 @@ export default function OrderCard({ order, href, showStore = false, children }) 
       {content}
     </Link>
   );
-}
+});

@@ -478,7 +478,6 @@ export default function AdminDashboard({ stores }) {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-white">Data Scope</h2>
-                <p className="mt-1 text-sm text-white/50">Filter your transaction history</p>
               </div>
             </div>
             <Button type="button" variant="secondary" icon={RotateCcw} onClick={handleResetFilters}>
