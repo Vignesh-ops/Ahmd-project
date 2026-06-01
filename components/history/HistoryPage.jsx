@@ -73,8 +73,8 @@ export default function HistoryPage({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [actionError, setActionError] = useState(null);
-  const [shareDialogOrderNo, setShareDialogOrderNo] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [shareConfirmOrder, setShareConfirmOrder] = useState(null);
   useEffect(() => {
     const controller = new AbortController();
 
@@ -268,17 +268,19 @@ export default function HistoryPage({
   }
 
   async function handleShare(order) {
-    const sharePromise = shareViaWhatsApp(getMessage(order));
-    await syncDoneStatus(order, "shared");
-    const result = await sharePromise;
+    const result = await shareViaWhatsApp(getMessage(order));
+    if (order.status === "done") {
+      return;
+    }
     if (result.returned) {
-      setShareDialogOrderNo(order.orderNo);
+      setShareConfirmOrder(order);
+    } else {
+      setActionError(`Order ${order.orderNo} share was opened. Status remains pending until sharing is confirmed.`);
     }
   }
 
   async function handlePrint(order) {
     router.push(`/receipt/${order.orderNo}?autoprint=true`);
-    await syncDoneStatus(order, "sent to print");
   }
 
   async function handleDelete(order) {
@@ -325,10 +327,26 @@ export default function HistoryPage({
   return (
     <div className="space-y-6">
       <InfoDialog
-        open={Boolean(shareDialogOrderNo)}
-        title="Back from WhatsApp"
-        description={`If the message was sent successfully for order ${shareDialogOrderNo}, tap OK to continue.`}
-        onClose={() => setShareDialogOrderNo("")}
+        open={Boolean(shareConfirmOrder)}
+        title="Have you successfully shared the order?"
+        description={
+          shareConfirmOrder
+            ? `Confirm only if order ${shareConfirmOrder.orderNo} was sent successfully.`
+            : ""
+        }
+        confirmLabel="Yes"
+        cancelLabel="No"
+        onCancel={() => {
+          setShareConfirmOrder(null);
+          setActionError("Share not confirmed. Order status remains pending.");
+        }}
+        onClose={() => {
+          const orderToUpdate = shareConfirmOrder;
+          setShareConfirmOrder(null);
+          if (orderToUpdate) {
+            void syncDoneStatus(orderToUpdate, "shared");
+          }
+        }}
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCard label="Total Orders" value={<OrderCountSummary idr={stats.orderCountIDR} inr={stats.orderCountINR} />} />

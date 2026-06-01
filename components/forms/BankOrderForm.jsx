@@ -608,14 +608,19 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       }
 
       if (intent === "share") {
-        const sharePromise = shareViaWhatsApp(formatBankMessage(order));
-        await syncDoneStatus(order, "shared");
-        await sharePromise;
+        const result = await shareViaWhatsApp(formatBankMessage(order));
+        if (order.status === "done") {
+          setMessage(`Order ${order.orderNo} shared.`);
+        } else if (result.returned && window.confirm("Have you successfully shared the order?")) {
+          await syncDoneStatus(order, "shared");
+        } else {
+          setMessage("Share not confirmed. Order status remains pending.");
+        }
         return;
       }
 
       router.push(`/receipt/${order.orderNo}?autoprint=true`);
-      await syncDoneStatus(order, "sent to print");
+      setMessage("Print opened. Order status will update only after a successful print.");
     } catch (error) {
       setMessage(error.message);
     } finally {
