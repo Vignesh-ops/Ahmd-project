@@ -64,7 +64,7 @@ export default function Navbar({ user }) {
                   key={item.href}
                   href={item.href}
                   prefetch={item.href === "/" ? false : undefined}
-                  refreshOnNavigate={item.href === "/"}
+                  refreshOnNavigate={item.href === "/" || item.href === "/bank-order"}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm transition",
                     active

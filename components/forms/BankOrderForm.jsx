@@ -134,6 +134,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   const [deleteConfirmChoice, setDeleteConfirmChoice] = useState(null);
   const [deleteConfirmError, setDeleteConfirmError] = useState(null);
   const actionInFlightRef = useRef(false);
+  const orderNoRequestRef = useRef(0);
   const savedOrderRef = useRef(initialOrder);
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
@@ -196,6 +197,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   function updateField(name, value) {
+    const shouldRefreshOrderNo = Boolean(savedOrderRef.current) && !isEditing;
     const nextValue =
       name === "accountNo"
         ? normalizeAccountNo(value)
@@ -210,6 +212,10 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       ...current,
       [name]: nextValue
     }));
+
+    if (shouldRefreshOrderNo) {
+      refreshDisplayedOrderNo(form.country);
+    }
   }
 
   function updateDecimalField(name, value) {
@@ -226,6 +232,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       return;
     }
 
+    const shouldRefreshOrderNo = Boolean(savedOrderRef.current) && !isEditing;
     savedOrderRef.current = null;
     setSavedOrder(null);
     setForm((current) => {
@@ -245,6 +252,10 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         )
       };
     });
+
+    if (shouldRefreshOrderNo) {
+      refreshDisplayedOrderNo(form.country);
+    }
   }
 
   function updateCountry(country) {
@@ -268,19 +279,8 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       };
     });
 
-    // Fetch new OrderNo in background without blocking
     if (!isEditing) {
-      void (async () => {
-        try {
-          const nextOrderNo = await fetchFreshOrderNo(country);
-          setForm((current) => ({
-            ...current,
-            orderNo: nextOrderNo
-          }));
-        } catch (error) {
-          console.error("Failed to fetch order number:", error);
-        }
-      })();
+      refreshDisplayedOrderNo(country);
     }
   }
 
@@ -325,12 +325,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     });
 
     if (nextOrderNoCountry) {
-      fetchFreshOrderNo(nextOrderNoCountry).then((nextOrderNo) => {
-        setForm((current) => ({
-          ...current,
-          orderNo: nextOrderNo
-        }));
-      });
+      refreshDisplayedOrderNo(nextOrderNoCountry);
     }
 
     setLookup({
@@ -525,9 +520,36 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }, [form.senderMobile]);
 
   async function fetchFreshOrderNo(country = form.country) {
-    const response = await fetch(`/api/orders/bank?preview=true&country=${country}`);
-      const payload = await readJsonResponse(response);
+    const response = await fetch(`/api/orders/bank?preview=true&country=${country}`, {
+      cache: "no-store"
+    });
+    const payload = await readJsonResponse(response);
+
+    if (!response.ok || !payload.orderNo) {
+      throw new Error(payload.error || "Could not fetch the next order number.");
+    }
+
     return payload.orderNo;
+  }
+
+  async function refreshDisplayedOrderNo(country = form.country) {
+    const requestId = orderNoRequestRef.current + 1;
+    orderNoRequestRef.current = requestId;
+
+    try {
+      const nextOrderNo = await fetchFreshOrderNo(country);
+
+      if (requestId !== orderNoRequestRef.current || isEditing) {
+        return;
+      }
+
+      setForm((current) => ({
+        ...current,
+        orderNo: nextOrderNo
+      }));
+    } catch (error) {
+      console.error("Failed to fetch order number:", error);
+    }
   }
 
   async function startNewOrder() {
@@ -702,6 +724,42 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     setSavedOrder(initialOrder);
     setForm(nextForm);
   }, [initialOrder, initialOrderNo, settings]);
+
+  useEffect(() => {
+    if (isEditing) {
+      return undefined;
+    }
+
+    let active = true;
+
+    function refreshBlankOrderNo() {
+      const requestId = orderNoRequestRef.current + 1;
+      orderNoRequestRef.current = requestId;
+
+      fetchFreshOrderNo(form.country)
+        .then((nextOrderNo) => {
+          if (!active || requestId !== orderNoRequestRef.current || savedOrderRef.current) {
+            return;
+          }
+
+          setForm((current) => ({
+            ...current,
+            orderNo: nextOrderNo
+          }));
+        })
+        .catch((error) => {
+          console.error("Failed to fetch order number:", error);
+        });
+    }
+
+    refreshBlankOrderNo();
+    window.addEventListener("pageshow", refreshBlankOrderNo);
+
+    return () => {
+      active = false;
+      window.removeEventListener("pageshow", refreshBlankOrderNo);
+    };
+  }, [isEditing, initialOrderNo]);
 
   const displayDefaultRate = mounted ? formatNumber(selectedCountrySettings.rate, 5) : String(selectedCountrySettings.rate ?? "");
   const displayDefaultServiceCharge = mounted
