@@ -39,14 +39,17 @@ export default async function OrdersHistoryPage({ searchParams }) {
   const activeStore = stores.find((store) => store.storeCode === requestedStoreCode);
   const initialStoreCode = activeStore?.storeCode || "all";
   const initialStoreName = activeStore?.storeName || "";
+  const requestedStatus = typeof resolvedSearchParams?.status === "string" ? resolvedSearchParams.status : "all";
+  const initialStatus = ["pending", "failed", "done"].includes(requestedStatus) ? requestedStatus : "all";
 
   return (
     <HistoryPage
-      key={`${session.user.role}-${initialStoreCode}`}
+      key={`${session.user.role}-${initialStoreCode}-${initialStatus}`}
       isAdmin={session.user.role === "admin"}
       stores={stores}
       initialStoreCode={initialStoreCode}
       initialStoreName={initialStoreName}
+      initialStatus={initialStatus}
     />
   );
 }

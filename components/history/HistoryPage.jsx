@@ -29,18 +29,20 @@ export default function HistoryPage({
   isAdmin,
   stores = [],
   initialStoreCode = "all",
-  initialStoreName = ""
+  initialStoreName = "",
+  initialStatus = "all"
 }) {
   const router = useRouter();
   const pageSize = 5;
   const initialFilters = {
     from: "",
     to: "",
-    status: "all",
+    status: initialStatus,
     storeCode: initialStoreCode
   };
   const resetFilters = {
     ...initialFilters,
+    status: "all",
     storeCode: isAdmin ? "all" : initialStoreCode
   };
   const [draftFilters, setDraftFilters] = useState(initialFilters);

@@ -1,4 +1,4 @@
-import { ArrowRight, Landmark } from "lucide-react";
+import { AlertTriangle, ArrowRight, Clock3, Landmark } from "lucide-react";
 import MonthFilter from "@/components/dashboard/MonthFilter";
 import TimeGreeting from "@/components/dashboard/TimeGreeting";
 import AppLink from "@/components/navigation/AppLink";
@@ -8,7 +8,7 @@ import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import OrderCard from "@/components/ui/OrderCard";
 import ProfitSummary from "@/components/ui/ProfitSummary";
 import StatCard from "@/components/ui/StatCard";
-import { getAvailableOrderMonths, getCombinedOrders, getOrderSummary } from "@/lib/orders";
+import { getAvailableOrderMonths, getCombinedOrders, getOpenOrderStatusSummary, getOrderSummary } from "@/lib/orders";
 import { requireSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +48,101 @@ function ensureSelectedMonthOption(months, selectedMonth) {
   return [{ value: selectedMonth, label }, ...months];
 }
 
+function buildHistoryStatusHref(status, storeCode) {
+  const params = new URLSearchParams({ status });
+
+  if (storeCode) {
+    params.set("storeCode", storeCode);
+  }
+
+  return `/history?${params.toString()}`;
+}
+
+function StatusCountLink({ href, icon: Icon, label, count, tone = "amber" }) {
+  const toneClassName = tone === "rose" ? "open-orders-link--rose" : "open-orders-link--amber";
+
+  return (
+    <AppLink
+      href={href}
+      className={`open-orders-link inline-flex min-h-[44px] items-center justify-between gap-3 rounded-2xl border px-4 py-2.5 text-sm font-semibold transition ${toneClassName}`}
+    >
+      <span className="inline-flex items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0" />
+        {label}
+      </span>
+      <span className="open-orders-count rounded-full px-2.5 py-1 font-mono text-xs">{count}</span>
+    </AppLink>
+  );
+}
+
+function OpenOrdersPanel({ summary, isAdmin }) {
+  if (!summary?.total) {
+    return null;
+  }
+
+  return (
+    <section className="open-orders-panel glass-panel rounded-[32px] p-5 shadow-xl">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="open-orders-eyebrow text-xs uppercase tracking-[0.22em]">Needs Attention</p>
+          <h2 className="open-orders-title mt-2 text-xl font-semibold">Pending / Failed Orders</h2>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {summary.pending ? (
+            <StatusCountLink
+              href={buildHistoryStatusHref("pending")}
+              icon={Clock3}
+              label="Pending"
+              count={summary.pending}
+            />
+          ) : null}
+          {summary.failed ? (
+            <StatusCountLink
+              href={buildHistoryStatusHref("failed")}
+              icon={AlertTriangle}
+              label="Failed"
+              count={summary.failed}
+              tone="rose"
+            />
+          ) : null}
+        </div>
+      </div>
+
+      {isAdmin && summary.stores?.length ? (
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {summary.stores.map((store) => (
+            <div key={store.userId} className="open-orders-store-card rounded-[24px] border p-4">
+              <p className="open-orders-store-code text-xs uppercase tracking-[0.2em]">
+                {store.role === "admin" ? "Admin" : store.storeCode}
+              </p>
+              <h3 className="open-orders-store-name mt-1 truncate text-base font-semibold">{store.storeName}</h3>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {store.pending ? (
+                  <StatusCountLink
+                    href={buildHistoryStatusHref("pending", store.storeCode)}
+                    icon={Clock3}
+                    label="Pending"
+                    count={store.pending}
+                  />
+                ) : null}
+                {store.failed ? (
+                  <StatusCountLink
+                    href={buildHistoryStatusHref("failed", store.storeCode)}
+                    icon={AlertTriangle}
+                    label="Failed"
+                    count={store.failed}
+                    tone="rose"
+                  />
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export default async function DashboardPage({ searchParams }) {
   const session = await requireSession();
   const isAdmin = session.user.role === "admin";
@@ -58,7 +153,7 @@ export default async function DashboardPage({ searchParams }) {
     from: monthRange.from,
     to: monthRange.to
   };
-  const [monthSummary, todaySummary, recentOrders, availableMonths] = await Promise.all([
+  const [monthSummary, todaySummary, recentOrders, availableMonths, openOrderSummary] = await Promise.all([
     getOrderSummary({
       sessionUser: session.user,
       filters: monthFilters
@@ -77,6 +172,9 @@ export default async function DashboardPage({ searchParams }) {
       }
     }),
     getAvailableOrderMonths({
+      sessionUser: session.user
+    }),
+    getOpenOrderStatusSummary({
       sessionUser: session.user
     })
   ]);
@@ -104,6 +202,8 @@ export default async function DashboardPage({ searchParams }) {
           </div>
         </div>
       </section>
+
+      <OpenOrdersPanel summary={openOrderSummary} isAdmin={isAdmin} />
 
       {isAdmin ? (
         <section className="glass-panel rounded-[36px] border border-white/5 p-6 space-y-4 shadow-xl">
