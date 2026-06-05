@@ -50,6 +50,7 @@ function ensureSelectedMonthOption(months, selectedMonth) {
 
 export default async function DashboardPage({ searchParams }) {
   const session = await requireSession();
+  const isAdmin = session.user.role === "admin";
   const resolvedSearchParams = await searchParams;
   const selectedMonth = resolvedSearchParams?.month || getCurrentMonthValue();
   const monthRange = buildMonthRange(selectedMonth);
@@ -89,14 +90,14 @@ export default async function DashboardPage({ searchParams }) {
         <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-semibold text-white">
-              <TimeGreeting name={session.user.role === "admin" ? "Admin" : session.user.storeName} />
+              <TimeGreeting name={isAdmin ? "Admin" : session.user.storeName} />
             </h1>
             {/* <p className="mt-2 max-w-2xl text-sm text-white/55">
               Full activity snapshot across your remittance workflow, with quick access to new bank transfer orders.
             </p> */}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <MonthFilter months={monthOptions} value={selectedMonth} />
+            {isAdmin ? <MonthFilter months={monthOptions} value={selectedMonth} /> : null}
             <Button href="/bank-order" icon={Landmark}>
               New Bank Order
             </Button>
@@ -104,37 +105,37 @@ export default async function DashboardPage({ searchParams }) {
         </div>
       </section>
 
-      <section className="glass-panel rounded-[36px] border border-white/5 p-6 space-y-4 shadow-xl">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
-          <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Monthly Activity</h2>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <StatCard
-            label="Total Orders"
-            value={<OrderCountSummary idr={monthSummary.orderCountIDR} inr={monthSummary.orderCountINR} compact />}
-          />
-          {session.user.role === "admin" && (
+      {isAdmin ? (
+        <section className="glass-panel rounded-[36px] border border-white/5 p-6 space-y-4 shadow-xl">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
+            <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Monthly Activity</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <StatCard
+              label="Total Orders"
+              value={<OrderCountSummary idr={monthSummary.orderCountIDR} inr={monthSummary.orderCountINR} compact />}
+            />
             <StatCard
               label="Profit"
               value={<ProfitSummary idr={monthSummary.profitIDR} inr={monthSummary.profitINR} compact />}
               accent="teal"
             />
-          )}
-          <StatCard
-            label="Total Amount"
-            value={
-              <CurrencyPairSummary
-                idr={monthSummary.totalIDR}
-                idrMyr={monthSummary.totalPayableIDRMYR}
-                inr={monthSummary.totalINR}
-                inrMyr={monthSummary.totalPayableINRMYR}
-                compact
-              />
-            }
-          />
-        </div>
-      </section>
+            <StatCard
+              label="Total Amount"
+              value={
+                <CurrencyPairSummary
+                  idr={monthSummary.totalIDR}
+                  idrMyr={monthSummary.totalPayableIDRMYR}
+                  inr={monthSummary.totalINR}
+                  inrMyr={monthSummary.totalPayableINRMYR}
+                  compact
+                />
+              }
+            />
+          </div>
+        </section>
+      ) : null}
 
       <section className="glass-panel rounded-[36px] border border-white/5 p-6 space-y-4 shadow-xl">
         <div>
@@ -146,7 +147,7 @@ export default async function DashboardPage({ searchParams }) {
             label="Orders"
             value={<OrderCountSummary idr={todaySummary.orderCountIDR} inr={todaySummary.orderCountINR} compact />}
           />
-          {session.user.role === "admin" && (
+          {isAdmin && (
             <StatCard
               label="Profit"
               value={<ProfitSummary idr={todaySummary.profitIDR} inr={todaySummary.profitINR} compact />}

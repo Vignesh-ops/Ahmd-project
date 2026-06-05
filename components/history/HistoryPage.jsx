@@ -391,20 +391,20 @@ export default function HistoryPage({
           }
         }}
       />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Total Orders" value={<OrderCountSummary idr={stats.orderCountIDR} inr={stats.orderCountINR} />} />
-        {isAdmin && (
-        <StatCard
-          label="Profit"
-          value={<ProfitSummary idr={stats.profitIDR} inr={stats.profitINR} />}
-          accent="teal"
-        />
-        )}
-        <StatCard
-          label="Total Amount"
-          value={<CurrencyPairSummary idr={stats.idr} idrMyr={stats.idrMyr} inr={stats.inr} inrMyr={stats.inrMyr} />}
-        />
-      </div>
+      {isAdmin ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard label="Total Orders" value={<OrderCountSummary idr={stats.orderCountIDR} inr={stats.orderCountINR} />} />
+          <StatCard
+            label="Profit"
+            value={<ProfitSummary idr={stats.profitIDR} inr={stats.profitINR} />}
+            accent="teal"
+          />
+          <StatCard
+            label="Total Amount"
+            value={<CurrencyPairSummary idr={stats.idr} idrMyr={stats.idrMyr} inr={stats.inr} inrMyr={stats.inrMyr} />}
+          />
+        </div>
+      ) : null}
 
       {isAdmin && initialStoreCode !== "all" ? (
         <div className="glass-panel rounded-[28px] border border-gold/20 bg-gold/10 p-4 text-sm text-white/75">
@@ -538,13 +538,15 @@ export default function HistoryPage({
             </div>
           ) : null}
 
-          {orders.length ? (
+          {orders.length && (isAdmin || hasMore) ? (
             <div className="glass-panel rounded-[28px] border border-white/5 p-4 text-center">
-              <p className="text-sm text-white/60">
-                Showing {orders.length} of {totalCount} orders
-              </p>
+              {isAdmin ? (
+                <p className="text-sm text-white/60">
+                  Showing {orders.length} of {totalCount} orders
+                </p>
+              ) : null}
               {hasMore ? (
-                <Button className="mt-3" variant="secondary" onClick={() => void loadMoreOrders()} loading={loadingMore}>
+                <Button className={isAdmin ? "mt-3" : ""} variant="secondary" onClick={() => void loadMoreOrders()} loading={loadingMore}>
                   Load More
                 </Button>
               ) : null}
