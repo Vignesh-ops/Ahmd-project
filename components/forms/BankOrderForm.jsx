@@ -28,8 +28,14 @@ import Input from "@/components/ui/Input";
 import RadioPill from "@/components/ui/RadioPill";
 import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
 import { cacheReceiptOrder } from "@/lib/receipt-cache";
+import {
+  clearPendingShareConfirmation,
+  getPendingShareConfirmation,
+  setPendingShareConfirmation
+} from "@/lib/shareConfirmation";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber, lettersAndSpacesOnly } from "@/lib/utils";
+import InfoDialog from "@/components/ui/InfoDialog";
 
 const countryOptions = [
   { label: "IDR", value: 1 },
@@ -133,6 +139,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmChoice, setDeleteConfirmChoice] = useState(null);
   const [deleteConfirmError, setDeleteConfirmError] = useState(null);
+  const [shareConfirmOrder, setShareConfirmOrder] = useState(null);
   const actionInFlightRef = useRef(false);
   const orderNoRequestRef = useRef(0);
   const savedOrderRef = useRef(initialOrder);
@@ -617,6 +624,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }
 
   function syncDoneStatusAsync(order, actionLabel) {
+    clearPendingShareConfirmation(order);
     // Optimistically update order status immediately
     const optimisticOrder = { ...order, status: "done" };
     savedOrderRef.current = optimisticOrder;
@@ -683,13 +691,16 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       }
 
       if (intent === "share") {
+        setPendingShareConfirmation(order);
         const result = await shareViaWhatsApp(formatBankMessage(order));
         if (order.status === "done") {
+          clearPendingShareConfirmation(order);
           setMessage(`Order ${order.orderNo} shared.`);
-        } else if (result.returned && window.confirm("Have you successfully shared the order?")) {
-          syncDoneStatusAsync(order, "shared");
         } else {
-          setMessage("Share not confirmed. Order status remains pending.");
+          setShareConfirmOrder(order);
+          if (!result.returned) {
+            setMessage("Share opened. Status remains pending until you confirm it was sent.");
+          }
         }
         return;
       }
@@ -713,6 +724,22 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    function restorePendingShareConfirmation() {
+      const pendingOrder = getPendingShareConfirmation();
+      setShareConfirmOrder(pendingOrder?.status === "done" ? null : pendingOrder);
+    }
+
+    restorePendingShareConfirmation();
+    window.addEventListener("pageshow", restorePendingShareConfirmation);
+    window.addEventListener("focus", restorePendingShareConfirmation);
+
+    return () => {
+      window.removeEventListener("pageshow", restorePendingShareConfirmation);
+      window.removeEventListener("focus", restorePendingShareConfirmation);
+    };
   }, []);
 
   useEffect(() => {
@@ -806,6 +833,31 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
   return (
     <div className="space-y-6">
+      <InfoDialog
+        open={Boolean(shareConfirmOrder)}
+        title="Have you successfully shared the order?"
+        description={
+          shareConfirmOrder
+            ? `Confirm only if order ${shareConfirmOrder.orderNo} was sent successfully.`
+            : ""
+        }
+        confirmLabel="Yes"
+        cancelLabel="No"
+        onCancel={() => {
+          if (shareConfirmOrder) {
+            clearPendingShareConfirmation(shareConfirmOrder);
+          }
+          setShareConfirmOrder(null);
+          setMessage("Share not confirmed. Order status remains pending.");
+        }}
+        onClose={() => {
+          const orderToUpdate = shareConfirmOrder;
+          setShareConfirmOrder(null);
+          if (orderToUpdate) {
+            syncDoneStatusAsync(orderToUpdate, "shared");
+          }
+        }}
+      />
       <div className="glass-panel rounded-[32px] border border-white/5 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
