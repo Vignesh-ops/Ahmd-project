@@ -729,12 +729,6 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }, []);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (appliedInitialFormKeyRef.current === initialFormKey) {
-      return;
-    }
-
-=======
     function restorePendingShareConfirmation() {
       const pendingOrder = getPendingShareConfirmation();
       setShareConfirmOrder(pendingOrder?.status === "done" ? null : pendingOrder);
@@ -751,7 +745,10 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }, []);
 
   useEffect(() => {
->>>>>>> 020fe811b06db7033caa5fdf6423c6059a4fee8a
+    if (appliedInitialFormKeyRef.current === initialFormKey) {
+      return;
+    }
+
     const nextForm = initialOrder
       ? buildFormFromOrder(initialOrder, settings)
       : buildInitialForm(initialOrderNo, settings);
