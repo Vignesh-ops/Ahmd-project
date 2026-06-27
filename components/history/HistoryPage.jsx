@@ -13,6 +13,11 @@ import StatCard from "@/components/ui/StatCard";
 import StoreFilter from "@/components/admin/StoreFilter";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
+import {
+  clearPendingShareConfirmation,
+  getPendingShareConfirmation,
+  setPendingShareConfirmation
+} from "@/lib/shareConfirmation";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
@@ -157,6 +162,22 @@ export default function HistoryPage({
     };
   }, []);
 
+  useEffect(() => {
+    function restorePendingShareConfirmation() {
+      const pendingOrder = getPendingShareConfirmation();
+      setShareConfirmOrder(pendingOrder?.status === "done" ? null : pendingOrder);
+    }
+
+    restorePendingShareConfirmation();
+    window.addEventListener("pageshow", restorePendingShareConfirmation);
+    window.addEventListener("focus", restorePendingShareConfirmation);
+
+    return () => {
+      window.removeEventListener("pageshow", restorePendingShareConfirmation);
+      window.removeEventListener("focus", restorePendingShareConfirmation);
+    };
+  }, []);
+
   const stats = useMemo(() => {
     return {
       total: summary.totalOrders,
@@ -270,6 +291,7 @@ export default function HistoryPage({
   }
 
   function syncDoneStatusAsync(order, actionLabel) {
+    clearPendingShareConfirmation(order);
     // Optimistically update order status immediately
     const optimisticOrder = { ...order, status: "done" };
     applyOrderUpdate(optimisticOrder);
@@ -313,13 +335,16 @@ export default function HistoryPage({
   }
 
   async function handleShare(order) {
+    setPendingShareConfirmation(order);
     const result = await shareViaWhatsApp(getMessage(order));
     if (order.status === "done") {
+      clearPendingShareConfirmation(order);
       return;
     }
     if (result.returned) {
       setShareConfirmOrder(order);
     } else {
+      setShareConfirmOrder(order);
       setActionError(`Order ${order.orderNo} share was opened. Status remains pending until sharing is confirmed.`);
     }
   }
@@ -382,6 +407,9 @@ export default function HistoryPage({
         confirmLabel="Yes"
         cancelLabel="No"
         onCancel={() => {
+          if (shareConfirmOrder) {
+            clearPendingShareConfirmation(shareConfirmOrder);
+          }
           setShareConfirmOrder(null);
           setActionError("Share not confirmed. Order status remains pending.");
         }}
@@ -389,7 +417,7 @@ export default function HistoryPage({
           const orderToUpdate = shareConfirmOrder;
           setShareConfirmOrder(null);
           if (orderToUpdate) {
-            syncDoneStatusAsync(orderToUpdate, "shared");
+            syncDoneStatusAsync(orderToUpdate, "`shared`");
           }
         }}
       />

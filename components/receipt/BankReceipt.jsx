@@ -7,6 +7,11 @@ import Button from "@/components/ui/Button";
 import InfoDialog from "@/components/ui/InfoDialog";
 import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
 import { buildBankReceiptText, printReceipt } from "@/lib/print";
+import {
+  clearPendingShareConfirmation,
+  getPendingShareConfirmation,
+  setPendingShareConfirmation
+} from "@/lib/shareConfirmation";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { formatDisplayOrderNo } from "@/lib/orderNoDisplay";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -17,7 +22,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
   const [currentOrder, setCurrentOrder] = useState(order);
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
-  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareConfirmOrder, setShareConfirmOrder] = useState(null);
   const autoPrintStartedRef = useRef(false);
 
   async function syncDoneStatus(actionLabel, silent = false) {
@@ -35,31 +40,36 @@ export default function BankReceipt({ order, autoPrint = false }) {
     }
   }
 
-  function syncDoneStatusAsync(actionLabel, silent = false) {
+  function syncDoneStatusAsync(actionLabel, silent = false, orderToUpdate = currentOrder) {
+    clearPendingShareConfirmation(orderToUpdate);
     // Optimistically update order status immediately
-    const optimisticOrder = { ...currentOrder, status: "done" };
-    setCurrentOrder(optimisticOrder);
+    const optimisticOrder = { ...orderToUpdate, status: "done" };
+    if (orderToUpdate.id === currentOrder.id) {
+      setCurrentOrder(optimisticOrder);
+    }
     
     if (!silent) {
-      setMessage(`Order ${currentOrder.orderNo} ${actionLabel} and marked done.`);
+      setMessage(`Order ${orderToUpdate.orderNo} ${actionLabel} and marked done.`);
     }
 
     // Update in background with proper error handling and verification
     (async () => {
       try {
-        const updatedOrder = await markOrderDone(currentOrder);
+        const updatedOrder = await markOrderDone(orderToUpdate);
         
         // Verify the update was successful
-        const verified = await verifyOrderStatus(currentOrder.id);
+        const verified = await verifyOrderStatus(orderToUpdate.id);
         if (verified && verified.status === "done") {
-          setCurrentOrder(verified);
+          if (orderToUpdate.id === currentOrder.id) {
+            setCurrentOrder(verified);
+          }
         } else {
           // Verification failed, keep optimistic for now but try again in 2 seconds
           setTimeout(() => verifyAndUpdate(), 2000);
         }
       } catch (error) {
         if (!silent) {
-          setMessage(`Order ${currentOrder.orderNo} ${actionLabel}, but status update failed. Retrying...`);
+          setMessage(`Order ${orderToUpdate.orderNo} ${actionLabel}, but status update failed. Retrying...`);
         }
         // Retry verification in 2 seconds
         setTimeout(() => verifyAndUpdate(), 2000);
@@ -68,11 +78,13 @@ export default function BankReceipt({ order, autoPrint = false }) {
 
     async function verifyAndUpdate() {
       try {
-        const verified = await verifyOrderStatus(currentOrder.id);
+        const verified = await verifyOrderStatus(orderToUpdate.id);
         if (verified) {
-          setCurrentOrder(verified);
+          if (orderToUpdate.id === currentOrder.id) {
+            setCurrentOrder(verified);
+          }
           if (verified.status === "done" && !silent) {
-            setMessage(`Order ${currentOrder.orderNo} ${actionLabel} and marked done.`);
+            setMessage(`Order ${orderToUpdate.orderNo} ${actionLabel} and marked done.`);
           } else if (verified.status !== "done" && !silent) {
             setMessage(`Order status is ${verified.status}. Please try again.`);
           }
@@ -113,18 +125,37 @@ export default function BankReceipt({ order, autoPrint = false }) {
     try {
       setLoading("share");
       setMessage("");
+      setPendingShareConfirmation(currentOrder);
       const result = await shareViaWhatsApp(formatBankMessage(currentOrder));
       if (currentOrder.status === "done") {
+        clearPendingShareConfirmation(currentOrder);
         setMessage(`Order ${currentOrder.orderNo} shared.`);
       } else if (result.returned) {
-        setShowShareDialog(true);
+        setShareConfirmOrder(currentOrder);
       } else {
+        setShareConfirmOrder(currentOrder);
         setMessage("Share opened. Status remains pending until you confirm it was sent.");
       }
     } finally {
       setLoading("");
     }
   }
+
+  useEffect(() => {
+    function restorePendingShareConfirmation() {
+      const pendingOrder = getPendingShareConfirmation();
+      setShareConfirmOrder(pendingOrder?.status === "done" ? null : pendingOrder);
+    }
+
+    restorePendingShareConfirmation();
+    window.addEventListener("pageshow", restorePendingShareConfirmation);
+    window.addEventListener("focus", restorePendingShareConfirmation);
+
+    return () => {
+      window.removeEventListener("pageshow", restorePendingShareConfirmation);
+      window.removeEventListener("focus", restorePendingShareConfirmation);
+    };
+  }, []);
 
   useEffect(() => {
     if (!autoPrint || autoPrintStartedRef.current) {
@@ -165,18 +196,28 @@ export default function BankReceipt({ order, autoPrint = false }) {
   return (
     <div className="page-fade space-y-6">
       <InfoDialog
-        open={showShareDialog}
+        open={Boolean(shareConfirmOrder)}
         title="Have you successfully shared the order?"
-        description={`Confirm only if order ${currentOrder.orderNo} was sent successfully.`}
+        description={
+          shareConfirmOrder
+            ? `Confirm only if order ${shareConfirmOrder.orderNo} was sent successfully.`
+            : ""
+        }
         confirmLabel="Yes"
         cancelLabel="No"
         onCancel={() => {
-          setShowShareDialog(false);
+          if (shareConfirmOrder) {
+            clearPendingShareConfirmation(shareConfirmOrder);
+          }
+          setShareConfirmOrder(null);
           setMessage("Share not confirmed. Order status remains pending.");
         }}
         onClose={() => {
-          setShowShareDialog(false);
-          syncDoneStatusAsync("shared");
+          const orderToUpdate = shareConfirmOrder;
+          setShareConfirmOrder(null);
+          if (orderToUpdate) {
+            syncDoneStatusAsync("shared", false, orderToUpdate);
+          }
         }}
       />
       <div className="print-hide flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
