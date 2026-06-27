@@ -136,6 +136,8 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   const actionInFlightRef = useRef(false);
   const orderNoRequestRef = useRef(0);
   const savedOrderRef = useRef(initialOrder);
+  const initialFormKey = initialOrder ? `edit:${initialOrder.id}` : `new:${initialOrderNo}`;
+  const appliedInitialFormKeyRef = useRef(initialFormKey);
 
   const selectedCountrySettings = useMemo(() => getCountryDefaults(form.country, settings), [form.country, settings]);
   const calculatedTotalPayableAmount = useMemo(
@@ -716,14 +718,19 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   }, []);
 
   useEffect(() => {
+    if (appliedInitialFormKeyRef.current === initialFormKey) {
+      return;
+    }
+
     const nextForm = initialOrder
       ? buildFormFromOrder(initialOrder, settings)
       : buildInitialForm(initialOrderNo, settings);
 
+    appliedInitialFormKeyRef.current = initialFormKey;
     savedOrderRef.current = initialOrder;
     setSavedOrder(initialOrder);
     setForm(nextForm);
-  }, [initialOrder, initialOrderNo, settings]);
+  }, [initialFormKey, initialOrder, initialOrderNo, settings]);
 
   useEffect(() => {
     if (isEditing) {
