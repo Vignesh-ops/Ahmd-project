@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import AdminTable from "@/components/admin/AdminTable";
 import StoreFilter from "@/components/admin/StoreFilter";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
 import Input from "@/components/ui/Input";
@@ -129,7 +130,9 @@ export default function AdminDashboard({
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
   const [exportMessage, setExportMessage] = useState("");
+  const [exportMessageTone, setExportMessageTone] = useState("idle");
   const isInitialSummaryLoad = useRef(true);
   const isInitialOrdersLoad = useRef(true);
   useEffect(() => {
@@ -297,6 +300,7 @@ export default function AdminDashboard({
     setDeleteOrder(order);
     setShowDeleteModal(true);
     setDeleteError(null);
+    setDeleteSuccessMessage("");
   }
 
   function removeOrderFromLocalState(order) {
@@ -347,6 +351,7 @@ export default function AdminDashboard({
         return;
       }
   
+      setDeleteSuccessMessage(`Order ${deleteOrder.orderNo} deleted.`);
       removeOrderFromLocalState(deleteOrder);
       setShowDeleteModal(false);
       setDeleteOrder(null);
@@ -370,14 +375,17 @@ export default function AdminDashboard({
   async function handleExportXlsx() {
     try {
       setExportMessage("");
+      setExportMessageTone("idle");
       const saveTarget = await pickXlsxSaveTarget(buildExportFilename(filters, reportScopeLabel));
 
       if (saveTarget?.canceled || saveTarget?.unsupported) {
         setExportMessage(saveTarget.message);
+        setExportMessageTone("idle");
         return;
       }
 
       setExportMessage("Preparing XLSX...");
+      setExportMessageTone("idle");
       const exportOrders = await fetchAllMatchingOrders();
       const result = await exportXlsx(
         saveTarget,
@@ -399,13 +407,17 @@ export default function AdminDashboard({
 
       if (result?.message) {
         setExportMessage(result.message);
+        setExportMessageTone("success");
       } else if (result?.saved) {
         setExportMessage(`Saved: ${result.filename}`);
+        setExportMessageTone("success");
       } else {
         setExportMessage("XLSX export complete.");
+        setExportMessageTone("success");
       }
     } catch (error) {
       setExportMessage(error?.message || "Failed to export XLSX.");
+      setExportMessageTone("error");
     }
   }
 
@@ -551,8 +563,13 @@ export default function AdminDashboard({
               Print All
             </Button>
           </div>
-          {exportMessage ? <p className="mt-3 text-sm text-white/65">{exportMessage}</p> : null}
+          {exportMessage ? (
+            <ActionStatusMessage tone={exportMessageTone}>{exportMessage}</ActionStatusMessage>
+          ) : null}
         </form>
+        {deleteSuccessMessage ? (
+          <ActionStatusMessage tone="success">{deleteSuccessMessage}</ActionStatusMessage>
+        ) : null}
 {/* Fancy Delete Confirmation Modal */}
 {showDeleteModal && (
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">

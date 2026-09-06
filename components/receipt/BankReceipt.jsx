@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Printer, Send } from "lucide-react";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 import Button from "@/components/ui/Button";
 import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
 import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
@@ -22,6 +23,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
   const [currentOrder, setCurrentOrder] = useState(order);
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState("idle");
   const [shareConfirmOrder, setShareConfirmOrder] = useState(null);
   const autoPrintStartedRef = useRef(false);
 
@@ -32,10 +34,12 @@ export default function BankReceipt({ order, autoPrint = false }) {
 
       if (!silent) {
         setMessage(`Order ${updatedOrder.orderNo} ${actionLabel} and marked done.`);
+        setMessageTone("success");
       }
     } catch (error) {
       if (!silent) {
         setMessage(`Order ${order.orderNo} ${actionLabel}, but status update failed: ${error.message}`);
+        setMessageTone("error");
       }
     }
   }
@@ -50,6 +54,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
     
     if (!silent) {
       setMessage(`Order ${orderToUpdate.orderNo} ${actionLabel} and marked done.`);
+      setMessageTone("success");
     }
 
     // Update in background with proper error handling and verification
@@ -70,6 +75,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
       } catch (error) {
         if (!silent) {
           setMessage(`Order ${orderToUpdate.orderNo} ${actionLabel}, but status update failed. Retrying...`);
+          setMessageTone("error");
         }
         // Retry verification in 2 seconds
         setTimeout(() => verifyAndUpdate(), 2000);
@@ -85,13 +91,16 @@ export default function BankReceipt({ order, autoPrint = false }) {
           }
           if (verified.status === "done" && !silent) {
             setMessage(`Order ${orderToUpdate.orderNo} ${actionLabel} and marked done.`);
+            setMessageTone("success");
           } else if (verified.status !== "done" && !silent) {
             setMessage(`Order status is ${verified.status}. Please try again.`);
+            setMessageTone("error");
           }
         }
       } catch (error) {
         if (!silent) {
           setMessage(`Could not verify order status. Please refresh the page.`);
+          setMessageTone("error");
         }
       }
     }
@@ -102,19 +111,23 @@ export default function BankReceipt({ order, autoPrint = false }) {
       setLoading("print");
       if (!silent) {
         setMessage("");
+        setMessageTone("idle");
       }
       const result = await printReceipt(buildBankReceiptText(currentOrder));
       if (result.fallback && !silent) {
         setMessage(`Print failed: ${result.error || "No preferred printer available"}`);
+        setMessageTone("error");
         return;
       }
       if (!silent) {
         setMessage(`Printed to ${result.deviceName || "printer"}.`);
+        setMessageTone("success");
       }
       await syncDoneStatus("printed", silent);
     } catch (error) {
       if (!silent) {
         setMessage(`Print failed: ${error.message}`);
+        setMessageTone("error");
       }
     } finally {
       setLoading("");
@@ -125,16 +138,19 @@ export default function BankReceipt({ order, autoPrint = false }) {
     try {
       setLoading("share");
       setMessage("");
+      setMessageTone("idle");
       setPendingShareConfirmation(currentOrder);
       const result = await shareViaWhatsApp(formatBankMessage(currentOrder));
       if (currentOrder.status === "done") {
         clearPendingShareConfirmation(currentOrder);
         setMessage(`Order ${currentOrder.orderNo} shared.`);
+        setMessageTone("success");
       } else if (result.returned) {
         setShareConfirmOrder(currentOrder);
       } else {
         setShareConfirmOrder(currentOrder);
         setMessage("Share opened. Status remains pending until you confirm it was sent.");
+        setMessageTone("idle");
       }
     } finally {
       setLoading("");
@@ -203,6 +219,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
             clearPendingShareConfirmation(shareConfirmOrder);
           }
           setMessage("Share not confirmed. Order status remains pending.");
+          setMessageTone("error");
         }}
         onConfirm={() => {
           const orderToUpdate = shareConfirmOrder;
@@ -232,9 +249,9 @@ export default function BankReceipt({ order, autoPrint = false }) {
           WhatsApp Share
         </Button>
       </div>
-      <p className="print-hide text-center text-sm text-white/55">
+      <ActionStatusMessage tone={messageTone} className="print-hide text-center text-sm text-white/55">
         {message || "Share confirmations and successful prints will mark the order as done."}
-      </p>
+      </ActionStatusMessage>
 
       <div className="print-area">
         <div className="thermal-paper">

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 import {
   canUseNativePrinters,
   getAvailablePrinters,
@@ -39,8 +40,10 @@ export default function SettingsForm({ settings, storeName }) {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState("idle");
   const [printerLoading, setPrinterLoading] = useState("");
   const [printerMessage, setPrinterMessage] = useState("");
+  const [printerMessageTone, setPrinterMessageTone] = useState("idle");
   const [printerTab, setPrinterTab] = useState("choose");
   const [nativeReady, setNativeReady] = useState(false);
   const [availablePrinters, setAvailablePrinters] = useState({ bluetooth: [], usb: [], preferred: null });
@@ -58,7 +61,10 @@ export default function SettingsForm({ settings, storeName }) {
   async function refreshPrinters(silent = false) {
     if (!canUseNativePrinters()) {
       setAvailablePrinters({ bluetooth: [], usb: [], preferred: null });
-      if (!silent) setPrinterMessage("Printer setup is only available inside the Android app.");
+      if (!silent) {
+        setPrinterMessage("Printer setup is only available inside the Android app.");
+        setPrinterMessageTone("idle");
+      }
       return;
     }
 
@@ -69,6 +75,7 @@ export default function SettingsForm({ settings, storeName }) {
         setNeedsPermissionHelp(true);
         if (!silent) {
           setPrinterMessage("Bluetooth permission is required to list paired printers.");
+          setPrinterMessageTone("idle");
         }
         setAvailablePrinters((current) => ({ ...current, bluetooth: [] }));
         return;
@@ -80,9 +87,11 @@ export default function SettingsForm({ settings, storeName }) {
 
       if (!silent && !data.preferred) {
         setPrinterMessage("Choose a printer to make it the default for all prints.");
+        setPrinterMessageTone("idle");
       }
     } catch (error) {
       setPrinterMessage(`Could not load printers: ${error.message}`);
+      setPrinterMessageTone("error");
     }
   }
 
@@ -90,11 +99,14 @@ export default function SettingsForm({ settings, storeName }) {
     try {
       setPrinterLoading(getPrinterKey(printer));
       setPrinterMessage("");
+      setPrinterMessageTone("idle");
       await setPreferredPrinter(printer);
       await refreshPrinters(true);
       setPrinterMessage(`${printer.name} is now preferred.`);
+      setPrinterMessageTone("success");
     } catch (error) {
       setPrinterMessage(`Could not set preferred printer: ${error.message}`);
+      setPrinterMessageTone("error");
     } finally {
       setPrinterLoading("");
     }
@@ -104,14 +116,18 @@ export default function SettingsForm({ settings, storeName }) {
     try {
       setPrinterLoading(`test-${getPrinterKey(printer)}`);
       setPrinterMessage("");
+      setPrinterMessageTone("idle");
       const result = await printTestSlip(printer);
       if (result.fallback) {
         setPrinterMessage(`Test print failed: ${result.error || "Unknown error"}`);
+        setPrinterMessageTone("error");
       } else {
         setPrinterMessage(`Printed test slip to ${result.deviceName}.`);
+        setPrinterMessageTone("success");
       }
     } catch (error) {
       setPrinterMessage(`Could not print test slip: ${error.message}`);
+      setPrinterMessageTone("error");
     } finally {
       setPrinterLoading("");
     }
@@ -123,10 +139,12 @@ export default function SettingsForm({ settings, storeName }) {
   async function handleStartScan() {
     if (!canUseNativePrinters()) {
       setPrinterMessage("Bluetooth scan is only available inside the Android app.");
+      setPrinterMessageTone("idle");
       return;
     }
 
     setPrinterMessage("");
+    setPrinterMessageTone("idle");
     setScanResults([]);
     setScanActive(true);
 
@@ -136,6 +154,7 @@ export default function SettingsForm({ settings, storeName }) {
         setScanActive(false);
         setNeedsPermissionHelp(true);
         setPrinterMessage("Bluetooth permission is required to scan for printers. Tap the button below to open settings.");
+        setPrinterMessageTone("idle");
         return;
       }
       setNeedsPermissionHelp(false);
@@ -162,6 +181,7 @@ export default function SettingsForm({ settings, storeName }) {
     } catch (error) {
       setScanActive(false);
       setPrinterMessage(`Bluetooth scan failed: ${error.message}`);
+      setPrinterMessageTone("error");
     }
   }
 
@@ -172,19 +192,23 @@ export default function SettingsForm({ settings, storeName }) {
     try {
       setPrinterLoading(`add-${device.address}`);
       setPrinterMessage("");
+      setPrinterMessageTone("idle");
 
       const permission = await requestBluetoothConnectPermissions();
       if (!permission?.granted) {
         setNeedsPermissionHelp(true);
         setPrinterMessage("Bluetooth permission is required before pairing.");
+        setPrinterMessageTone("idle");
         return;
       }
 
       await pairBluetoothPrinter(device.address);
       await refreshPrinters(true);
       setPrinterMessage(`${device.name || "Printer"} paired. Choose it in the list to set preferred.`);
+      setPrinterMessageTone("success");
     } catch (error) {
       setPrinterMessage(`Could not pair printer: ${error.message}`);
+      setPrinterMessageTone("error");
     } finally {
       setPrinterLoading("");
     }
@@ -195,6 +219,7 @@ export default function SettingsForm({ settings, storeName }) {
 
     setLoading(true);
     setMessage("");
+    setMessageTone("idle");
 
     try {
       const response = await fetch("/api/settings", {
@@ -212,6 +237,7 @@ export default function SettingsForm({ settings, storeName }) {
 
       if (!response.ok) {
         setMessage(payload?.error || "Could not save settings.");
+        setMessageTone("error");
         return;
       }
 
@@ -223,8 +249,10 @@ export default function SettingsForm({ settings, storeName }) {
       });
       router.refresh();
       setMessage("Settings saved. New orders will use the updated rate and service charge.");
+      setMessageTone("success");
     } catch (error) {
       setMessage(error.message || "Could not save settings.");
+      setMessageTone("error");
     } finally {
       setLoading(false);
     }
@@ -243,6 +271,7 @@ export default function SettingsForm({ settings, storeName }) {
 
   async function startScanAfterPermission() {
     setPrinterMessage("");
+    setPrinterMessageTone("idle");
     setScanResults([]);
     setScanActive(true);
 
@@ -268,17 +297,20 @@ export default function SettingsForm({ settings, storeName }) {
     } catch (error) {
       setScanActive(false);
       setPrinterMessage(`Bluetooth scan failed: ${error.message}`);
+      setPrinterMessageTone("error");
     }
   }
 
   async function handleAddPrinterClick() {
     if (!canUseNativePrinters()) {
       setPrinterMessage("Bluetooth scan is only available inside the Android app.");
+      setPrinterMessageTone("idle");
       return;
     }
 
     setPrinterTab("add");
     setPrinterMessage("");
+    setPrinterMessageTone("idle");
     setScanResults([]);
     setScanActive(false);
     setNeedsPermissionHelp(false);
@@ -289,6 +321,7 @@ export default function SettingsForm({ settings, storeName }) {
     if (!permission?.granted) {
       setNeedsPermissionHelp(true);
       setPrinterMessage("Please allow Nearby devices permission.");
+      setPrinterMessageTone("idle");
       return;
     }
 
@@ -347,9 +380,9 @@ export default function SettingsForm({ settings, storeName }) {
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-red/55">
+        <ActionStatusMessage tone={messageTone}>
           {message || "Rates are used to prefill your order forms."}
-        </p>
+        </ActionStatusMessage>
         <Button type="submit" loading={loading}>
           Save Settings
         </Button>
@@ -576,9 +609,9 @@ export default function SettingsForm({ settings, storeName }) {
           </div>
         )}
 
-        <p className="mt-4 text-sm text-red/55">
+        <ActionStatusMessage tone={printerMessageTone} className="mt-4">
           {printerMessage || "After selecting a preferred printer, all print actions will use it automatically."}
-        </p>
+        </ActionStatusMessage>
         {needsPermissionHelp ? (
           <Button
             type="button"
@@ -590,6 +623,7 @@ export default function SettingsForm({ settings, storeName }) {
                 await openBluetoothPermissionSettings();
               } catch (error) {
                 setPrinterMessage(error.message || "Could not open permission settings.");
+                setPrinterMessageTone("error");
               }
             }}
           >

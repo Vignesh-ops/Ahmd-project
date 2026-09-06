@@ -21,10 +21,12 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 
 export default function UsersManager({ initialUsers = [], initialAdminAccount = null }) {
   const [adminAccount, setAdminAccount] = useState(initialAdminAccount);
   const [adminMessage, setAdminMessage] = useState("");
+  const [adminMessageTone, setAdminMessageTone] = useState("idle");
   const [adminSaving, setAdminSaving] = useState(false);
   const [adminResetting, setAdminResetting] = useState(false);
   const [adminForm, setAdminForm] = useState({
@@ -35,7 +37,9 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
   const [users, setUsers] = useState(initialUsers);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState("idle");
   const [copiedMessage, setCopiedMessage] = useState("");
+  const [copiedMessageTone, setCopiedMessageTone] = useState("idle");
   const [editingId, setEditingId] = useState(null);
   const [resettingId, setResettingId] = useState(null);
   const [temporaryPasswordInfo, setTemporaryPasswordInfo] = useState(null);
@@ -75,6 +79,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
   async function handleCreate(event) {
     event.preventDefault();
     setMessage("");
+    setMessageTone("idle");
 
     const response = await fetch("/api/admin/users", {
       method: "POST",
@@ -88,6 +93,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
 
     if (!response.ok) {
       setMessage(payload.error || "Could not create user.");
+      setMessageTone("error");
       return;
     }
 
@@ -98,6 +104,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
       storeCode: ""
     });
     setMessage("Store user created.");
+    setMessageTone("success");
     loadUsers();
   }
 
@@ -105,6 +112,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
     event.preventDefault();
     setAdminSaving(true);
     setAdminMessage("");
+    setAdminMessageTone("idle");
 
     const response = await fetch("/api/admin/account", {
       method: "PUT",
@@ -118,6 +126,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
 
     if (!response.ok) {
       setAdminMessage(payload.error || "Could not update admin account.");
+      setAdminMessageTone("error");
       setAdminSaving(false);
       return;
     }
@@ -129,6 +138,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
       newPassword: ""
     });
     setAdminMessage("Admin account updated.");
+    setAdminMessageTone("success");
     setAdminSaving(false);
   }
 
@@ -140,7 +150,9 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
     }
 
     setAdminMessage("");
+    setAdminMessageTone("idle");
     setCopiedMessage("");
+    setCopiedMessageTone("idle");
     setAdminResetting(true);
 
     const response = await fetch("/api/admin/account/reset-password", {
@@ -151,6 +163,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
 
     if (!response.ok) {
       setAdminMessage(payload.error || "Could not reset admin password.");
+      setAdminMessageTone("error");
       setAdminResetting(false);
       return;
     }
@@ -167,6 +180,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
       newPassword: ""
     }));
     setAdminMessage("Temporary admin password generated. Copy it now and keep it secure.");
+    setAdminMessageTone("success");
     setAdminResetting(false);
   }
 
@@ -183,6 +197,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
 
   async function handleUpdate(userId) {
     setMessage("");
+    setMessageTone("idle");
     const response = await fetch(`/api/admin/users/${userId}`, {
       method: "PUT",
       headers: {
@@ -195,11 +210,13 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
 
     if (!response.ok) {
       setMessage(payload.error || "Could not update user.");
+      setMessageTone("error");
       return;
     }
 
     setEditingId(null);
     setMessage("Store user updated.");
+    setMessageTone("success");
     loadUsers();
   }
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -226,22 +243,26 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
     try {
       setDeletingId(deleteUserId);
       setMessage("");
+      setMessageTone("idle");
       const response = await fetch(`/api/admin/users/${deleteUserId}`, {
         method: "DELETE"
       });
       const payload = await response.json();
-  
+
       if (!response.ok) {
         setMessage(payload.error || "Could not delete user.");
+        setMessageTone("error");
         resetDeleteState();
         return;
       }
 
       setUsers((current) => current.filter((user) => user.id !== deleteUserId));
       setMessage(`Store user "${deleteStoreName}" deleted successfully.`);
+      setMessageTone("success");
       resetDeleteState();
     } catch (error) {
       setMessage("Error deleting user.");
+      setMessageTone("error");
       resetDeleteState();
     }
   }
@@ -255,7 +276,9 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
     }
 
     setMessage("");
+    setMessageTone("idle");
     setCopiedMessage("");
+    setCopiedMessageTone("idle");
     setResettingId(user.id);
 
     const response = await fetch(`/api/admin/users/${user.id}/reset-password`, {
@@ -266,6 +289,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
 
     if (!response.ok) {
       setMessage(payload.error || "Could not reset password.");
+      setMessageTone("error");
       setResettingId(null);
       return;
     }
@@ -277,6 +301,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
       password: payload.temporaryPassword
     });
     setMessage(`Temporary password generated for ${payload.user.storeName}. Copy it now and share it securely.`);
+    setMessageTone("success");
     setResettingId(null);
   }
 
@@ -288,8 +313,10 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
     try {
       await navigator.clipboard.writeText(temporaryPasswordInfo.password);
       setCopiedMessage("Temporary password copied.");
+      setCopiedMessageTone("success");
     } catch (error) {
       setCopiedMessage("Copy failed. Please copy it manually.");
+      setCopiedMessageTone("error");
     }
   }
 
@@ -336,9 +363,9 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-white/55">
+          <ActionStatusMessage tone={adminMessage ? adminMessageTone : "idle"}>
             {adminMessage || "Change the admin username anytime. Current password is required for all admin account changes."}
-          </p>
+          </ActionStatusMessage>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button
               type="button"
@@ -407,9 +434,9 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-red/55">
+          <ActionStatusMessage tone={message ? messageTone : "idle"}>
             {message || "Fresh setup now starts with zero store users. Add any number of store accounts with unique store codes."}
-          </p>
+          </ActionStatusMessage>
           <Button type="submit" icon={Plus}>
             Add User
           </Button>
@@ -469,9 +496,9 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
               </Button>
             </div>
           </div>
-          <p className="mt-3 text-sm text-white/65">
+          <ActionStatusMessage tone={copiedMessage ? copiedMessageTone : "idle"} className="mt-3">
             {copiedMessage || "This password is shown only once. Share it securely and ask the store user to change it later."}
-          </p>
+          </ActionStatusMessage>
         </div>
       ) : null}
 

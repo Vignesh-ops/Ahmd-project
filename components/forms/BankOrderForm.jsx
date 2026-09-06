@@ -36,6 +36,7 @@ import {
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber, lettersAndSpacesOnly } from "@/lib/utils";
 import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 
 const countryOptions = [
   { label: "IDR", value: 1 },
@@ -125,6 +126,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
   const [savedOrder, setSavedOrder] = useState(initialOrder);
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState("idle");
   const [lookup, setLookup] = useState({
     status: "idle",
     message: ""
@@ -565,6 +567,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     savedOrderRef.current = null;
     setSavedOrder(null);
     setMessage("");
+    setMessageTone("idle");
     setLookup({
       status: "idle",
       message: ""
@@ -616,11 +619,13 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       savedOrderRef.current = updatedOrder;
       setSavedOrder(updatedOrder);
       setMessage(`Order ${updatedOrder.orderNo} ${actionLabel} and marked done.`);
+      setMessageTone("success");
       return updatedOrder;
     } catch (error) {
       savedOrderRef.current = order;
       setSavedOrder(order);
       setMessage(`Order ${order.orderNo} ${actionLabel}, but status update failed: ${error.message}`);
+      setMessageTone("error");
       return order;
     }
   }
@@ -632,6 +637,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     savedOrderRef.current = optimisticOrder;
     setSavedOrder(optimisticOrder);
     setMessage(`Order ${order.orderNo} ${actionLabel} and marked done.`);
+    setMessageTone("success");
 
     // Update in background with proper error handling and verification
     (async () => {
@@ -649,6 +655,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         }
       } catch (error) {
         setMessage(`Order ${order.orderNo} ${actionLabel}, but status update failed. Retrying...`);
+        setMessageTone("error");
         // Retry verification in 2 seconds
         setTimeout(() => verifyAndUpdate(), 2000);
       }
@@ -662,12 +669,15 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
           setSavedOrder(verified);
           if (verified.status === "done") {
             setMessage(`Order ${order.orderNo} ${actionLabel} and marked done.`);
+            setMessageTone("success");
           } else {
             setMessage(`Order status is ${verified.status}. Please try again.`);
+            setMessageTone("error");
           }
         }
       } catch (error) {
         setMessage(`Could not verify order status. Please refresh the page.`);
+        setMessageTone("error");
       }
     }
   }
@@ -681,6 +691,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
       actionInFlightRef.current = true;
       setLoading(intent);
       setMessage("");
+      setMessageTone("idle");
       if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
@@ -698,10 +709,12 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
         if (order.status === "done") {
           clearPendingShareConfirmation(order);
           setMessage(`Order ${order.orderNo} shared.`);
+          setMessageTone("success");
         } else {
           setShareConfirmOrder(order);
           if (!result.returned) {
             setMessage("Share opened. Status remains pending until you confirm it was sent.");
+            setMessageTone("idle");
           }
         }
         return;
@@ -709,8 +722,10 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
       router.push(`/receipt/${order.orderNo}?autoprint=true`);
       setMessage("Print opened. Order status will update only after a successful print.");
+      setMessageTone("idle");
     } catch (error) {
       setMessage(error.message);
+      setMessageTone("error");
     } finally {
       actionInFlightRef.current = false;
       setLoading("");
@@ -810,6 +825,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
     savedOrderRef.current = null;
     setSavedOrder(null);
     setMessage("");
+    setMessageTone("idle");
     setLookup({
       status: "idle",
       message: ""
@@ -848,6 +864,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
             clearPendingShareConfirmation(shareConfirmOrder);
           }
           setMessage("Share not confirmed. Order status remains pending.");
+          setMessageTone("idle");
         }}
         onConfirm={() => {
           if (shareConfirmOrder) {
@@ -1106,12 +1123,12 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               Print
             </Button> */}
           </div>
-          <p className="text-sm text-white/55">
+          <ActionStatusMessage tone={message ? messageTone : "idle"}>
             {message ||
               (isEditing
                 ? "Update the order to refresh its receipt."
                 : "Save first to generate a permanent order and receipt.")}
-          </p>
+          </ActionStatusMessage>
         </div>
       </div>
 

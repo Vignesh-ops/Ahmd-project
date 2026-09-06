@@ -851,12 +851,113 @@ html[data-theme="light"] .bg-red-500\/90 {
   animation: status-pending-ring 1500ms ease-out infinite;
 }
 
+@keyframes status-confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) translate(var(--confetti-x), var(--confetti-y)) scale(0.35) rotate(var(--confetti-rot));
+    opacity: 0;
+  }
+}
+
+.status-confetti-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  animation: status-confetti-burst 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--confetti-delay, 0ms);
+}
+
+@keyframes status-sand-fall {
+  0% {
+    transform: translateY(-9px);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(9px);
+    opacity: 0;
+  }
+}
+
+.status-sand-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: #f2c96b;
+  animation: status-sand-fall 1000ms linear infinite;
+  animation-delay: var(--sand-delay, 0ms);
+}
+
+@keyframes status-message-pop {
+  0% {
+    transform: scale(0.9) translateY(4px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes status-message-shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+.status-message-pop {
+  animation: status-message-pop 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.status-message-shake {
+  animation:
+    status-message-pop 220ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    status-message-shake 420ms ease-in-out 220ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .status-result-pop,
   .status-success-circle,
   .status-success-check,
   .status-pending-icon,
-  .status-pending-ring {
+  .status-pending-ring,
+  .status-message-pop,
+  .status-message-shake,
+  .status-confetti-particle,
+  .status-sand-particle {
     animation-duration: 0.01ms !important;
   }
 }

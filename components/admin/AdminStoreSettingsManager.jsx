@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRightLeft, BadgeDollarSign, Pencil, Save, Settings2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 import { cn } from "@/lib/utils";
 
 function toForm(settings) {
@@ -77,6 +78,7 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
   const [editingId, setEditingId] = useState(null);
   const [savingId, setSavingId] = useState(null);
   const [messages, setMessages] = useState({});
+  const [messageTones, setMessageTones] = useState({});
 
   function updateField(userId, field, value) {
     const normalized = String(value).replace(/,/g, "");
@@ -96,6 +98,10 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
       ...current,
       [userId]: ""
     }));
+    setMessageTones((current) => ({
+      ...current,
+      [userId]: "idle"
+    }));
   }
 
   async function saveSettings(userId) {
@@ -105,6 +111,10 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
     setMessages((current) => ({
       ...current,
       [userId]: ""
+    }));
+    setMessageTones((current) => ({
+      ...current,
+      [userId]: "idle"
     }));
 
     try {
@@ -134,11 +144,19 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
         ...current,
         [userId]: "Updated. New orders for this store will use these values."
       }));
+      setMessageTones((current) => ({
+        ...current,
+        [userId]: "success"
+      }));
       setEditingId(null);
     } catch (error) {
       setMessages((current) => ({
         ...current,
         [userId]: error.message || "Could not update store settings."
+      }));
+      setMessageTones((current) => ({
+        ...current,
+        [userId]: "error"
       }));
     } finally {
       setSavingId(null);
@@ -153,6 +171,10 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
     setMessages((current) => ({
       ...current,
       [store.id]: ""
+    }));
+    setMessageTones((current) => ({
+      ...current,
+      [store.id]: "idle"
     }));
     setEditingId(null);
   }
@@ -171,7 +193,9 @@ export default function AdminStoreSettingsManager({ stores = [] }) {
                 <h2 className="mt-2 text-xl font-semibold text-white">{store.storeName || store.username}</h2>
                 <p className="mt-1 text-sm text-white/60">{store.username}</p>
               </div>
-              <p className="text-sm text-white/60">{messages[store.id] || "Default pricing for new orders."}</p>
+              <ActionStatusMessage tone={messages[store.id] ? messageTones[store.id] || "success" : "idle"}>
+                {messages[store.id] || "Default pricing for new orders."}
+              </ActionStatusMessage>
             </div>
 
             {isEditing ? (

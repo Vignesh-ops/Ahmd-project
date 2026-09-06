@@ -22,6 +22,7 @@ import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
+import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -95,6 +96,7 @@ export default function HistoryPage({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [actionError, setActionError] = useState(null);
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [shareConfirmOrder, setShareConfirmOrder] = useState(null);
   const isInitialOrdersLoad = useRef(true);
@@ -363,6 +365,7 @@ export default function HistoryPage({
     setDeleteOrder(order);
     setShowDeleteModal(true);
     setDeleteError(null);
+    setDeleteSuccessMessage("");
   }
 
   async function confirmDelete() {
@@ -379,6 +382,7 @@ export default function HistoryPage({
         return;
       }
 
+      setDeleteSuccessMessage(`Order ${deleteOrder.orderNo} deleted.`);
       removeOrderFromLocalState(deleteOrder);
       setSelectedOrder(null);
       setShowDeleteModal(false);
@@ -501,9 +505,10 @@ export default function HistoryPage({
       </form>
 
       {actionError ? (
-        <div className="rounded-[28px] border border-red-500/30 bg-red-500/10 p-4 text-sm text-white/80">
-          {actionError}
-        </div>
+        <ActionStatusMessage tone="error">{actionError}</ActionStatusMessage>
+      ) : null}
+      {deleteSuccessMessage ? (
+        <ActionStatusMessage tone="success">{deleteSuccessMessage}</ActionStatusMessage>
       ) : null}
 
       {loading ? (
