@@ -11,6 +11,7 @@ import {
   validateSecurePassword,
   unauthorized
 } from "@/lib/api";
+import { invalidateUsersCache } from "@/lib/cache";
 
 const safeUserSelect = {
   id: true,
@@ -137,6 +138,8 @@ export async function PUT(request, { params }) {
     select: safeUserSelect
   });
 
+  invalidateUsersCache();
+
   return NextResponse.json(user);
 }
 
@@ -186,6 +189,8 @@ export async function DELETE(request, { params }) {
   await prisma.user.delete({
     where: { id }
   });
+
+  invalidateUsersCache();
 
   return NextResponse.json({ success: true });
 }

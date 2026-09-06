@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   CalendarDays,
@@ -35,11 +35,18 @@ const statusOptions = [
   { label: "Failed", value: "failed" }
 ];
 
+const countryOptions = [
+  { label: "All Countries", value: "all" },
+  { label: "Indonesia (IDR)", value: "1" },
+  { label: "India (INR)", value: "2" }
+];
+
 const defaultFilters = {
   storeCode: "all",
   from: "",
   to: "",
-  status: "all"
+  status: "all",
+  country: "all"
 };
 
 function toFilenamePart(value, fallback) {
@@ -68,42 +75,54 @@ function buildExportFilename(filters, scopeLabel) {
   return `Data_${scope}_${toFilenamePart(dateRange, "All_Dates")}.xlsx`;
 }
 
-export default function AdminDashboard({ stores }) {
+const emptyAdminSummary = {
+  totalToday: 0,
+  bankToday: 0,
+  orderCountIDR: 0,
+  orderCountINR: 0,
+  profitIDR: 0,
+  profitINR: 0,
+  profitIDRMYR: 0,
+  profitINRMYR: 0,
+  totalProfitMYR: 0,
+  byStore: []
+};
+
+const emptyFilteredSummary = {
+  totalOrders: 0,
+  bankOrders: 0,
+  orderCountIDR: 0,
+  orderCountINR: 0,
+  totalIDR: 0,
+  totalINR: 0,
+  totalPayableMYR: 0,
+  totalPayableIDRMYR: 0,
+  totalPayableINRMYR: 0,
+  profitIDR: 0,
+  profitINR: 0,
+  profitIDRMYR: 0,
+  profitINRMYR: 0,
+  totalProfitMYR: 0
+};
+
+export default function AdminDashboard({
+  stores,
+  initialSummary = emptyAdminSummary,
+  initialOrders = [],
+  initialFilteredSummary = emptyFilteredSummary,
+  initialHasMore = false,
+  initialTotalCount = 0,
+  initialPage = 1
+}) {
   const pageSize = 5;
-  const [summary, setSummary] = useState({
-    totalToday: 0,
-    bankToday: 0,
-    orderCountIDR: 0,
-    orderCountINR: 0,
-    profitIDR: 0,
-    profitINR: 0,
-    profitIDRMYR: 0,
-    profitINRMYR: 0,
-    totalProfitMYR: 0,
-    byStore: []
-  });
-  const [orders, setOrders] = useState([]);
-  const [filteredSummary, setFilteredSummary] = useState({
-    totalOrders: 0,
-    bankOrders: 0,
-    orderCountIDR: 0,
-    orderCountINR: 0,
-    totalIDR: 0,
-    totalINR: 0,
-    totalPayableMYR: 0,
-    totalPayableIDRMYR: 0,
-    totalPayableINRMYR: 0,
-    profitIDR: 0,
-    profitINR: 0,
-    profitIDRMYR: 0,
-    profitINRMYR: 0,
-    totalProfitMYR: 0
-  });
-  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState(initialSummary);
+  const [orders, setOrders] = useState(initialOrders);
+  const [filteredSummary, setFilteredSummary] = useState(initialFilteredSummary);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [draftFilters, setDraftFilters] = useState(defaultFilters);
   const [filters, setFilters] = useState(defaultFilters);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -111,7 +130,14 @@ export default function AdminDashboard({ stores }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [exportMessage, setExportMessage] = useState("");
+  const isInitialSummaryLoad = useRef(true);
+  const isInitialOrdersLoad = useRef(true);
   useEffect(() => {
+    if (isInitialSummaryLoad.current) {
+      isInitialSummaryLoad.current = false;
+      return;
+    }
+
     const controller = new AbortController();
 
     async function loadSummary() {
@@ -143,6 +169,11 @@ export default function AdminDashboard({ stores }) {
   }, [filters.storeCode]);
 
   useEffect(() => {
+    if (isInitialOrdersLoad.current) {
+      isInitialOrdersLoad.current = false;
+      return;
+    }
+
     const controller = new AbortController();
 
     async function loadOrders() {
@@ -165,22 +196,7 @@ export default function AdminDashboard({ stores }) {
         });
         const payload = await response.json();
         setOrders(payload.items || []);
-        setFilteredSummary(payload.summary || {
-          totalOrders: 0,
-          bankOrders: 0,
-          orderCountIDR: 0,
-          orderCountINR: 0,
-          totalIDR: 0,
-          totalINR: 0,
-          totalPayableMYR: 0,
-          totalPayableIDRMYR: 0,
-          totalPayableINRMYR: 0,
-          profitIDR: 0,
-          profitINR: 0,
-          profitIDRMYR: 0,
-          profitINRMYR: 0,
-          totalProfitMYR: 0
-        });
+        setFilteredSummary(payload.summary || emptyFilteredSummary);
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
         setCurrentPage(Number(payload.page || 1));
@@ -514,6 +530,13 @@ export default function AdminDashboard({ stores }) {
               icon={ListFilter}
               value={draftFilters.status}
               onChange={(event) => setDraftFilters((current) => ({ ...current, status: event.target.value }))}
+            />
+            <Select
+              label="Country"
+              options={countryOptions}
+              icon={Filter}
+              value={draftFilters.country}
+              onChange={(event) => setDraftFilters((current) => ({ ...current, country: event.target.value }))}
             />
           </div>
 

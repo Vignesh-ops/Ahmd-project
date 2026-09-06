@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AlertTriangle,
   Badge,
@@ -22,18 +22,18 @@ import {
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
-export default function UsersManager() {
-  const [adminAccount, setAdminAccount] = useState(null);
+export default function UsersManager({ initialUsers = [], initialAdminAccount = null }) {
+  const [adminAccount, setAdminAccount] = useState(initialAdminAccount);
   const [adminMessage, setAdminMessage] = useState("");
   const [adminSaving, setAdminSaving] = useState(false);
   const [adminResetting, setAdminResetting] = useState(false);
   const [adminForm, setAdminForm] = useState({
-    username: "",
+    username: initialAdminAccount?.username || "",
     currentPassword: "",
     newPassword: ""
   });
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState(initialUsers);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [copiedMessage, setCopiedMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -71,10 +71,6 @@ export default function UsersManager() {
     }));
     setLoading(false);
   }
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   async function handleCreate(event) {
     event.preventDefault();

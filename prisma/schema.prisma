@@ -58,6 +58,7 @@ model BankOrder {
   @@index([senderMobile, date])
   @@index([userId, senderMobile, date])
   @@index([status])
+  @@index([country, date])
 }
 
 model HomeOrder {

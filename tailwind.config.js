@@ -26,9 +26,9 @@ module.exports = {
         }
       },
       fontFamily: {
-        display: ["Syne", "sans-serif"],
-        body: ["DM Sans", "sans-serif"],
-        mono: ["DM Mono", "monospace"]
+        display: ["var(--font-display)", "Syne", "sans-serif"],
+        body: ["var(--font-body)", "DM Sans", "sans-serif"],
+        mono: ["var(--font-mono)", "DM Mono", "monospace"]
       },
       boxShadow: {
         glow: "0 0 0 1px rgba(212, 168, 67, 0.15), 0 18px 55px rgba(0, 0, 0, 0.35)"

@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { normalizeBankOrder } from "@/lib/orders";
+import { invalidateOrdersCache } from "@/lib/cache";
 import {
   badRequest,
   cleanString,
@@ -245,15 +246,18 @@ export async function PUT(request, { params }) {
     }
   });
   
+  invalidateOrdersCache();
+
   // Revalidate critical paths immediately
   revalidatePath(`/receipt/${order.orderNo}`);
   revalidatePath("/history");
-  
-  // Revalidate other paths asynchronously in background
-  setTimeout(() => {
+
+  // Revalidate the rest after the response is sent (kept alive via after(), unlike setTimeout
+  // which is not guaranteed to run once a serverless invocation's response has been flushed).
+  after(() => {
     revalidatePath("/admin");
     revalidatePath("/bank-order");
-  }, 0);
+  });
 
   return NextResponse.json(normalizeBankOrder(order), {
     headers: {
@@ -285,6 +289,10 @@ export async function DELETE(request, { params }) {
   await prisma.bankOrder.delete({
     where: { id }
   });
+
+  invalidateOrdersCache();
+  revalidatePath("/history");
+  revalidatePath("/admin");
 
   return NextResponse.json({ success: true });
 }

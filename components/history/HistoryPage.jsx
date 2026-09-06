@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, Filter, ListFilter, RotateCcw, Search } from "lucide-react";
 import Button from "@/components/ui/Button";
@@ -30,12 +30,40 @@ const statusOptions = [
   { label: "Failed", value: "failed" }
 ];
 
+const countryOptions = [
+  { label: "All Countries", value: "all" },
+  { label: "Indonesia (IDR)", value: "1" },
+  { label: "India (INR)", value: "2" }
+];
+
+const emptySummary = {
+  totalOrders: 0,
+  bankOrders: 0,
+  orderCountIDR: 0,
+  orderCountINR: 0,
+  totalIDR: 0,
+  totalINR: 0,
+  totalPayableMYR: 0,
+  totalPayableIDRMYR: 0,
+  totalPayableINRMYR: 0,
+  profitIDR: 0,
+  profitINR: 0,
+  profitIDRMYR: 0,
+  profitINRMYR: 0,
+  totalProfitMYR: 0
+};
+
 export default function HistoryPage({
   isAdmin,
   stores = [],
   initialStoreCode = "all",
   initialStoreName = "",
-  initialStatus = "all"
+  initialStatus = "all",
+  initialOrders = [],
+  initialSummary = emptySummary,
+  initialHasMore = false,
+  initialTotalCount = 0,
+  initialPage = 1
 }) {
   const router = useRouter();
   const pageSize = 5;
@@ -43,37 +71,24 @@ export default function HistoryPage({
     from: "",
     to: "",
     status: initialStatus,
-    storeCode: initialStoreCode
+    storeCode: initialStoreCode,
+    country: "all"
   };
   const resetFilters = {
     ...initialFilters,
     status: "all",
-    storeCode: isAdmin ? "all" : initialStoreCode
+    storeCode: isAdmin ? "all" : initialStoreCode,
+    country: "all"
   };
   const [draftFilters, setDraftFilters] = useState(initialFilters);
   const [filters, setFilters] = useState(initialFilters);
-  const [orders, setOrders] = useState([]);
-  const [summary, setSummary] = useState({
-    totalOrders: 0,
-    bankOrders: 0,
-    orderCountIDR: 0,
-    orderCountINR: 0,
-    totalIDR: 0,
-    totalINR: 0,
-    totalPayableMYR: 0,
-    totalPayableIDRMYR: 0,
-    totalPayableINRMYR: 0,
-    profitIDR: 0,
-    profitINR: 0,
-    profitIDRMYR: 0,
-    profitINRMYR: 0,
-    totalProfitMYR: 0
-  });
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState(initialOrders);
+  const [summary, setSummary] = useState(initialSummary);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [totalCount, setTotalCount] = useState(initialTotalCount);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteOrder, setDeleteOrder] = useState(null);
@@ -82,7 +97,13 @@ export default function HistoryPage({
   const [actionError, setActionError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [shareConfirmOrder, setShareConfirmOrder] = useState(null);
+  const isInitialOrdersLoad = useRef(true);
   useEffect(() => {
+    if (isInitialOrdersLoad.current) {
+      isInitialOrdersLoad.current = false;
+      return;
+    }
+
     const controller = new AbortController();
 
     async function loadOrders() {
@@ -106,22 +127,7 @@ export default function HistoryPage({
         const payload = await response.json();
         const nextOrders = payload.items || [];
         setOrders(nextOrders);
-        setSummary(payload.summary || {
-          totalOrders: 0,
-          bankOrders: 0,
-          orderCountIDR: 0,
-          orderCountINR: 0,
-          totalIDR: 0,
-          totalINR: 0,
-          totalPayableMYR: 0,
-          totalPayableIDRMYR: 0,
-          totalPayableINRMYR: 0,
-          profitIDR: 0,
-          profitINR: 0,
-          profitIDRMYR: 0,
-          profitINRMYR: 0,
-          totalProfitMYR: 0
-        });
+        setSummary(payload.summary || emptySummary);
         setHasMore(Boolean(payload.hasMore));
         setTotalCount(Number(payload.totalCount || 0));
         setCurrentPage(Number(payload.page || 1));
@@ -489,6 +495,13 @@ export default function HistoryPage({
             icon={ListFilter}
             value={draftFilters.status}
             onChange={(event) => setDraftFilters((current) => ({ ...current, status: event.target.value }))}
+          />
+          <Select
+            label="Country"
+            options={countryOptions}
+            icon={Filter}
+            value={draftFilters.country}
+            onChange={(event) => setDraftFilters((current) => ({ ...current, country: event.target.value }))}
           />
         </div>
         <Button className="mt-6 w-full" type="submit" icon={Search}>

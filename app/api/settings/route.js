@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { badRequest, getApiSession, unauthorized } from "@/lib/api";
 import { getUserSettings, updateUserSettings } from "@/lib/settings";
+import { invalidateSettingsCache } from "@/lib/cache";
 
 export async function GET() {
   const session = await getApiSession();
@@ -40,6 +41,7 @@ export async function PUT(request) {
       service2
     });
 
+    invalidateSettingsCache();
     revalidatePath("/settings");
     revalidatePath("/bank-order");
 

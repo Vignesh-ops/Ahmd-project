@@ -1,8 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import AdminStoreSettingsManager from "@/components/admin/AdminStoreSettingsManager";
 import Button from "@/components/ui/Button";
-import prisma from "@/lib/prisma";
-import { defaultSettingsData } from "@/lib/settings";
+import { getCachedStoreSettingsList } from "@/lib/cache";
 import { requireAdminPage } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -11,30 +10,7 @@ export const revalidate = 0;
 export default async function AdminSettingsPage() {
   await requireAdminPage();
 
-  const stores = await prisma.user.findMany({
-    where: {
-      role: "store"
-    },
-    include: {
-      settings: true
-    },
-    orderBy: [
-      {
-        storeCode: "asc"
-      },
-      {
-        id: "asc"
-      }
-    ]
-  });
-  const storesWithSettings = stores.map((store) => ({
-    ...store,
-    settings: store.settings || {
-      id: store.id,
-      userId: store.id,
-      ...defaultSettingsData
-    }
-  }));
+  const storesWithSettings = await getCachedStoreSettingsList();
 
   return (
     <div className="page-fade space-y-6">

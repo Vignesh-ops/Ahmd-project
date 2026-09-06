@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { safeUserSelect } from "@/lib/users";
+import { getCachedStoreUsers, invalidateUsersCache } from "@/lib/cache";
 import {
   badRequest,
   cleanString,
@@ -9,16 +11,6 @@ import {
   validateSecurePassword,
   unauthorized
 } from "@/lib/api";
-
-const safeUserSelect = {
-  id: true,
-  username: true,
-  role: true,
-  storeName: true,
-  storeCode: true,
-  isActive: true,
-  createdAt: true
-};
 
 function toStorePayload(body) {
   return {
@@ -40,15 +32,7 @@ export async function GET() {
     return forbidden();
   }
 
-  const users = await prisma.user.findMany({
-    where: {
-      role: "store"
-    },
-    select: safeUserSelect,
-    orderBy: {
-      createdAt: "asc"
-    }
-  });
+  const users = await getCachedStoreUsers();
 
   return NextResponse.json(users);
 }
@@ -112,6 +96,8 @@ export async function POST(request) {
     },
     select: safeUserSelect
   });
+
+  invalidateUsersCache();
 
   return NextResponse.json(user, { status: 201 });
 }

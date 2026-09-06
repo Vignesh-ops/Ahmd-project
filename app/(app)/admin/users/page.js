@@ -1,10 +1,18 @@
 import { ArrowLeft, UserCog } from "lucide-react";
 import UsersManager from "@/components/admin/UsersManager";
 import Button from "@/components/ui/Button";
+import { getCachedAdminAccount, getCachedStoreUsers } from "@/lib/cache";
 import { requireAdminPage } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminUsersPage() {
-  await requireAdminPage();
+  const session = await requireAdminPage();
+  const [users, adminAccount] = await Promise.all([
+    getCachedStoreUsers(),
+    getCachedAdminAccount(session.user.id)
+  ]);
 
   return (
     <div className="page-fade space-y-6">
@@ -25,7 +33,7 @@ export default async function AdminUsersPage() {
           Back to Admin
         </Button>
       </div>
-      <UsersManager />
+      <UsersManager initialUsers={users} initialAdminAccount={adminAccount} />
     </div>
   );
 }

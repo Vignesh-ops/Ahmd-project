@@ -1,33 +1,28 @@
 import { Settings2, Shield, UserCog } from "lucide-react";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import Button from "@/components/ui/Button";
-import prisma from "@/lib/prisma";
+import { getCachedAdminSummary, getCachedOrdersPage, getCachedOrgStores } from "@/lib/cache";
 import { requireAdminPage } from "@/lib/session";
 
+const ADMIN_ORDERS_PAGE_SIZE = 5;
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminPage() {
-  await requireAdminPage();
+  const session = await requireAdminPage();
 
-  const stores = (
-    await prisma.user.findMany({
-    where: {
-      role: {
-        in: ["admin", "store"]
-      }
-    },
-    select: {
-      id: true,
-      role: true,
-      storeName: true,
-      storeCode: true
-    }
-    })
-  ).sort((left, right) => {
-    if (left.role !== right.role) {
-      return left.role === "admin" ? -1 : 1;
-    }
-
-    return (left.storeCode || "").localeCompare(right.storeCode || "");
-  });
+  const [stores, initialSummary, initialOrdersPage] = await Promise.all([
+    getCachedOrgStores(),
+    getCachedAdminSummary({ today: true }),
+    getCachedOrdersPage(
+      session.user.role,
+      session.user.id,
+      { storeCode: "all", from: "", to: "", status: "all", country: "all" },
+      1,
+      ADMIN_ORDERS_PAGE_SIZE
+    )
+  ]);
 
   return (
     <div className="page-fade space-y-6">
@@ -53,7 +48,15 @@ export default async function AdminPage() {
           </Button>
         </div>
       </div>
-      <AdminDashboard stores={stores} />
+      <AdminDashboard
+        stores={stores}
+        initialSummary={initialSummary}
+        initialOrders={initialOrdersPage.items}
+        initialFilteredSummary={initialOrdersPage.summary}
+        initialHasMore={initialOrdersPage.hasMore}
+        initialTotalCount={initialOrdersPage.totalCount}
+        initialPage={initialOrdersPage.page}
+      />
     </div>
   );
 }

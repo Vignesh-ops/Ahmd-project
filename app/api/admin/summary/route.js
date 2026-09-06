@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { getStoreOrderSummary } from "@/lib/orders";
+import { getCachedAdminSummary } from "@/lib/cache";
 import { forbidden, getApiSession, unauthorized } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -24,75 +23,11 @@ export async function GET(request) {
     storeCode: searchParams.get("storeCode") || undefined
   };
 
-  const [summary, stores] = await Promise.all([
-    getStoreOrderSummary({
-      filters
-    }),
-    prisma.user.findMany({
-      where: {
-        role: {
-          in: ["admin", "store"]
-        }
-      },
-      select: {
-        id: true,
-        role: true,
-        storeName: true,
-        storeCode: true
-      }
-    })
-  ]);
+  const payload = await getCachedAdminSummary(filters);
 
-  const byStore = stores
-    .sort((left, right) => {
-      if (left.role !== right.role) {
-        return left.role === "admin" ? -1 : 1;
-      }
-
-      return (left.storeCode || "").localeCompare(right.storeCode || "");
-    })
-    .map((store) => {
-    const storeSummary = summary.byStore[String(store.id)] || {
-      count: 0,
-      orderCountIDR: 0,
-      orderCountINR: 0,
-      totalIDR: 0,
-      totalINR: 0,
-      totalPayableIDRMYR: 0,
-      totalPayableINRMYR: 0
-    };
-
-    return {
-      storeCode: store.storeCode,
-      storeName: store.storeName,
-      role: store.role,
-      count: storeSummary.count,
-      orderCountIDR: storeSummary.orderCountIDR,
-      orderCountINR: storeSummary.orderCountINR,
-      totalIDR: storeSummary.totalIDR,
-      totalINR: storeSummary.totalINR,
-      totalPayableIDRMYR: storeSummary.totalPayableIDRMYR,
-      totalPayableINRMYR: storeSummary.totalPayableINRMYR
-    };
-  });
-
-  return NextResponse.json(
-    {
-      totalToday: summary.totalOrders,
-      bankToday: summary.totalOrders,
-      orderCountIDR: summary.orderCountIDR,
-      orderCountINR: summary.orderCountINR,
-      profitIDR: summary.profitIDR,
-      profitINR: summary.profitINR,
-      profitIDRMYR: summary.profitIDRMYR,
-      profitINRMYR: summary.profitINRMYR,
-      totalProfitMYR: summary.totalProfitMYR,
-      byStore
-    },
-    {
-      headers: {
-        "Cache-Control": "no-store"
-      }
+  return NextResponse.json(payload, {
+    headers: {
+      "Cache-Control": "no-store"
     }
-  );
+  });
 }

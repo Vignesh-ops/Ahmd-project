@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { generateCurrencyOrderNo } from "@/lib/orderNo";
 import { bankCurrencyFromCountry, normalizeBankOrder } from "@/lib/orders";
+import { invalidateOrdersCache } from "@/lib/cache";
 import {
   badRequest,
   cleanString,
@@ -237,6 +238,8 @@ export async function POST(request) {
   if (!order) {
     throw new Error("Could not save bank order.");
   }
+
+  invalidateOrdersCache();
 
   return NextResponse.json(normalizeBankOrder({ ...order, user: responseUser }), { status: 201 });
 }

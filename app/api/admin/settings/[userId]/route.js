@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { badRequest, forbidden, getApiSession, parseRouteId, unauthorized } from "@/lib/api";
 import { getUserSettings, updateUserSettings } from "@/lib/settings";
+import { invalidateSettingsCache } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -114,6 +115,7 @@ export async function PUT(request, { params }) {
 
     const settings = await updateUserSettings(userId, data);
 
+    invalidateSettingsCache();
     revalidatePath("/admin/settings");
     revalidatePath("/bank-order");
     revalidatePath("/settings");

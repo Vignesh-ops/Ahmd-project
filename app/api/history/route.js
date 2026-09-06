@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCombinedOrders, getCombinedOrdersPage } from "@/lib/orders";
+import { getCombinedOrders } from "@/lib/orders";
+import { getCachedOrdersPage } from "@/lib/cache";
 import { getApiSession, guardAdminStoreAccess, unauthorized } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,7 @@ export async function GET(request) {
     limit: searchParams.get("limit") || undefined,
     storeId: searchParams.get("storeId") || undefined,
     storeCode: searchParams.get("storeCode") || undefined,
+    country: searchParams.get("country") || "all",
     orderNo: searchParams.get("orderNo") || undefined,
     today: searchParams.get("today") === "true"
   };
@@ -34,12 +36,13 @@ export async function GET(request) {
   }
 
   if (paginated) {
-    const result = await getCombinedOrdersPage({
-      sessionUser: session.user,
+    const result = await getCachedOrdersPage(
+      session.user.role,
+      session.user.id,
       filters,
-      page,
-      pageSize
-    });
+      Number(page) || 1,
+      Number(pageSize) || undefined
+    );
 
     return NextResponse.json(result, {
       headers: {

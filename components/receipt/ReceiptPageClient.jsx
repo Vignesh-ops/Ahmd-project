@@ -21,12 +21,12 @@ async function fetchReceiptOrder(orderNo) {
   return Array.isArray(payload) ? payload[0] || null : null;
 }
 
-export default function ReceiptPageClient({ orderNo, autoPrint = false }) {
-  const [order, setOrder] = useState(() => readCachedReceiptOrder(orderNo));
+export default function ReceiptPageClient({ orderNo, autoPrint = false, initialOrder = null }) {
+  const [order, setOrder] = useState(() => readCachedReceiptOrder(orderNo) || initialOrder);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const cachedOrder = readCachedReceiptOrder(orderNo);
+    const cachedOrder = readCachedReceiptOrder(orderNo) || initialOrder;
     setOrder(cachedOrder);
     setError("");
 
@@ -65,7 +65,7 @@ export default function ReceiptPageClient({ orderNo, autoPrint = false }) {
     return () => {
       active = false;
     };
-  }, [orderNo]);
+  }, [orderNo, initialOrder]);
 
   if (order) {
     return <BankReceipt order={order} autoPrint={autoPrint} />;

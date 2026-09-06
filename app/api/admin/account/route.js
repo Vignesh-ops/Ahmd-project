@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAdminAccountSummary } from "@/lib/users";
+import { invalidateUsersCache } from "@/lib/cache";
 import {
   badRequest,
   cleanString,
@@ -21,18 +23,7 @@ export async function GET() {
     return forbidden();
   }
 
-  const adminUser = await prisma.user.findUnique({
-    where: {
-      id: Number(session.user.id)
-    },
-    select: {
-      id: true,
-      username: true,
-      storeName: true,
-      storeCode: true,
-      role: true
-    }
-  });
+  const adminUser = await getAdminAccountSummary(session.user.id);
 
   if (!adminUser || adminUser.role !== "admin") {
     return forbidden();
@@ -124,6 +115,8 @@ export async function PUT(request) {
       role: true
     }
   });
+
+  invalidateUsersCache();
 
   return NextResponse.json({
     success: true,
