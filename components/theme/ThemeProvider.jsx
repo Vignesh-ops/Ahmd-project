@@ -39,7 +39,7 @@ function beginThemeTransition() {
   document.documentElement.classList.add(TRANSITION_CLASS);
   transitionTimer = window.setTimeout(() => {
     document.documentElement.classList.remove(TRANSITION_CLASS);
-  }, 520);
+  }, 300);
 }
 
 export default function ThemeProvider({ children }) {
