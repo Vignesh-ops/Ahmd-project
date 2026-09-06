@@ -16,7 +16,7 @@ export default function MonthFilter({ value }) {
             type="month"
             value={value}
             onChange={(event) => router.push(`/?month=${event.target.value}`)}
-            className="month-filter-select w-full appearance-none rounded-2xl border border-white/10 bg-dark-input py-3 pl-12 pr-11 text-sm font-semibold text-white outline-none transition hover:border-gold/50 focus:border-gold/70 focus:ring-2 focus:ring-gold/20"
+            className="month-filter-select w-full appearance-none rounded-2xl border border-white/10 bg-dark-input py-3 pl-12 pr-11 text-sm font-semibold text-white outline-none transition-colors hover:border-gold/50 focus:border-gold/70 focus:ring-2 focus:ring-gold/20"
           />
         </span>
       </label>

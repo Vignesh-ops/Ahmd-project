@@ -21,7 +21,7 @@ import {
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
-import InfoDialog from "@/components/ui/InfoDialog";
+import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -402,30 +402,21 @@ export default function HistoryPage({
 
   return (
     <div className="space-y-6">
-      <InfoDialog
+      <ShareStatusDialog
         open={Boolean(shareConfirmOrder)}
-        title="Have you successfully shared the order?"
-        description={
-          shareConfirmOrder
-            ? `Confirm only if order ${shareConfirmOrder.orderNo} was sent successfully.`
-            : ""
-        }
-        confirmLabel="Yes"
-        cancelLabel="No"
-        onCancel={() => {
+        orderNo={shareConfirmOrder?.orderNo}
+        onDeny={() => {
           if (shareConfirmOrder) {
             clearPendingShareConfirmation(shareConfirmOrder);
           }
-          setShareConfirmOrder(null);
           setActionError("Share not confirmed. Order status remains pending.");
         }}
-        onClose={() => {
-          const orderToUpdate = shareConfirmOrder;
-          setShareConfirmOrder(null);
-          if (orderToUpdate) {
-            syncDoneStatusAsync(orderToUpdate, "`shared`");
+        onConfirm={() => {
+          if (shareConfirmOrder) {
+            syncDoneStatusAsync(shareConfirmOrder, "`shared`");
           }
         }}
+        onDismiss={() => setShareConfirmOrder(null)}
       />
       {isAdmin ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

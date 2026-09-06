@@ -35,7 +35,7 @@ export default function NetworkStatusIndicator() {
         type="button"
         disabled
         className={cn(
-          "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold transition",
+          "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold transition-colors",
           "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
         )}
       >
@@ -53,7 +53,7 @@ export default function NetworkStatusIndicator() {
       onClick={() => (isOnline ? router.refresh() : showNetworkRetryToast())}
       title={isOnline ? "Online. Refresh data" : "Offline. Waiting for network"}
       className={cn(
-        "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold transition",
+        "inline-flex min-h-[44px] items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold transition-colors",
         isOnline
           ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/15"
           : "border-red-400/30 bg-red-500/15 text-red-100"

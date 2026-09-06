@@ -22,7 +22,7 @@ export default memo(function OrderCard({ order, href, showStore = false, childre
       : formatCurrency(order.amount, order.currency);
 
   const content = (
-    <div className="glass-panel w-full relative overflow-hidden rounded-[28px] border border-white/5 p-5 transition hover:border-gold/25">
+    <div className="glass-panel w-full relative overflow-hidden rounded-[28px] border border-white/5 p-5 transition-colors hover:border-gold/25">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold/15 to-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/65">
@@ -38,7 +38,7 @@ export default memo(function OrderCard({ order, href, showStore = false, childre
         <div className="flex items-center gap-2 self-start sm:shrink-0">
           <StatusBadge status={order.status} />
           {showLinkIndicator ? (
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/45 transition group-hover:bg-gold/20 group-hover:text-gold-light">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/45 transition-colors group-hover:bg-gold/20 group-hover:text-gold-light">
               <ArrowUpRight className="h-4 w-4" />
             </span>
           ) : null}

@@ -66,7 +66,7 @@ export default function Navbar({ user }) {
                   prefetch={item.href === "/" ? false : undefined}
                   refreshOnNavigate={item.href === "/" || item.href === "/bank-order"}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm transition",
+                    "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-colors",
                     active
                       ? "bg-gold/15 text-gold-light"
                       : "text-white/60 hover:bg-white/5 hover:text-white"

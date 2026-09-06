@@ -35,7 +35,7 @@ import {
 } from "@/lib/shareConfirmation";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
 import { calculateTotalPayable, digitsOnly, formatCurrency, formatNumber, lettersAndSpacesOnly } from "@/lib/utils";
-import InfoDialog from "@/components/ui/InfoDialog";
+import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
 
 const countryOptions = [
   { label: "IDR", value: 1 },
@@ -840,30 +840,21 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
 
   return (
     <div className="space-y-6">
-      <InfoDialog
+      <ShareStatusDialog
         open={Boolean(shareConfirmOrder)}
-        title="Have you successfully shared the order?"
-        description={
-          shareConfirmOrder
-            ? `Confirm only if order ${shareConfirmOrder.orderNo} was sent successfully.`
-            : ""
-        }
-        confirmLabel="Yes"
-        cancelLabel="No"
-        onCancel={() => {
+        orderNo={shareConfirmOrder?.orderNo}
+        onDeny={() => {
           if (shareConfirmOrder) {
             clearPendingShareConfirmation(shareConfirmOrder);
           }
-          setShareConfirmOrder(null);
           setMessage("Share not confirmed. Order status remains pending.");
         }}
-        onClose={() => {
-          const orderToUpdate = shareConfirmOrder;
-          setShareConfirmOrder(null);
-          if (orderToUpdate) {
-            syncDoneStatusAsync(orderToUpdate, "shared");
+        onConfirm={() => {
+          if (shareConfirmOrder) {
+            syncDoneStatusAsync(shareConfirmOrder, "shared");
           }
         }}
+        onDismiss={() => setShareConfirmOrder(null)}
       />
       <div className="glass-panel rounded-[32px] border border-white/5 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -1147,11 +1138,11 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
               {visibleLookupChoices.map((choice) => (
                 <div
                   key={`${choice.data.accountNo}-${choice.orderNo}`}
-                  className="flex w-full items-stretch overflow-hidden rounded-[24px] border border-white/10 bg-white/5 transition hover:border-gold/30 hover:bg-white/10"
+                  className="flex w-full items-stretch overflow-hidden rounded-[24px] border border-white/10 bg-white/5 transition-colors hover:border-gold/30 hover:bg-white/10"
                 >
                   <button
                     type="button"
-                    className="min-w-0 flex-1 p-5 text-left transition hover:bg-white/5"
+                    className="min-w-0 flex-1 p-5 text-left transition-colors hover:bg-white/5"
                     onClick={() => applyLookupSelection(choice)}
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -1171,7 +1162,7 @@ export default function BankOrderForm({ initialOrderNo, settings, initialOrder =
                   <div className="flex flex-col items-center justify-center border-l border-white/10 px-3 py-2">
                     <button
                       type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 transition hover:bg-red-500/20 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40"
                       aria-label={`Delete saved account ${choice.data.accountName || choice.data.accountNo || ""}`.trim()}
                       title="Delete saved suggestion"
                       disabled={deletingSuggestion === choice.signature}

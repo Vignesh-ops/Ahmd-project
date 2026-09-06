@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Printer, Send } from "lucide-react";
 import Button from "@/components/ui/Button";
-import InfoDialog from "@/components/ui/InfoDialog";
+import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
 import { markOrderDone, verifyOrderStatus } from "@/lib/orderStatus";
 import { buildBankReceiptText, printReceipt } from "@/lib/print";
 import {
@@ -195,30 +195,22 @@ export default function BankReceipt({ order, autoPrint = false }) {
 
   return (
     <div className="page-fade space-y-6">
-      <InfoDialog
+      <ShareStatusDialog
         open={Boolean(shareConfirmOrder)}
-        title="Have you successfully shared the order?"
-        description={
-          shareConfirmOrder
-            ? `Confirm only if order ${shareConfirmOrder.orderNo} was sent successfully.`
-            : ""
-        }
-        confirmLabel="Yes"
-        cancelLabel="No"
-        onCancel={() => {
+        orderNo={shareConfirmOrder?.orderNo}
+        onDeny={() => {
           if (shareConfirmOrder) {
             clearPendingShareConfirmation(shareConfirmOrder);
           }
-          setShareConfirmOrder(null);
           setMessage("Share not confirmed. Order status remains pending.");
         }}
-        onClose={() => {
+        onConfirm={() => {
           const orderToUpdate = shareConfirmOrder;
-          setShareConfirmOrder(null);
           if (orderToUpdate) {
             syncDoneStatusAsync("shared", false, orderToUpdate);
           }
         }}
+        onDismiss={() => setShareConfirmOrder(null)}
       />
       <div className="print-hide flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
         <Button

@@ -21,7 +21,7 @@ export default function Input({
   const canTogglePassword = !textarea && allowPasswordToggle && props.type === "password";
   const resolvedType = canTogglePassword ? (showPassword ? "text" : "password") : props.type;
   const sharedClassName = cn(
-    "w-full rounded-2xl border border-white/10 bg-dark-input px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
+    "w-full rounded-2xl border border-white/10 bg-dark-input px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
     mono && "font-mono",
     (prefix || Icon) && "pl-10",
     canTogglePassword && "pr-12",
@@ -64,7 +64,7 @@ export default function Input({
         {canTogglePassword ? (
           <button
             type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-white/45 transition hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-white/45 transition-colors hover:text-white"
             onClick={() => setShowPassword((current) => !current)}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >

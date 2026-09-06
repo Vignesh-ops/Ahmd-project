@@ -138,7 +138,7 @@ export default function PullToRefresh() {
         {refreshing ? (
           <Loader2 className="h-4 w-4 animate-spin text-gold-light" />
         ) : (
-          <RefreshCw className={cn("h-4 w-4 text-gold-light transition", ready && "rotate-180")} />
+          <RefreshCw className={cn("h-4 w-4 text-gold-light transition-colors", ready && "rotate-180")} />
         )}
         <span>{refreshing ? "Refreshing" : ready ? "Release to refresh" : "Pull to refresh"}</span>
       </div>

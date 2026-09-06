@@ -14,7 +14,7 @@ export default function ThemeToggle({ className, showLabel = true }) {
       type="button"
       onClick={toggleTheme}
       className={cn(
-        "theme-toggle inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 bg-dark-elevated px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10",
+        "theme-toggle inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 bg-dark-elevated px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10",
         isLight && "theme-toggle--light",
         !showLabel && "!h-11 !w-11 !px-0",
         className

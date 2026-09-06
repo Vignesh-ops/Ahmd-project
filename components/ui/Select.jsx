@@ -50,7 +50,7 @@ export default function Select({ label, options = [], className, icon: Icon, ...
           }}
           disabled={disabled}
           className={cn(
-            "flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-dark-input px-4 py-3 pr-10 text-left text-sm text-white outline-none transition hover:border-gold/50 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
+            "flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-dark-input px-4 py-3 pr-10 text-left text-sm text-white outline-none transition-colors hover:border-gold/50 focus:border-gold/70 focus:ring-2 focus:ring-gold/20 disabled:cursor-not-allowed disabled:opacity-70",
             disabled && "hover:border-white/10"
           )}
           aria-expanded={isOpen}
