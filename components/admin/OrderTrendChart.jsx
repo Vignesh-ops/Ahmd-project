@@ -16,6 +16,21 @@ const COLORS = {
   light: { idr: "#D4A843", inr: "#1ECFB0" }
 };
 
+const INK = {
+  dark: {
+    axisText: "rgba(255, 255, 255, 0.4)",
+    gridline: "rgba(255, 255, 255, 0.1)",
+    crosshair: "rgba(255, 255, 255, 0.25)",
+    dotRing: "#111318"
+  },
+  light: {
+    axisText: "rgba(71, 85, 105, 0.84)",
+    gridline: "rgba(15, 23, 42, 0.08)",
+    crosshair: "rgba(15, 23, 42, 0.18)",
+    dotRing: "#ffffff"
+  }
+};
+
 const WEEKDAY_FORMATTER = new Intl.DateTimeFormat("en-US", { weekday: "short" });
 const DAY_FORMATTER = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
 
@@ -39,6 +54,7 @@ function parseDayKey(key) {
 export default function OrderTrendChart({ data = [] }) {
   const { theme } = useTheme();
   const palette = theme === "light" ? COLORS.light : COLORS.dark;
+  const ink = theme === "light" ? INK.light : INK.dark;
   const containerRef = useRef(null);
   const [hoverIndex, setHoverIndex] = useState(null);
 
@@ -160,11 +176,10 @@ export default function OrderTrendChart({ data = [] }) {
                     x2={CHART_WIDTH - PAD_RIGHT}
                     y1={y}
                     y2={y}
-                    stroke="currentColor"
+                    stroke={ink.gridline}
                     strokeWidth="1"
-                    className="text-white/10"
                   />
-                  <text x={PAD_LEFT - 8} y={y + 3} textAnchor="end" fontSize="9" className="fill-white/40">
+                  <text x={PAD_LEFT - 8} y={y + 3} textAnchor="end" fontSize="9" fill={ink.axisText}>
                     {tick}
                   </text>
                 </g>
@@ -178,7 +193,7 @@ export default function OrderTrendChart({ data = [] }) {
                 y={CHART_HEIGHT - 6}
                 textAnchor="middle"
                 fontSize="9"
-                className="fill-white/40"
+                fill={ink.axisText}
               >
                 {DAY_FORMATTER.format(parseDayKey(day.date))}
               </text>
@@ -195,8 +210,8 @@ export default function OrderTrendChart({ data = [] }) {
               const lastX = chart.xFor(lastIndex);
               return (
                 <>
-                  <circle cx={lastX} cy={chart.yFor(data[lastIndex].idr)} r="4" fill={palette.idr} stroke="#111318" strokeWidth="2" />
-                  <circle cx={lastX} cy={chart.yFor(data[lastIndex].inr)} r="4" fill={palette.inr} stroke="#111318" strokeWidth="2" />
+                  <circle cx={lastX} cy={chart.yFor(data[lastIndex].idr)} r="4" fill={palette.idr} stroke={ink.dotRing} strokeWidth="2" />
+                  <circle cx={lastX} cy={chart.yFor(data[lastIndex].inr)} r="4" fill={palette.inr} stroke={ink.dotRing} strokeWidth="2" />
                 </>
               );
             })()}
@@ -208,12 +223,11 @@ export default function OrderTrendChart({ data = [] }) {
                   x2={hoverX}
                   y1={PAD_TOP}
                   y2={PAD_TOP + chart.plotHeight}
-                  stroke="currentColor"
+                  stroke={ink.crosshair}
                   strokeWidth="1"
-                  className="text-white/25"
                 />
-                <circle cx={hoverX} cy={chart.yFor(hovered.idr)} r="4" fill={palette.idr} stroke="#111318" strokeWidth="2" />
-                <circle cx={hoverX} cy={chart.yFor(hovered.inr)} r="4" fill={palette.inr} stroke="#111318" strokeWidth="2" />
+                <circle cx={hoverX} cy={chart.yFor(hovered.idr)} r="4" fill={palette.idr} stroke={ink.dotRing} strokeWidth="2" />
+                <circle cx={hoverX} cy={chart.yFor(hovered.inr)} r="4" fill={palette.inr} stroke={ink.dotRing} strokeWidth="2" />
               </>
             ) : null}
           </svg>
@@ -229,14 +243,14 @@ export default function OrderTrendChart({ data = [] }) {
               <p className="font-semibold text-white">
                 {WEEKDAY_FORMATTER.format(parseDayKey(hovered.date))}, {DAY_FORMATTER.format(parseDayKey(hovered.date))}
               </p>
-              <p className="mt-1.5 flex items-center justify-between gap-3 text-white/70">
+              <p className="mt-1.5 flex items-center justify-between gap-3 text-white/65">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3 rounded-full" style={{ background: palette.idr }} />
                   IDR
                 </span>
                 <span className="font-semibold text-white">{hovered.idr}</span>
               </p>
-              <p className="mt-1 flex items-center justify-between gap-3 text-white/70">
+              <p className="mt-1 flex items-center justify-between gap-3 text-white/65">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-3 rounded-full" style={{ background: palette.inr }} />
                   INR

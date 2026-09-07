@@ -566,14 +566,14 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
                 </div>
               ) : (
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-start gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gold-light">
                       <Store className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs uppercase tracking-[0.24em] text-white/35">{user.storeCode}</p>
-                      <h3 className="mt-2 text-xl font-semibold text-white">{user.storeName}</h3>
-                      <p className="mt-1 text-sm text-white/55">
+                      <h3 className="mt-2 break-words text-xl font-semibold text-white">{user.storeName}</h3>
+                      <p className="mt-1 break-words text-sm text-white/55">
                         {user.username} · {user.isActive ? "Active" : "Inactive"}
                       </p>
                     </div>
