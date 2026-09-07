@@ -10,7 +10,7 @@ function SummarySkeleton() {
           <SkeletonBlock className="h-3 w-28" />
           <SkeletonBlock className="h-7 w-48" />
         </div>
-        <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:min-w-[560px]">
           {[0, 1, 2].map((item) => (
             <div key={item} className="rounded-2xl border border-white/5 bg-white/5 px-4 py-3">
               <SkeletonBlock className="h-8 w-32 rounded-lg" />

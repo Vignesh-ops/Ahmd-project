@@ -465,7 +465,7 @@ export default function SettingsForm({ settings, storeName }) {
             {!nativeReady ? (
               <p className="text-sm text-white/55">Printer setup is only available inside the Android app.</p>
             ) : (
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-black/15 p-3">
                   <div className="flex items-center gap-2 text-sm font-semibold text-white">
                     <Bluetooth className="h-4 w-4 text-gold-light" />

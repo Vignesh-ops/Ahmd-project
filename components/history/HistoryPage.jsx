@@ -423,7 +423,7 @@ export default function HistoryPage({
         onDismiss={() => setShareConfirmOrder(null)}
       />
       {isAdmin ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <StatCard label="Total Orders" value={<OrderCountSummary idr={stats.orderCountIDR} inr={stats.orderCountINR} />} />
           <StatCard
             label="Profit"

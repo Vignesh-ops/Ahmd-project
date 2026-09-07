@@ -14,7 +14,7 @@ function StoreRateCardSkeleton() {
         <SkeletonBlock className="h-4 w-48" />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {[0, 1, 2, 3].map((item) => (
           <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/5 p-4">
             <SkeletonBlock className="h-10 w-10 shrink-0 rounded-xl" />

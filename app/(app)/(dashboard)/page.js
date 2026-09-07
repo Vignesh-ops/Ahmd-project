@@ -87,7 +87,7 @@ function OpenOrdersPanel({ summary, isAdmin }) {
           <p className="open-orders-eyebrow text-xs uppercase tracking-[0.22em]">Needs Attention</p>
           <h2 className="open-orders-title mt-2 text-xl font-semibold">Pending / Failed Orders</h2>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {summary.pending ? (
             <StatusCountLink
               href={buildHistoryStatusHref("pending")}
@@ -211,7 +211,7 @@ export default async function DashboardPage({ searchParams }) {
             <p className="text-xs uppercase tracking-[0.22em] text-white/35">{selectedMonthLabel}</p>
             <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Monthly Activity</h2>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <StatCard
               label="Total Orders"
               value={<OrderCountSummary idr={monthSummary.orderCountIDR} inr={monthSummary.orderCountINR} compact />}
@@ -242,7 +242,7 @@ export default async function DashboardPage({ searchParams }) {
           <p className="text-xs uppercase tracking-[0.22em] text-white/35">Today</p>
           <h2 className="mt-2 text-2xl font-bold text-white decoration-gold-light decoration-2 underline-offset-4">Today&apos;s Activity</h2>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <StatCard
             label="Orders"
             value={<OrderCountSummary idr={todaySummary.orderCountIDR} inr={todaySummary.orderCountINR} compact />}

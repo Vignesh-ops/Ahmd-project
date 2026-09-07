@@ -72,13 +72,13 @@ export default function AdminLoading() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <StatCardSkeleton />
         <StatCardSkeleton />
         <StatCardSkeleton />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StoreCardSkeleton />
         <StoreCardSkeleton />
         <StoreCardSkeleton />
@@ -93,7 +93,7 @@ export default function AdminLoading() {
           </div>
           <SkeletonBlock className="h-11 w-24 rounded-2xl" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />

@@ -449,7 +449,7 @@ export default function AdminDashboard({
   return (
     <>
       <div className="admin-screen-only space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <StatCard
             label="Total Orders Today"
             value={<OrderCountSummary idr={summary.orderCountIDR} inr={summary.orderCountINR} />}
@@ -474,7 +474,7 @@ export default function AdminDashboard({
 
         <OrderTrendChart data={initialTrend} />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {summary.byStore.map((store) => (
             <div key={store.storeCode} className="glass-panel rounded-[28px] border border-white/5 p-5">
               <div className="flex items-start gap-3">

@@ -49,7 +49,7 @@ export default function AdminUsersLoading() {
             <SkeletonBlock className="h-7 w-72 max-w-full" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
@@ -73,7 +73,7 @@ export default function AdminUsersLoading() {
             <SkeletonBlock className="h-7 w-80 max-w-full" />
           </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
@@ -85,7 +85,7 @@ export default function AdminUsersLoading() {
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <StoreUserSkeleton />
         <StoreUserSkeleton />
         <StoreUserSkeleton />

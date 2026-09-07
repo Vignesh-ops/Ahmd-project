@@ -47,7 +47,7 @@ function OrderCardSkeleton() {
 export default function HistoryLoading() {
   return (
     <div className="page-fade space-y-6" aria-label="Loading order history">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCardSkeleton />
         <StatCardSkeleton />
         <StatCardSkeleton />
@@ -61,7 +61,7 @@ export default function HistoryLoading() {
           </div>
           <SkeletonBlock className="h-10 w-24 rounded-2xl" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />
           <SkeletonBlock className="h-11 w-full rounded-2xl" />

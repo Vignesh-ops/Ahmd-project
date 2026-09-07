@@ -50,7 +50,7 @@ export default function SettingsLoading() {
               <SkeletonBlock className="h-11 w-36 rounded-2xl" />
             </div>
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <SkeletonBlock className="h-28 w-full rounded-2xl" />
             <SkeletonBlock className="h-28 w-full rounded-2xl" />
           </div>
