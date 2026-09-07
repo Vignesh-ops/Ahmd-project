@@ -16,6 +16,7 @@ import {
   Store
 } from "lucide-react";
 import AdminTable from "@/components/admin/AdminTable";
+import OrderTrendChart from "@/components/admin/OrderTrendChart";
 import StoreFilter from "@/components/admin/StoreFilter";
 import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 import Button from "@/components/ui/Button";
@@ -113,7 +114,8 @@ export default function AdminDashboard({
   initialFilteredSummary = emptyFilteredSummary,
   initialHasMore = false,
   initialTotalCount = 0,
-  initialPage = 1
+  initialPage = 1,
+  initialTrend = []
 }) {
   const pageSize = 5;
   const [summary, setSummary] = useState(initialSummary);
@@ -469,6 +471,8 @@ export default function AdminDashboard({
             }
           />
         </div>
+
+        <OrderTrendChart data={initialTrend} />
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {summary.byStore.map((store) => (

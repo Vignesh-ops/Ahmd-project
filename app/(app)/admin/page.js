@@ -1,10 +1,11 @@
 import { Settings2, Shield, UserCog } from "lucide-react";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import Button from "@/components/ui/Button";
-import { getCachedAdminSummary, getCachedOrdersPage, getCachedOrgStores } from "@/lib/cache";
+import { getCachedAdminSummary, getCachedDailyOrderTrend, getCachedOrdersPage, getCachedOrgStores } from "@/lib/cache";
 import { requireAdminPage } from "@/lib/session";
 
 const ADMIN_ORDERS_PAGE_SIZE = 5;
+const TREND_DAYS = 14;
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,7 +13,7 @@ export const revalidate = 0;
 export default async function AdminPage() {
   const session = await requireAdminPage();
 
-  const [stores, initialSummary, initialOrdersPage] = await Promise.all([
+  const [stores, initialSummary, initialOrdersPage, initialTrend] = await Promise.all([
     getCachedOrgStores(),
     getCachedAdminSummary({ today: true }),
     getCachedOrdersPage(
@@ -21,7 +22,8 @@ export default async function AdminPage() {
       { storeCode: "all", from: "", to: "", status: "all", country: "all" },
       1,
       ADMIN_ORDERS_PAGE_SIZE
-    )
+    ),
+    getCachedDailyOrderTrend(TREND_DAYS)
   ]);
 
   return (
@@ -56,6 +58,7 @@ export default async function AdminPage() {
         initialHasMore={initialOrdersPage.hasMore}
         initialTotalCount={initialOrdersPage.totalCount}
         initialPage={initialOrdersPage.page}
+        initialTrend={initialTrend}
       />
     </div>
   );
