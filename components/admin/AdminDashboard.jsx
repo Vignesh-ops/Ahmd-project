@@ -51,6 +51,8 @@ const defaultFilters = {
   country: "all"
 };
 
+const PRINT_ALL_MAX_ORDERS = 300;
+
 function toFilenamePart(value, fallback) {
   const cleaned = String(value || fallback)
     .normalize("NFKD")
@@ -424,6 +426,14 @@ export default function AdminDashboard({
   }
 
   async function handlePrintAll() {
+    if (totalCount > PRINT_ALL_MAX_ORDERS) {
+      setExportMessage(
+        `This filter matches ${totalCount} orders, too many to print safely at once. Narrow the date range or store first, or use Export Report for the full data set.`
+      );
+      setExportMessageTone("error");
+      return;
+    }
+
     if (hasMore) {
       const allOrders = await fetchAllMatchingOrders();
       setOrders(allOrders);
