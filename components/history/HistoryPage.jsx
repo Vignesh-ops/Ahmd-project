@@ -19,7 +19,7 @@ import {
   setPendingShareConfirmation
 } from "@/lib/shareConfirmation";
 import { formatBankMessage, shareViaWhatsApp } from "@/lib/whatsapp";
-import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
+import { calculateProfitMYR, formatCurrency, todayDateString } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
 import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
@@ -475,6 +475,7 @@ export default function HistoryPage({
             type="date"
             icon={CalendarDays}
             value={draftFilters.from}
+            max={draftFilters.to || todayDateString()}
             onChange={(event) => setDraftFilters((current) => ({ ...current, from: event.target.value }))}
           />
           <Input
@@ -483,6 +484,8 @@ export default function HistoryPage({
             type="date"
             icon={CalendarDays}
             value={draftFilters.to}
+            min={draftFilters.from || undefined}
+            max={todayDateString()}
             onChange={(event) => setDraftFilters((current) => ({ ...current, to: event.target.value }))}
           />
           <Select

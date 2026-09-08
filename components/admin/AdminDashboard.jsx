@@ -28,7 +28,7 @@ import Select from "@/components/ui/Select";
 import StatCard from "@/components/ui/StatCard";
 import { exportXlsx, pickXlsxSaveTarget } from "@/lib/client-export";
 import { printCurrentPage } from "@/lib/print";
-import { calculateProfitMYR, formatCurrency, formatCurrencyPlain, formatDate } from "@/lib/utils";
+import { calculateProfitMYR, formatCurrency, formatCurrencyPlain, formatDate, todayDateString } from "@/lib/utils";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -545,6 +545,7 @@ export default function AdminDashboard({
               placeholder="Select start date"
               icon={CalendarDays}
               value={draftFilters.from}
+              max={draftFilters.to || todayDateString()}
               onChange={(event) => setDraftFilters((current) => ({ ...current, from: event.target.value }))}
             />
             <Input
@@ -553,6 +554,8 @@ export default function AdminDashboard({
               placeholder="Select end date"
               icon={CalendarDays}
               value={draftFilters.to}
+              min={draftFilters.from || undefined}
+              max={todayDateString()}
               onChange={(event) => setDraftFilters((current) => ({ ...current, to: event.target.value }))}
             />
             <Select
