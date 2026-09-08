@@ -23,6 +23,7 @@ import { calculateProfitMYR, formatCurrency } from "@/lib/utils";
 import Select from "@/components/ui/Select";
 import ShareStatusDialog from "@/components/ui/ShareStatusDialog";
 import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
+import DeleteWarningIcon from "@/components/ui/DeleteWarningIcon";
 
 const statusOptions = [
   { label: "All Statuses", value: "all" },
@@ -597,11 +598,7 @@ export default function HistoryPage({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-500/20 rounded-lg">
-                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4v2m0-10a8 8 0 100 16 8 8 0 000-16z" />
-                </svg>
-              </div>
+              <DeleteWarningIcon />
               <h3 className="text-lg font-semibold text-white">Delete Order?</h3>
             </div>
 

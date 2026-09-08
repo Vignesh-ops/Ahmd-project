@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  AlertTriangle,
   Badge,
   Building2,
   Copy,
@@ -22,6 +21,7 @@ import {
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
+import DeleteWarningIcon from "@/components/ui/DeleteWarningIcon";
 
 export default function UsersManager({ initialUsers = [], initialAdminAccount = null }) {
   const [adminAccount, setAdminAccount] = useState(initialAdminAccount);
@@ -448,9 +448,7 @@ export default function UsersManager({ initialUsers = [], initialAdminAccount = 
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-red-500/20 rounded-lg">
-            <AlertTriangle className="h-6 w-6 text-red-400" />
-          </div>
+          <DeleteWarningIcon />
           <h3 className="text-lg font-semibold text-white">Delete Store User?</h3>
         </div>
   

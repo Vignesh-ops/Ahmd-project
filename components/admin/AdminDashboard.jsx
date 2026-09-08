@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  AlertTriangle,
   CalendarDays,
   Download,
   Filter,
@@ -21,6 +20,7 @@ import StoreFilter from "@/components/admin/StoreFilter";
 import ActionStatusMessage from "@/components/ui/ActionStatusMessage";
 import Button from "@/components/ui/Button";
 import CurrencyPairSummary from "@/components/ui/CurrencyPairSummary";
+import DeleteWarningIcon from "@/components/ui/DeleteWarningIcon";
 import Input from "@/components/ui/Input";
 import OrderCountSummary from "@/components/ui/OrderCountSummary";
 import ProfitSummary from "@/components/ui/ProfitSummary";
@@ -137,6 +137,7 @@ export default function AdminDashboard({
   const [deleteSuccessMessage, setDeleteSuccessMessage] = useState("");
   const [exportMessage, setExportMessage] = useState("");
   const [exportMessageTone, setExportMessageTone] = useState("idle");
+  const [exportAlertKey, setExportAlertKey] = useState(0);
   const isInitialSummaryLoad = useRef(true);
   const isInitialOrdersLoad = useRef(true);
   useEffect(() => {
@@ -431,8 +432,12 @@ export default function AdminDashboard({
         `This filter matches ${totalCount} orders, too many to print safely at once. Narrow the date range or store first, or use Export Report for the full data set.`
       );
       setExportMessageTone("error");
+      setExportAlertKey((current) => current + 1);
       return;
     }
+
+    setExportMessage("");
+    setExportMessageTone("idle");
 
     if (hasMore) {
       const allOrders = await fetchAllMatchingOrders();
@@ -578,7 +583,7 @@ export default function AdminDashboard({
             </Button>
           </div>
           {exportMessage ? (
-            <ActionStatusMessage tone={exportMessageTone}>{exportMessage}</ActionStatusMessage>
+            <ActionStatusMessage key={exportAlertKey} tone={exportMessageTone}>{exportMessage}</ActionStatusMessage>
           ) : null}
         </form>
         {deleteSuccessMessage ? (
@@ -589,9 +594,7 @@ export default function AdminDashboard({
   <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div className="dialog-surface w-full max-w-sm rounded-xl border border-red-500/30 p-6 shadow-2xl animate-in fade-in zoom-in-95">
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-red-500/20 rounded-lg">
-          <AlertTriangle className="h-6 w-6 text-red-400" />
-        </div>
+        <DeleteWarningIcon />
         <h3 className="text-lg font-semibold text-white">Delete Order?</h3>
       </div>
 

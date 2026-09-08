@@ -191,7 +191,7 @@ export default function OrderTrendChart({ data = [] }) {
                 key={day.date}
                 x={chart.xFor(index)}
                 y={CHART_HEIGHT - 6}
-                textAnchor="middle"
+                textAnchor={index === 0 ? "start" : index === data.length - 1 ? "end" : "middle"}
                 fontSize="9"
                 fill={ink.axisText}
               >

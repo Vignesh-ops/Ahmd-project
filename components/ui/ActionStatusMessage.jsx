@@ -26,11 +26,11 @@ export default function ActionStatusMessage({ tone = "idle", children, className
     return (
       <div
         className={cn(
-          "status-message-pop flex items-center gap-2 rounded-2xl border border-teal/30 bg-teal/10 px-4 py-3 text-sm text-white/85",
+          "status-message-pop flex items-start gap-2 rounded-2xl border border-teal/30 bg-teal/10 px-4 py-3 text-sm text-white/80",
           className
         )}
       >
-        <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal text-dark-base">
+        <span className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal text-dark-base">
           {MINI_CONFETTI_PARTICLES.map((particle, index) => (
             <span
               key={index}
@@ -48,7 +48,7 @@ export default function ActionStatusMessage({ tone = "idle", children, className
           ))}
           <Check className="relative h-3.5 w-3.5" strokeWidth={3} />
         </span>
-        {children}
+        <span className="min-w-0 break-words">{children}</span>
       </div>
     );
   }
@@ -57,14 +57,14 @@ export default function ActionStatusMessage({ tone = "idle", children, className
     return (
       <div
         className={cn(
-          "status-message-shake flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-white/85",
+          "status-message-shake flex items-start gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-white/80",
           className
         )}
       >
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/90 text-white">
+        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/90 text-white">
           <AlertTriangle className="h-3.5 w-3.5" strokeWidth={3} />
         </span>
-        {children}
+        <span className="min-w-0 break-words">{children}</span>
       </div>
     );
   }
