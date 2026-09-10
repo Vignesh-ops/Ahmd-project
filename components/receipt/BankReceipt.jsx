@@ -210,7 +210,7 @@ export default function BankReceipt({ order, autoPrint = false }) {
   const displayOrderNo = formatDisplayOrderNo(currentOrder.orderNo);
 
   return (
-    <div className="page-fade space-y-6">
+    <div className="receipt-page page-fade">
       <ShareStatusDialog
         open={Boolean(shareConfirmOrder)}
         orderNo={shareConfirmOrder?.orderNo}
@@ -229,30 +229,6 @@ export default function BankReceipt({ order, autoPrint = false }) {
         }}
         onDismiss={() => setShareConfirmOrder(null)}
       />
-      <div className="print-hide flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-        <Button
-          variant="secondary"
-          icon={Printer}
-          loading={loading === "print"}
-          onClick={() => handlePrint()}
-          className="w-full sm:w-auto"
-        >
-          Print
-        </Button>
-        <Button
-          variant="secondary"
-          icon={Send}
-          loading={loading === "share"}
-          onClick={() => handleShare()}
-          className="w-full sm:w-auto"
-        >
-          WhatsApp Share
-        </Button>
-      </div>
-      <ActionStatusMessage tone={messageTone} className="print-hide text-center text-sm text-white/55">
-        {message || "Share confirmations and successful prints will mark the order as done."}
-      </ActionStatusMessage>
-
       <div className="print-area">
         <div className="thermal-paper">
           <div className="text-center">
@@ -304,6 +280,30 @@ export default function BankReceipt({ order, autoPrint = false }) {
           </div>
         </div>
       </div>
+
+      <div className="receipt-actions print-hide">
+        <Button
+          variant="secondary"
+          icon={Printer}
+          loading={loading === "print"}
+          onClick={() => handlePrint()}
+          className="w-full"
+        >
+          Print
+        </Button>
+        <Button
+          variant="secondary"
+          icon={Send}
+          loading={loading === "share"}
+          onClick={() => handleShare()}
+          className="w-full"
+        >
+          WhatsApp Share
+        </Button>
+      </div>
+      <ActionStatusMessage tone={messageTone} className="receipt-status print-hide text-center text-sm text-white/55">
+        {message || "Share confirmations and successful prints will mark the order as done."}
+      </ActionStatusMessage>
     </div>
   );
 }
