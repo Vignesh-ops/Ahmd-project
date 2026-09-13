@@ -23,9 +23,34 @@ model User {
   homeOrders                 HomeOrder[]
   settings                   Settings?
   customerAutofillExclusions CustomerAutofillExclusion[]
+  bankBalanceTransactions    BankBalanceTransaction[]
 
   @@index([role])
   @@index([storeCode])
+}
+
+model BankBalance {
+  id            Int                      @id @default(1)
+  manualBalance Float                    @default(0)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  transactions  BankBalanceTransaction[]
+}
+
+model BankBalanceTransaction {
+  id           Int         @id @default(autoincrement())
+  balanceId    Int
+  balance      BankBalance @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  type         String
+  description  String
+  amount       Float
+  balanceAfter Float
+  updatedById  Int
+  updatedBy    User        @relation(fields: [updatedById], references: [id])
+  createdAt    DateTime    @default(now())
+
+  @@index([balanceId, createdAt])
+  @@index([updatedById])
 }
 
 model BankOrder {
