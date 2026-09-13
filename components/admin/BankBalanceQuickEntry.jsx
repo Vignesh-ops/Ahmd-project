@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Landmark, Plus, RefreshCw, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/utils";
@@ -25,6 +26,7 @@ const CONFETTI_PARTICLES = Array.from({ length: 10 }, (_, index) => {
 });
 
 export default function BankBalanceQuickEntry({ initialData }) {
+  const router = useRouter();
   const [data, setData] = useState(initialData);
   const [amount, setAmount] = useState("");
   const [open, setOpen] = useState(false);
@@ -57,6 +59,7 @@ export default function BankBalanceQuickEntry({ initialData }) {
       setAmount("");
       setOpen(false);
       setShowSuccess(true);
+      router.refresh();
     } catch (saveError) {
       setError(saveError.message);
     } finally {
