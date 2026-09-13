@@ -655,6 +655,10 @@ html[data-theme="light"] .bg-red-500\/90 {
   color: #fff !important;
 }
 
+html[data-theme="light"] .text-amber-200\/90 {
+  color: rgba(146, 64, 14, 0.92) !important;
+}
+
 .grid-form {
   display: grid;
   gap: 1rem;
