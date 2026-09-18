@@ -1,6 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { adjustBalanceForOrderChange, isBankOrderCounted } from "@/lib/bankBalance";
 import { normalizeBankOrder } from "@/lib/orders";
 import { invalidateOrdersCache } from "@/lib/cache";
 import {
@@ -231,21 +232,52 @@ export async function PUT(request, { params }) {
     });
   }
 
-  const order = await prisma.bankOrder.update({
-    where: { id },
-    data: updates,
-    include: {
-      user: {
-        select: {
-          id: true,
-          username: true,
-          storeName: true,
-          storeCode: true
-        }
-      }
-    }
+  const wasCounted = isBankOrderCounted(existing);
+  const willBeCounted = isBankOrderCounted({
+    country: updates.country ?? existing.country,
+    status: updates.status ?? existing.status
   });
-  
+  const oldAmount = existing.depositAmount;
+  const newAmount = updates.depositAmount ?? existing.depositAmount;
+
+  let order;
+
+  try {
+    order = await prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.bankOrder.update({
+        where: { id },
+        data: updates,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              storeName: true,
+              storeCode: true
+            }
+          }
+        }
+      });
+
+      await adjustBalanceForOrderChange({
+        transactionClient: tx,
+        oldAmount,
+        wasCounted,
+        newAmount,
+        willBeCounted,
+        userId: session.user.id,
+        description: `Order ${updatedOrder.orderNo} updated`
+      });
+
+      return updatedOrder;
+    });
+  } catch (error) {
+    if (error.message === "Insufficient bank balance. Please contact admin.") {
+      return badRequest(error.message);
+    }
+    throw error;
+  }
+
   invalidateOrdersCache();
 
   // Revalidate critical paths immediately
@@ -286,8 +318,20 @@ export async function DELETE(request, { params }) {
     return forbidden("Bank order not found.");
   }
 
-  await prisma.bankOrder.delete({
-    where: { id }
+  await prisma.$transaction(async (tx) => {
+    await tx.bankOrder.delete({
+      where: { id }
+    });
+
+    await adjustBalanceForOrderChange({
+      transactionClient: tx,
+      oldAmount: existing.depositAmount,
+      wasCounted: isBankOrderCounted(existing),
+      newAmount: 0,
+      willBeCounted: false,
+      userId: session.user.id,
+      description: `Order ${existing.orderNo} deleted`
+    });
   });
 
   invalidateOrdersCache();

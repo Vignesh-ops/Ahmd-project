@@ -65,7 +65,7 @@ export default async function AdminPage() {
             <p className="text-sm font-bold tracking-wide">Indonesia Bank Balance</p>
           </div>
           <p className={`mt-2 font-mono text-2xl font-bold ${bankBalance.availableBalance < 0 ? "text-red-300" : "text-white"}`}>{formatCurrency(bankBalance.availableBalance, "IDR")}</p>
-          <p className="mt-1 text-xs text-white/45">Available after today&apos;s RP orders</p>
+          <p className="mt-1 text-xs text-white/45">Live balance, updated with every order</p>
         </div>
       </section>
       <AdminDashboard

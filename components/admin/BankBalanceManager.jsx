@@ -83,11 +83,10 @@ export default function BankBalanceManager({ initialData }) {
       </section>
 
       <section className="space-y-4">
-        <div><p className="text-xs uppercase tracking-[0.22em] text-white/35">Today&apos;s Position</p><h2 className="mt-2 text-2xl font-semibold text-white">Balance Breakdown</h2><p className="mt-2 text-sm text-white/45">Manual bank balance less today&apos;s Indonesia RP orders.</p></div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <SummaryCard label="Today’s Bank Balance" value={money(data.manualBalance)} detail="Entered manually by admin" icon={Wallet} />
-          <SummaryCard label="Today’s RP Amount" value={`- ${money(data.totalRpAmount)}`} detail="Indonesia orders created today" icon={ArrowDownRight} />
-          <SummaryCard label="Available Balance" value={money(data.availableBalance)} detail="Today’s balance minus today’s RP amount" tone="teal" icon={Landmark} />
+        <div><p className="text-xs uppercase tracking-[0.22em] text-white/35">Current Position</p><h2 className="mt-2 text-2xl font-semibold text-white">Balance Breakdown</h2><p className="mt-2 text-sm text-white/45">Available Balance updates live as Indonesia RP orders are placed, edited, or cancelled.</p></div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <SummaryCard label="Available Balance" value={money(data.availableBalance)} detail="Live running balance" tone="teal" icon={Landmark} />
+          <SummaryCard label="Today’s RP Orders" value={money(data.totalRpAmount)} detail="Indonesia orders placed today (for reference)" icon={ArrowDownRight} />
         </div>
       </section>
 

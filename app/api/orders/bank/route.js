@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { generateCurrencyOrderNo } from "@/lib/orderNo";
+import { adjustBalanceForOrderChange } from "@/lib/bankBalance";
 import { bankCurrencyFromCountry, normalizeBankOrder } from "@/lib/orders";
 import { invalidateOrdersCache } from "@/lib/cache";
 import {
@@ -195,48 +196,73 @@ export async function POST(request) {
   };
 
   let order = null;
-  const attemptedOrderNos = new Set();
 
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const orderNo =
-      attempt === 0 && clientOrderNo
-        ? clientOrderNo
-        : await generateCurrencyOrderNo("B", session.user.storeCode, prisma, currency);
+  try {
+    order = await prisma.$transaction(async (tx) => {
+      const attemptedOrderNos = new Set();
+      let createdOrder = null;
 
-    if (attemptedOrderNos.has(orderNo)) {
-      continue;
-    }
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const orderNo =
+          attempt === 0 && clientOrderNo
+            ? clientOrderNo
+            : await generateCurrencyOrderNo("B", session.user.storeCode, tx, currency);
 
-    attemptedOrderNos.add(orderNo);
-
-    try {
-      order = await prisma.bankOrder.create({
-        data: {
-          orderNo,
-          ...orderData
+        if (attemptedOrderNos.has(orderNo)) {
+          continue;
         }
-      });
-      break;
-    } catch (error) {
-      if (!isUniqueOrderNoError(error) || attempt === 3) {
-        throw error;
+
+        attemptedOrderNos.add(orderNo);
+
+        try {
+          createdOrder = await tx.bankOrder.create({
+            data: {
+              orderNo,
+              ...orderData
+            }
+          });
+          break;
+        } catch (error) {
+          if (!isUniqueOrderNoError(error) || attempt === 3) {
+            throw error;
+          }
+
+          const existingOrder = await tx.bankOrder.findUnique({
+            where: {
+              orderNo
+            }
+          });
+
+          if (isSameBankOrder(existingOrder, orderData)) {
+            createdOrder = existingOrder;
+            break;
+          }
+        }
       }
 
-      const existingOrder = await prisma.bankOrder.findUnique({
-        where: {
-          orderNo
-        }
-      });
-
-      if (isSameBankOrder(existingOrder, orderData)) {
-        order = existingOrder;
-        break;
+      if (!createdOrder) {
+        throw new Error("Could not save bank order.");
       }
-    }
-  }
 
-  if (!order) {
-    throw new Error("Could not save bank order.");
+      if (country === 1) {
+        await adjustBalanceForOrderChange({
+          transactionClient: tx,
+          oldAmount: 0,
+          wasCounted: false,
+          newAmount: depositAmount,
+          willBeCounted: true,
+          userId: session.user.id,
+          description: `Order ${createdOrder.orderNo} placed`
+        });
+      }
+
+      return createdOrder;
+    });
+  } catch (error) {
+    if (error.message === "Insufficient bank balance. Please contact admin.") {
+      return badRequest(error.message);
+    }
+    throw error;
   }
 
   invalidateOrdersCache();
