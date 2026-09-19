@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowRight, ArrowUpCircle, ArrowUpRight, CalendarClock, ChevronLeft, ChevronRight, Landmark, RefreshCw, SlidersHorizontal, Wallet, X } from "lucide-react";
+import { AlertTriangle, ArrowDownCircle, ArrowDownRight, ArrowRight, ArrowUpCircle, ArrowUpRight, CalendarClock, ChevronLeft, ChevronRight, Landmark, RefreshCw, SlidersHorizontal, Wallet, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
@@ -35,12 +35,22 @@ export default function BankBalanceManager({ initialData }) {
   const historyPageSize = 10;
 
   const enteredAmount = Number(form.amount) || 0;
-  const newBalancePreview = mode === "topup" ? data.availableBalance + enteredAmount : enteredAmount;
+  const newBalancePreview =
+    mode === "topup"
+      ? data.availableBalance + enteredAmount
+      : mode === "deduct"
+        ? data.availableBalance - enteredAmount
+        : enteredAmount;
 
   async function saveAdjustment(event) {
     event.preventDefault();
     if (!form.amount || Number(form.amount) <= 0) {
-      setMessage(mode === "topup" ? "Enter an amount to add." : "Enter today's bank balance.");
+      const messages = {
+        topup: "Enter an amount to add.",
+        deduct: "Enter the order amount to deduct.",
+        set: "Enter today's bank balance."
+      };
+      setMessage(messages[mode] || messages.set);
       return;
     }
     setSaving(true);
@@ -112,7 +122,7 @@ export default function BankBalanceManager({ initialData }) {
               </button>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/5 p-1">
+            <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/5 p-1">
               <button
                 type="button"
                 onClick={() => setMode("topup")}
@@ -120,6 +130,14 @@ export default function BankBalanceManager({ initialData }) {
               >
                 <ArrowUpCircle className="h-4 w-4" />
                 Top Up
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("deduct")}
+                className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${mode === "deduct" ? "bg-gradient-to-br from-gold-light via-gold to-[#a87620] text-dark-base shadow-[0_6px_18px_rgba(212,168,67,0.3)]" : "text-white/55 hover:text-white"}`}
+              >
+                <ArrowDownCircle className="h-4 w-4" />
+                Deduct
               </button>
               <button
                 type="button"
@@ -134,7 +152,7 @@ export default function BankBalanceManager({ initialData }) {
             <div className="mt-5 space-y-4">
               <div>
                 <label htmlFor="balance-amount" className="mb-2 block text-sm font-medium text-white/75">
-                  {mode === "topup" ? "Amount to Add" : "Today’s Bank Balance"}
+                  {mode === "topup" ? "Amount to Add" : mode === "deduct" ? "Order Amount (Placed Outside the App)" : "Today’s Bank Balance"}
                 </label>
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-dark-input pl-4 pr-3 focus-within:border-gold/60 focus-within:ring-2 focus-within:ring-gold/20">
                   <span className="shrink-0 text-sm font-semibold text-white/35">Rp</span>
@@ -166,6 +184,13 @@ export default function BankBalanceManager({ initialData }) {
                   <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200/90">
                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     This replaces the current balance entirely instead of adding to it.
+                  </p>
+                )}
+
+                {mode === "deduct" && (
+                  <p className="mt-3 flex items-start gap-2 rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200/90">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    Use this only for Indonesia orders placed directly with the client, outside this app.
                   </p>
                 )}
               </div>
