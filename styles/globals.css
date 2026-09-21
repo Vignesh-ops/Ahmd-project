@@ -158,6 +158,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     rgba(10, 12, 16, 0.92);
 }
 
+/* On many Android devices running as an installed app, env(safe-area-inset-top)
+   under-reports (or reports 0) even though the OS status bar visually overlaps
+   the content, unlike iOS where it is accurate. Guarantee a minimum clearance
+   in standalone mode without double-padding devices where env() is correct. */
+@media (display-mode: standalone) {
+  .top-navbar {
+    padding-top: max(env(safe-area-inset-top, 0px), 28px);
+  }
+}
+
 .pull-refresh-indicator {
   background: rgba(24, 28, 36, 0.95);
   color: #fff;

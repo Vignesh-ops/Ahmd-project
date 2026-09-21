@@ -240,43 +240,34 @@ export async function PUT(request, { params }) {
   const oldAmount = existing.depositAmount;
   const newAmount = updates.depositAmount ?? existing.depositAmount;
 
-  let order;
-
-  try {
-    order = await prisma.$transaction(async (tx) => {
-      const updatedOrder = await tx.bankOrder.update({
-        where: { id },
-        data: updates,
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              storeName: true,
-              storeCode: true
-            }
+  const order = await prisma.$transaction(async (tx) => {
+    const updatedOrder = await tx.bankOrder.update({
+      where: { id },
+      data: updates,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            storeName: true,
+            storeCode: true
           }
         }
-      });
-
-      await adjustBalanceForOrderChange({
-        transactionClient: tx,
-        oldAmount,
-        wasCounted,
-        newAmount,
-        willBeCounted,
-        userId: session.user.id,
-        description: `Order ${updatedOrder.orderNo} updated`
-      });
-
-      return updatedOrder;
+      }
     });
-  } catch (error) {
-    if (error.message === "Insufficient bank balance. Please contact admin.") {
-      return badRequest(error.message);
-    }
-    throw error;
-  }
+
+    await adjustBalanceForOrderChange({
+      transactionClient: tx,
+      oldAmount,
+      wasCounted,
+      newAmount,
+      willBeCounted,
+      userId: session.user.id,
+      description: `Order ${updatedOrder.orderNo} updated`
+    });
+
+    return updatedOrder;
+  });
 
   invalidateOrdersCache();
 

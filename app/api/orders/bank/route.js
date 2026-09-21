@@ -195,75 +195,66 @@ export async function POST(request) {
     storeCode: session.user.storeCode
   };
 
-  let order = null;
+  const order = await prisma.$transaction(async (tx) => {
+    const attemptedOrderNos = new Set();
+    let createdOrder = null;
 
-  try {
-    order = await prisma.$transaction(async (tx) => {
-      const attemptedOrderNos = new Set();
-      let createdOrder = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const orderNo =
+        attempt === 0 && clientOrderNo
+          ? clientOrderNo
+          : await generateCurrencyOrderNo("B", session.user.storeCode, tx, currency);
 
-      for (let attempt = 0; attempt < 4; attempt += 1) {
-        const orderNo =
-          attempt === 0 && clientOrderNo
-            ? clientOrderNo
-            : await generateCurrencyOrderNo("B", session.user.storeCode, tx, currency);
-
-        if (attemptedOrderNos.has(orderNo)) {
-          continue;
-        }
-
-        attemptedOrderNos.add(orderNo);
-
-        try {
-          createdOrder = await tx.bankOrder.create({
-            data: {
-              orderNo,
-              ...orderData
-            }
-          });
-          break;
-        } catch (error) {
-          if (!isUniqueOrderNoError(error) || attempt === 3) {
-            throw error;
-          }
-
-          const existingOrder = await tx.bankOrder.findUnique({
-            where: {
-              orderNo
-            }
-          });
-
-          if (isSameBankOrder(existingOrder, orderData)) {
-            createdOrder = existingOrder;
-            break;
-          }
-        }
+      if (attemptedOrderNos.has(orderNo)) {
+        continue;
       }
 
-      if (!createdOrder) {
-        throw new Error("Could not save bank order.");
-      }
+      attemptedOrderNos.add(orderNo);
 
-      if (country === 1) {
-        await adjustBalanceForOrderChange({
-          transactionClient: tx,
-          oldAmount: 0,
-          wasCounted: false,
-          newAmount: depositAmount,
-          willBeCounted: true,
-          userId: session.user.id,
-          description: `Order ${createdOrder.orderNo} placed`
+      try {
+        createdOrder = await tx.bankOrder.create({
+          data: {
+            orderNo,
+            ...orderData
+          }
         });
-      }
+        break;
+      } catch (error) {
+        if (!isUniqueOrderNoError(error) || attempt === 3) {
+          throw error;
+        }
 
-      return createdOrder;
-    });
-  } catch (error) {
-    if (error.message === "Insufficient bank balance. Please contact admin.") {
-      return badRequest(error.message);
+        const existingOrder = await tx.bankOrder.findUnique({
+          where: {
+            orderNo
+          }
+        });
+
+        if (isSameBankOrder(existingOrder, orderData)) {
+          createdOrder = existingOrder;
+          break;
+        }
+      }
     }
-    throw error;
-  }
+
+    if (!createdOrder) {
+      throw new Error("Could not save bank order.");
+    }
+
+    if (country === 1) {
+      await adjustBalanceForOrderChange({
+        transactionClient: tx,
+        oldAmount: 0,
+        wasCounted: false,
+        newAmount: depositAmount,
+        willBeCounted: true,
+        userId: session.user.id,
+        description: `Order ${createdOrder.orderNo} placed`
+      });
+    }
+
+    return createdOrder;
+  });
 
   invalidateOrdersCache();
 
