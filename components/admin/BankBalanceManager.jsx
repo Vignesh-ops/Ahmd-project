@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowDownCircle, ArrowDownRight, ArrowRight, ArrowUpCircle, ArrowUpRight, CalendarClock, ChevronLeft, ChevronRight, Landmark, RefreshCw, SlidersHorizontal, Wallet, X } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatAmountInput, formatCurrency, formatDateTime, sanitizeAmountInput } from "@/lib/utils";
 
 const emptyForm = { amount: "", reason: "" };
 
@@ -158,13 +158,12 @@ export default function BankBalanceManager({ initialData }) {
                   <span className="shrink-0 text-sm font-semibold text-white/35">Rp</span>
                   <input
                     id="balance-amount"
-                    min="0"
-                    step="0.01"
-                    type="number"
-                    value={form.amount}
-                    onChange={(event) => { setForm((current) => ({ ...current, amount: event.target.value })); if (message) setMessage(""); }}
+                    type="text"
+                    inputMode="decimal"
+                    value={formatAmountInput(form.amount)}
+                    onChange={(event) => { setForm((current) => ({ ...current, amount: sanitizeAmountInput(event.target.value) })); if (message) setMessage(""); }}
                     placeholder="30,000"
-                    className="w-full appearance-none bg-transparent py-3 font-mono text-base text-white outline-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="w-full appearance-none bg-transparent py-3 font-mono text-base text-white outline-none"
                   />
                 </div>
 

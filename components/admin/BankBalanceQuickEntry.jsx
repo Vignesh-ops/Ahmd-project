@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowDownCircle, ArrowRight, ArrowUpCircle, Landmark, Plus, RefreshCw, SlidersHorizontal, X } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { formatCurrency } from "@/lib/utils";
+import { formatAmountInput, formatCurrency, sanitizeAmountInput } from "@/lib/utils";
 
 const SUCCESS_DISPLAY_MS = 1400;
 
@@ -146,14 +146,13 @@ export default function BankBalanceQuickEntry({ initialData }) {
                 <span className="shrink-0 text-sm font-semibold text-white/35">Rp</span>
                 <input
                   id="quick-balance-amount"
-                  min="0"
-                  step="0.01"
-                  type="number"
-                  value={amount}
-                  onChange={(event) => { setAmount(event.target.value); if (error) setError(""); }}
+                  type="text"
+                  inputMode="decimal"
+                  value={formatAmountInput(amount)}
+                  onChange={(event) => { setAmount(sanitizeAmountInput(event.target.value)); if (error) setError(""); }}
                   placeholder="30,000"
                   autoFocus
-                  className="w-full appearance-none bg-transparent py-3 font-mono text-base text-white outline-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  className="w-full appearance-none bg-transparent py-3 font-mono text-base text-white outline-none"
                 />
               </div>
 
